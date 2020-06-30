@@ -1,0 +1,1 @@
+from .rightdock import RightDockWidget

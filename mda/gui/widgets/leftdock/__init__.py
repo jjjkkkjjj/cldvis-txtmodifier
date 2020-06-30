@@ -1,0 +1,1 @@
+from .leftdock import LeftDockWidget
