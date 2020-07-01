@@ -1,16 +1,18 @@
 from PySide2.QtWidgets import *
 
-
 import glob, os
 
-from .utils import path_desktop
+from .utils import path_desktop, check_instance
+from ..widgets.baseWidget import BaseWidget
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm', '.pxm', '.pnm', '.hdr', '.pic']
 
 def openFiles(self):
+    _ = check_instance('self', self, BaseWidget)
+
     filters = 'Images (*.jpeg *.jpg *.png *.tif *.tiff *.bmp *.die *.pbm *.pgm *.ppm *.pxm *.pnm *.hdr *.pic)'
     # filenames is (list of str(filepath), str(filters))
-    filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', path_desktop(), filters, None, QFileDialog.DontUseNativeDialog)
+    filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.last_opendir, filters, None, QFileDialog.DontUseNativeDialog)
     return filenames[0]
     """
     dialog = QFileDialog(self)
@@ -22,7 +24,9 @@ def openFiles(self):
     """
 
 def openDir(self):
-    dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', path_desktop(), QFileDialog.DontUseNativeDialog)
+    _ = check_instance('self', self, BaseWidget)
+
+    dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir, QFileDialog.DontUseNativeDialog)
 
     filenames = sorted(glob.glob(os.path.join(dirname, '*')))
     # remove not supported files and directories
