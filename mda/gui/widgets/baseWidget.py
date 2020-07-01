@@ -9,3 +9,7 @@ class BaseWidget(QWidget):
 
         super().__init__(parent=mainWidget)
         self.mainWidget = mainWidget
+
+    @property
+    def model(self):
+        return self.mainWidget.model

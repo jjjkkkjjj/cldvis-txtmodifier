@@ -23,3 +23,11 @@ class CanvasWidget(BaseWidget):
         vbox.addWidget(self.img)
 
         self.setLayout(vbox)
+
+
+    def set_img(self, imgpath):
+        """
+        :param imgpath: str or None, if None is passed, show blank
+        :return:
+        """
+        pass

@@ -9,9 +9,9 @@ SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die'
 
 def openFiles(self):
     filters = 'Images (*.jpeg *.jpg *.png *.tif *.tiff *.bmp *.die *.pbm *.pgm *.ppm *.pxm *.pnm *.hdr *.pic)'
-
+    # filenames is (list of str(filepath), str(filters))
     filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', path_desktop(), filters, None, QFileDialog.DontUseNativeDialog)
-    return filenames
+    return filenames[0]
     """
     dialog = QFileDialog(self)
     dialog.setWindowTitle('Open Files')

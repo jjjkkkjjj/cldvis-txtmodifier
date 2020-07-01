@@ -1,8 +1,14 @@
+from PySide2.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+
 from .button import Button
 from ...functions.dialogs import *
 from ..baseWidget import BaseWidget
 
 class LeftDockWidget(BaseWidget):
+    imgChanged = Signal(str) # emit imgpath
+
     def __init__(self, mainWidget):
         super().__init__(mainWidget)
 
@@ -31,5 +37,8 @@ class LeftDockWidget(BaseWidget):
 
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
-            return
+            self.model.set_imgPaths(None)
+        else:
+            self.model.set_imgPaths(filenames)
 
+        self.imgChanged.emit(self.model.imgpath)

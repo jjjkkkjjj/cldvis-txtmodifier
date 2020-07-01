@@ -8,6 +8,8 @@ class MainWidget(QWidget):
         super().__init__(parent=parent)
 
         self.initUI()
+        self.establish_connection()
+
         self.model = Model()
 
     def initUI(self):
@@ -26,7 +28,8 @@ class MainWidget(QWidget):
         hbox.addWidget(self.rightdock, 2)
         self.setLayout(hbox)
 
-
+    def establish_connection(self):
+        self.leftdock.imgChanged.connect(lambda imgpath: self.canvas.set_img(imgpath))
 
 class MainWindow(QMainWindow):
     def __init__(self):
