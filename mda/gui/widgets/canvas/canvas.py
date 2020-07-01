@@ -14,13 +14,19 @@ class CanvasWidget(BaseWidget):
         self.initUI()
 
     def initUI(self):
-        self.setStyleSheet("margin:5px; border:1px solid rgb(0, 0, 0); ")
         vbox = QVBoxLayout()
 
-        #self.scrollArea = QScrollArea(self)
+        self.scrollArea = QScrollArea(self)
         self.img = ImgWidget(self)
-        #self.scrollArea.setWidget(self.img)
-        vbox.addWidget(self.img)
+
+        self.img.setBackgroundRole(QPalette.Base)
+        self.img.setScaledContents(True) # allow to stretch
+
+        #self.scrollArea.setStyleSheet("margin:5px; border:1px solid rgb(0, 0, 0); ")
+        self.scrollArea.setWidget(self.img)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setBackgroundRole(QPalette.Dark)
+        vbox.addWidget(self.scrollArea)
 
         self.setLayout(vbox)
 
@@ -30,4 +36,6 @@ class CanvasWidget(BaseWidget):
         :param imgpath: str or None, if None is passed, show blank
         :return:
         """
-        pass
+        pixmap = QPixmap(imgpath)
+
+        self.img.setPixmap(pixmap)
