@@ -1,8 +1,6 @@
 from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
 
-from .widgets import *
+from . import *
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
@@ -26,6 +24,8 @@ class MainWidget(QWidget):
         hbox.addWidget(self.rightdock, 2)
         self.setLayout(hbox)
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,4 +35,6 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.main = MainWidget(self)
         self.setCentralWidget(self.main)
+
+        self.setMenuBar(MenuBar(self.main))
 
