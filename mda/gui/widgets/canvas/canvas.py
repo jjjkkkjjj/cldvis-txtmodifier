@@ -3,10 +3,11 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 
 from .img import ImgWidget
+from ..baseWidget import BaseWidget
 
-class CanvasWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class CanvasWidget(BaseWidget):
+    def __init__(self, mainWidget):
+        super().__init__(mainWidget)
 
         self.rubbers = []
 

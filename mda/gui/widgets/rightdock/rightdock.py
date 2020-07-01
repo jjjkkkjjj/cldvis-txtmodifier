@@ -2,9 +2,11 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-class RightDockWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
+from ..baseWidget import BaseWidget
+
+class RightDockWidget(BaseWidget):
+    def __init__(self, mainWidget):
+        super().__init__(mainWidget)
 
         self.initUI()
 

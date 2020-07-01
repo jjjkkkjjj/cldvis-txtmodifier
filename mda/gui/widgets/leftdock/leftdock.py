@@ -1,9 +1,10 @@
 from .button import Button
 from ...functions.dialogs import *
+from ..baseWidget import BaseWidget
 
-class LeftDockWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
+class LeftDockWidget(BaseWidget):
+    def __init__(self, mainWidget):
+        super().__init__(mainWidget)
 
         self.initUI()
 
@@ -31,5 +32,4 @@ class LeftDockWidget(QWidget):
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
             return
-
 

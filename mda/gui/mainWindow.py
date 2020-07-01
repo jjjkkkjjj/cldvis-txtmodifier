@@ -1,12 +1,14 @@
 from PySide2.QtWidgets import *
 
-from . import *
+from .widgets import *
+from .model import Model
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.initUI()
+        self.model = Model()
 
     def initUI(self):
         hbox = QHBoxLayout(self)

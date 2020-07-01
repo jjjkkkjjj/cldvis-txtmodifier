@@ -1,11 +1,11 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
-from PySide2.QtCore import *
+
 
 class MenuBar(QMenuBar):
     def __init__(self, mainWidget):
         super().__init__(parent=mainWidget)
-        from .mainWindow import MainWidget
+        from ..mainWindow import MainWidget
 
         if not isinstance(mainWidget, MainWidget):
             ValueError('parent must be MainWidget, but got {}'.format(type(mainWidget).__name__))

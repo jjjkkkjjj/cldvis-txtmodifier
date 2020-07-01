@@ -1,1 +1,1 @@
-from mda.gui.widgets.mainWindow import MainWindow
+from .mainWindow import MainWindow
