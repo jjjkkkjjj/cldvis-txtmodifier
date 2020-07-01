@@ -1,3 +1,4 @@
+from PySide2.QtGui import *
 import os
 
 def path_desktop():
@@ -15,3 +16,9 @@ def check_instance(name, val, cls, allow_none=True):
             raise ValueError('Invalid argument: \'{}\' must be {}, but got {}'.format(name, cls.__name__, type(val).__name__))
 
     return val
+
+def cvimg2qpixmap(cvimg):
+    height, width, channel = cvimg.shape
+    bytesPerLine = 3 * width
+    qImg = QImage(cvimg.data, width, height, bytesPerLine, QImage.Format_RGB888)
+    return QPixmap(qImg)

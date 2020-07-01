@@ -29,7 +29,8 @@ class MainWidget(QWidget):
         self.setLayout(hbox)
 
     def establish_connection(self):
-        self.leftdock.imgChanged.connect(lambda imgpath: self.canvas.set_img(imgpath))
+        self.leftdock.imgChanged.connect(self.canvas.set_img)
+        self.leftdock.ratioChanged.connect(self.canvas.set_img)
 
 class MainWindow(QMainWindow):
     def __init__(self):
