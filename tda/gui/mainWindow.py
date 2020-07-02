@@ -54,8 +54,9 @@ class MainWindow(QMainWindow):
         self.main.leftdock.enableChecking.connect(self.check_enable)
 
     def check_enable(self):
-        # back next
-        self.main.leftdock.check_enable_backnext()
+        # back forward
+        self.main.leftdock.check_enable_backforward()
+        self.menu.check_enable_backforward()
 
         # zoom
         self.main.leftdock.check_enable_zoom()

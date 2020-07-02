@@ -31,15 +31,15 @@ class LeftDockWidget(BaseWidget):
         self.button_openfile = Button('file.png')
         vbox_open.addWidget(self.button_openfile)
 
-        # open back and next
-        hbox_backnext = QHBoxLayout()
+        # open back and forward
+        hbox_backforward = QHBoxLayout()
         self.button_back = Button('back.png')
-        hbox_backnext.addWidget(self.button_back)
+        hbox_backforward.addWidget(self.button_back)
 
-        self.button_next = Button('next.png')
-        hbox_backnext.addWidget(self.button_next)
+        self.button_forward = Button('forward.png')
+        hbox_backforward.addWidget(self.button_forward)
 
-        vbox_open.addLayout(hbox_backnext)
+        vbox_open.addLayout(hbox_backforward)
 
         self.groupBox_open.setLayout(vbox_open)
         vbox.addWidget(self.groupBox_open)
@@ -72,8 +72,8 @@ class LeftDockWidget(BaseWidget):
         self.button_openfolder.clicked.connect(lambda: self.openDialog(True))
         self.button_openfile.clicked.connect(lambda: self.openDialog(False))
 
-        self.button_back.clicked.connect(lambda: self.backnext(True))
-        self.button_next.clicked.connect(lambda: self.backnext(False))
+        self.button_back.clicked.connect(lambda: self.backforward(True))
+        self.button_forward.clicked.connect(lambda: self.backforward(False))
 
         self.button_zoomin.clicked.connect(lambda: self.buttonZoomClicked(True))
         self.button_zoomout.clicked.connect(lambda: self.buttonZoomClicked(False))
@@ -96,11 +96,14 @@ class LeftDockWidget(BaseWidget):
         self.imgChanged.emit(self.model.imgpath, self.spinBox_zoom.value())
         self.enableChecking.emit()
 
-    def backnext(self, isBack):
+    def backforward(self, isBack):
         if isBack:
-            pass
+            self.model.back()
         else:
-            pass
+            self.model.forward()
+
+        self.imgChanged.emit(self.model.imgpath, self.spinBox_zoom.value())
+        self.enableChecking.emit()
 
     ##### signal #####
     def buttonZoomClicked(self, isZoomIn):
@@ -115,9 +118,9 @@ class LeftDockWidget(BaseWidget):
         self.ratioChanged.emit(self.model.imgpath, value)
 
     ##### check enable #####
-    def check_enable_backnext(self):
+    def check_enable_backforward(self):
         self.button_back.setEnabled(self.model.isExistBackImg)
-        self.button_next.setEnabled(self.model.isExistNextImg)
+        self.button_forward.setEnabled(self.model.isExistForwardImg)
 
     def check_enable_zoom(self):
         self.button_zoomin.setEnabled(self.model.isExistImg)

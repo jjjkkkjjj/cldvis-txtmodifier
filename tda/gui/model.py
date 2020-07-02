@@ -13,7 +13,7 @@ class Model(object):
 
     @property
     def imgpath(self):
-        if self.isExistImg:
+        if not self.isExistImg:
             return None
         else:
             return self._imgPaths[self._imgIndex]
@@ -22,7 +22,7 @@ class Model(object):
     def isExistImg(self):
         return len(self._imgPaths) > 0
     @property
-    def isExistNextImg(self):
+    def isExistForwardImg(self):
         if self.isExistImg:
             return self._imgIndex != len(self._imgPaths) - 1
         else:
@@ -34,6 +34,12 @@ class Model(object):
         else:
             return False
 
+    def forward(self):
+        if self.isExistForwardImg:
+            self._imgIndex += 1
+    def back(self):
+        if self.isExistBackImg:
+            self._imgIndex += -1
 
     def set_imgPaths(self, paths):
         """

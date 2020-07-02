@@ -22,14 +22,20 @@ class MenuBar(BaseMenuBar):
     def establish_connection(self):
         ##### File #####
         # open folder
-        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: self.mainWidget.leftdock.openDialog('folder'),
-                                                 shortcut="Ctrl+O", tip="open folder")
-
+        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: self.mainWidget.leftdock.openDialog(True),
+                                                shortcut="Ctrl+O", tip="open folder")
         # open files
-        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: self.mainWidget.leftdock.openDialog('file'),
+        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: self.mainWidget.leftdock.openDialog(False),
                                                shortcut="Ctrl+Shift+O", tip="open files")
 
-        _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None))
+        # back file
+        self.action_backfile = _create_action(self, "&Back File", slot=lambda: self.mainWidget.leftdock.backforward(True),
+                                              shortcut="Alt+Left", tip="Back file")
+        # forward file
+        self.action_forwardfile = _create_action(self, "&Forward File", slot=lambda: self.mainWidget.leftdock.backforward(False),
+                                                 shortcut="Alt+Right", tip="Forward file")
+
+        _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None, self.action_backfile, self.action_forwardfile))
 
         ##### View #####
         # zoom in
@@ -48,6 +54,10 @@ class MenuBar(BaseMenuBar):
         _add_actions(self.menu_help, (self.action_about,))
 
     ##### check enable #####
+    def check_enable_backforward(self):
+        self.action_backfile.setEnabled(self.model.isExistBackImg)
+        self.action_forwardfile.setEnabled(self.model.isExistForwardImg)
+
     def check_enable_zoom(self):
         self.action_zoomin.setEnabled(self.model.isExistImg)
         self.action_zoomout.setEnabled(self.model.isExistImg)
