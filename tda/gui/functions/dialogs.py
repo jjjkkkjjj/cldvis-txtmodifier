@@ -70,7 +70,9 @@ class AboutDialog(QDialog):
                '<a href="https://icons8.com/icon/80323/next-page">Next page icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/80689/back">Back icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/63650/plus">Plus icon by Icons8</a><br>' \
-               '<a href="https://icons8.com/icon/12386/minus">Minus icon by Icons8</a>'
+               '<a href="https://icons8.com/icon/12386/minus">Minus icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/107448/remove">Remove icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/66368/artificial-intelligence">Artificial Intelligence icon by Icons8</a>'
         label_text.setText(text)
         label_text.setTextFormat(Qt.RichText)
         label_text.setTextInteractionFlags(Qt.TextBrowserInteraction)
@@ -78,4 +80,4 @@ class AboutDialog(QDialog):
         hbox.addWidget(label_text)
 
         self.setLayout(hbox)
-        self.setFixedSize(400, 200)
+        self.setFixedSize(400, 300)

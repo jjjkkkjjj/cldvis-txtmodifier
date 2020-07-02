@@ -9,6 +9,8 @@ class Model(object):
         self._imgPaths = []
         self._imgpixmap = None
 
+        self._rubberPercentRect = None
+
         self.config = Config()
 
     @property
@@ -17,7 +19,6 @@ class Model(object):
             return None
         else:
             return self._imgPaths[self._imgIndex]
-
     @property
     def isExistImg(self):
         return len(self._imgPaths) > 0
@@ -55,4 +56,12 @@ class Model(object):
             self._imgIndex = 0
 
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])
+
+
+    @property
+    def isExistRubberPercentRect(self):
+        return self._rubberPercentRect is not None
+
+    def set_rubberPercentRect(self, rubberPercentRect):
+        self._rubberPercentRect = rubberPercentRect
 

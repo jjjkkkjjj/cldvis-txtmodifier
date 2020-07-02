@@ -5,6 +5,7 @@ from PySide2.QtCore import *
 from .rubber import Rubber, MoveActionState
 
 class ImgWidget(QLabel):
+    rubberCreated = Signal(tuple)
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -55,6 +56,7 @@ class ImgWidget(QLabel):
                                   self.rubberBand.geometry().right()/self.width(), self.rubberBand.geometry().bottom()/self.height())
 
         self.startPosition = None
+        self.rubberCreated.emit(self.rubberPercentRect)
 
     def setPixmap(self, pixmap: QPixmap):
         super().setPixmap(pixmap)
@@ -72,3 +74,7 @@ class ImgWidget(QLabel):
         newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
 
         self.rubberBand.setGeometry(newRect)
+
+    def refresh_rubberBand(self):
+        self.rubberBand.hide()
+        self.rubberBand = Rubber(self)

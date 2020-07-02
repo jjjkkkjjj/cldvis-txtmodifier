@@ -31,7 +31,7 @@ class MainWidget(QWidget):
     def establish_connection(self):
         self.leftdock.imgChanged.connect(self.canvas.set_img)
         self.leftdock.ratioChanged.connect(self.canvas.set_img)
-
+        self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
 
 
 class MainWindow(QMainWindow):
@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
 
     def establish_connection(self):
         self.main.leftdock.enableChecking.connect(self.check_enable)
+        self.main.canvas.enableChecking.connect(self.check_enable)
 
     def check_enable(self):
         # back forward
@@ -61,3 +62,8 @@ class MainWindow(QMainWindow):
         # zoom
         self.main.leftdock.check_enable_zoom()
         self.menu.check_enable_zoom()
+
+        # run
+        self.main.canvas.check_enable()
+        self.main.leftdock.check_enable_run()
+        self.menu.check_enable_run()
