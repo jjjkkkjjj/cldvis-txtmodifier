@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 
+from ..functions.dialogs import openAbout
 
 class MenuBar(QMenuBar):
     def __init__(self, mainWidget):
@@ -15,7 +16,7 @@ class MenuBar(QMenuBar):
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
-        self.menu_about = self.addMenu('&About')
+        self.menu_help = self.addMenu('&Help')
 
 
     def establish_connection(self, mainWidget):
@@ -30,8 +31,10 @@ class MenuBar(QMenuBar):
 
         _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None))
 
-        ##### About #####
+        ##### Help #####
+        self.action_about = _create_action(self, '&About', slot=lambda: openAbout(mainWidget), tip='about Table Data Analyzer')
 
+        _add_actions(self.menu_help, (self.action_about,))
 
 def _add_actions(target, actions):
     for action in actions:

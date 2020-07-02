@@ -1,4 +1,5 @@
 from PySide2.QtWidgets import *
+from PySide2.QtCore import *
 
 import glob, os
 
@@ -35,3 +36,44 @@ def openDir(self):
 
 
     return filenames
+
+def openAbout(mainWidget):
+    from ..mainWindow import MainWidget
+    _ = check_instance('mainWidget', mainWidget, MainWidget)
+
+    #msgBox = QMessageBox.information(mainWidget, 'About Table Data Analyzer', 'aaaa')
+    aboutBox = AboutDialog(mainWidget)
+    aboutBox.show()
+
+
+class AboutDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.initUI()
+
+    def initUI(self):
+        title = 'About Table Data Analyzer'
+        self.setWindowTitle(title)
+
+        hbox = QHBoxLayout()
+
+        label_icon = QLabel()
+        label_icon.setPixmap(QMessageBox.standardIcon(QMessageBox.Information))
+        hbox.addWidget(label_icon)
+
+        label_text = QLabel()
+        text = 'Table Data Analyzer uses following icon <br>' \
+               'by <a href="https://icons8.com/icons">icons8.com</a>;<br><br>' \
+               '<a href="https://icons8.com/icon/XWoSyGbnshH2/file">File icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/dINnkNb1FBl4/folder">Folder icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/63650/plus">Plus icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/12386/minus">Minus icon by Icons8</a>'
+        label_text.setText(text)
+        label_text.setTextFormat(Qt.RichText)
+        label_text.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        label_text.setOpenExternalLinks(True)
+        hbox.addWidget(label_text)
+
+        self.setLayout(hbox)
+        self.setFixedSize(400, 200)
