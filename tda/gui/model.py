@@ -24,10 +24,12 @@ class Model(object):
         :param paths: list of str(path) or None
         :return:
         """
-        self._imgPaths = paths
         if paths is None:
-            self._imgIndex = -1
+            pass
+            #self._imgIndex = -1
         else:
+            self._imgPaths = paths
+            
             self._imgIndex = 0
 
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])

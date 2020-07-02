@@ -9,12 +9,24 @@ class ImgWidget(QLabel):
         super().__init__(parent)
 
         self.startPosition = None
-        self.endPosition = None
 
         self.moveActionState = MoveActionState.CREATE
 
         self.rubberBand = Rubber(self)
+        self.rubberPercentRect = (0., 0., 0., 0.)
 
+    @property
+    def left_percent(self):
+        return self.rubberPercentRect[0]
+    @property
+    def top_percent(self):
+        return self.rubberPercentRect[1]
+    @property
+    def right_percent(self):
+        return self.rubberPercentRect[2]
+    @property
+    def bottom_percent(self):
+        return self.rubberPercentRect[3]
 
     def mousePressEvent(self, e: QMouseEvent):
         self.startPosition, self.moveActionState = self.rubberBand.press(e.pos())
@@ -39,21 +51,24 @@ class ImgWidget(QLabel):
         rect = self.rubberBand.geometry()
         self.rubberBand.setGeometry(rect)
 
+        self.rubberPercentRect = (self.rubberBand.geometry().left()/self.width(), self.rubberBand.geometry().top()/self.height(),
+                                  self.rubberBand.geometry().right()/self.width(), self.rubberBand.geometry().bottom()/self.height())
+
         self.startPosition = None
 
-    def set_ratio(self, ratio, prevImgSize):
+    def setPixmap(self, pixmap: QPixmap):
+        super().setPixmap(pixmap)
         if self.rubberBand.isHidden():
             return
 
+        newImgSize = pixmap.size()
+
         # to percent
-        tlX_percent = float(self.rubberBand.geometry().topLeft().x()) / prevImgSize.width()
-        tlY_percent = float(self.rubberBand.geometry().topLeft().y()) / prevImgSize.height()
-        brX_percent = float(self.rubberBand.geometry().bottomRight().x()) / prevImgSize.width()
-        brY_percent = float(self.rubberBand.geometry().bottomRight().y()) / prevImgSize.height()
+        tlX = int(self.left_percent * newImgSize.width())
+        tlY = int(self.top_percent * newImgSize.height())
+        brX = int(self.right_percent * newImgSize.width())
+        brY = int(self.bottom_percent * newImgSize.height())
 
-        newImgSize = prevImgSize * ratio
-
-        newRect = QRect(QPoint(int(tlX_percent * newImgSize.width()), int(tlY_percent * newImgSize.height())),
-                        QPoint(int(brX_percent * newImgSize.width()), int(brY_percent * newImgSize.height())))
+        newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
 
         self.rubberBand.setGeometry(newRect)

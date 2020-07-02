@@ -22,7 +22,7 @@ class CanvasWidget(BaseWidget):
         self.img = ImgWidget(self)
 
         self.img.setBackgroundRole(QPalette.Base)
-        self.img.setScaledContents(True) # allow to stretch
+        #self.img.setScaledContents(True) # allow to stretch
 
         #self.scrollArea.setStyleSheet("margin:5px; border:1px solid rgb(0, 0, 0); ")
         self.scrollArea.setWidget(self.img)
@@ -50,5 +50,5 @@ class CanvasWidget(BaseWidget):
             h, w, c = cvimg.shape
             ratio = zoomvalue / 100.
             pixmap = cvimg2qpixmap(cv2.resize(cvimg, (int(w*ratio), int(h*ratio))))
-            self.img.set_ratio(ratio, QSize(w, h))
+
             self.img.setPixmap(pixmap)
