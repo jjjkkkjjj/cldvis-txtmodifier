@@ -2,6 +2,7 @@ from PySide2.QtWidgets import *
 
 from .widgets import *
 from .model import Model
+from ..estimator.wrapper import Estimator
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
@@ -40,6 +41,7 @@ class MainWindow(QMainWindow):
 
         self.initUI()
         self.establish_connection()
+        self.estimator = Estimator()
 
         self.check_enable()
 
@@ -53,6 +55,7 @@ class MainWindow(QMainWindow):
     def establish_connection(self):
         self.main.leftdock.enableChecking.connect(self.check_enable)
         self.main.canvas.enableChecking.connect(self.check_enable)
+        self.main.leftdock.predicting.connect(lambda imgpath, tableRect: self.predict(imgpath, tableRect))
 
     def check_enable(self):
         # back forward
@@ -67,3 +70,6 @@ class MainWindow(QMainWindow):
         self.main.canvas.check_enable()
         self.main.leftdock.check_enable_run()
         self.menu.check_enable_run()
+
+    def predict(self, imgpath, tableRect):
+        pass

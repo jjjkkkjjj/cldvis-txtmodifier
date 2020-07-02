@@ -11,6 +11,7 @@ class LeftDockWidget(BaseWidget):
     ratioChanged = Signal(str, int) # emit imgpath and zoomvalue
     enableChecking = Signal()
     rectRemoved = Signal()
+    predicting = Signal(str, tuple)
 
     def __init__(self, mainWidget):
         super().__init__(mainWidget)
@@ -139,7 +140,7 @@ class LeftDockWidget(BaseWidget):
         self.rectRemoved.emit()
 
     def buttonPredictTableClicked(self):
-        pass
+        self.predicting.emit(self.model.imgpath, self.model.rubberPercentRect)
 
     ##### check enable #####
     def check_enable_backforward(self):

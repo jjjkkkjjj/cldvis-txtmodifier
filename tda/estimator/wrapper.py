@@ -1,0 +1,3 @@
+
+class Estimator(object):
+    pass

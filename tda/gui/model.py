@@ -57,6 +57,9 @@ class Model(object):
 
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])
 
+    @property
+    def rubberPercentRect(self):
+        return self._rubberPercentRect
 
     @property
     def isExistRubberPercentRect(self):
