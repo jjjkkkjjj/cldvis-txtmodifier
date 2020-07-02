@@ -52,11 +52,12 @@ class LeftDockWidget(BaseWidget):
 
         ## zoom in and out ##
         hbox_zoom_auto = QHBoxLayout()
-        self.button_zoomin = Button('zoomin.png')
-        hbox_zoom_auto.addWidget(self.button_zoomin)
 
         self.button_zoomout = Button('zoomout.png')
         hbox_zoom_auto.addWidget(self.button_zoomout)
+
+        self.button_zoomin = Button('zoomin.png')
+        hbox_zoom_auto.addWidget(self.button_zoomin)
         vbox_viewer.addLayout(hbox_zoom_auto, 1)
 
         ## zoom manually ##
