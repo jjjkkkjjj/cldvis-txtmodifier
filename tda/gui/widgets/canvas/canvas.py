@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import cv2
+import cv2, os
 
 from .img import ImgWidget
 from ..baseWidget import BaseWidget
@@ -17,6 +17,10 @@ class CanvasWidget(BaseWidget):
 
     def initUI(self):
         vbox = QVBoxLayout()
+
+        self.label_filename = QLabel(self)
+        self.label_filename.setText('Filename:')
+        vbox.addWidget(self.label_filename)
 
         self.scrollArea = QScrollArea(self)
         self.img = ImgWidget(self)
@@ -40,6 +44,9 @@ class CanvasWidget(BaseWidget):
         :return:
         """
         if imgpath is not None and imgpath != '':
+
+            self.label_filename.setText('Filename: {}'.format(os.path.basename(imgpath)))
+
             """
             # below code is not good resizing
             pixmap = QPixmap(imgpath)

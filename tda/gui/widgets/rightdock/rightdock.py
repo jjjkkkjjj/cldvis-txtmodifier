@@ -13,6 +13,10 @@ class RightDockWidget(BaseWidget):
     def initUI(self):
         vbox = QVBoxLayout()
 
+        self.label_predict = QLabel(self)
+        self.label_predict.setText("Prediction")
+        vbox.addWidget(self.label_predict)
+
         self.textedit = QTextEdit(self)
 
         vbox.addWidget(self.textedit)
