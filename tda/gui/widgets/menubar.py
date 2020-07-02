@@ -3,6 +3,8 @@ from PySide2.QtGui import *
 
 from ..functions.dialogs import openAbout
 
+
+# shortcut list: https://doc.qt.io/qtforpython/PySide2/QtGui/QKeySequence.html
 class MenuBar(QMenuBar):
     def __init__(self, mainWidget):
         super().__init__(parent=mainWidget)
@@ -16,6 +18,7 @@ class MenuBar(QMenuBar):
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
+        self.menu_view = self.addMenu('&View')
         self.menu_help = self.addMenu('&Help')
 
 
@@ -23,15 +26,26 @@ class MenuBar(QMenuBar):
         ##### File #####
         # open folder
         self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: mainWidget.leftdock.openDialog('folder'),
-                                                 shortcut="Ctrl+F", tip="open folder")
+                                                 shortcut="Ctrl+O", tip="open folder")
 
         # open files
         self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: mainWidget.leftdock.openDialog('file'),
-                                               shortcut="Ctrl+Shift+F", tip="open files")
+                                               shortcut="Ctrl+Shift+O", tip="open files")
 
         _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None))
 
+        ##### View #####
+        # zoom in
+        self.action_zoomin = _create_action(self, '&Zoom In', slot=mainWidget.leftdock.button_zoomin.click,
+                                            shortcut="Ctrl++", tip='Zoom in')
+        # zoom out
+        self.action_zoomout = _create_action(self, '&Zoom Out', slot=mainWidget.leftdock.button_zoomout.click,
+                                             shortcut="Ctrl+-", tip='Zoom out')
+
+        _add_actions(self.menu_view, (self.action_zoomin, self.action_zoomout, None))
+
         ##### Help #####
+        # about
         self.action_about = _create_action(self, '&About', slot=lambda: openAbout(mainWidget), tip='about Table Data Analyzer')
 
         _add_actions(self.menu_help, (self.action_about,))
