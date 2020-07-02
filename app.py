@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 import sys
 
-from mda.gui import MainWindow
+from tda.gui import MainWindow
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

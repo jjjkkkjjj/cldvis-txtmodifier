@@ -2,7 +2,7 @@ from PySide2.QtWidgets import *
 
 import glob, os
 
-from .utils import path_desktop, check_instance
+from .utils import check_instance
 from ..widgets.baseWidget import BaseWidget
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm', '.pxm', '.pnm', '.hdr', '.pic']

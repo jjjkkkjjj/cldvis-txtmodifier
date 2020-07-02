@@ -10,7 +10,7 @@ class Config(object):
 
     @property
     def configpath(self):
-        return os.path.join('.mda', 'mda.ini')
+        return os.path.join('.tda', 'tda.ini')
 
     @property
     def last_opendir(self):
@@ -23,9 +23,9 @@ class Config(object):
     def _initialReadConfig(self):
         if not os.path.exists(self.configpath):
             # initial creation
-            if os.path.exists('.mda'):
-                shutil.rmtree('.mda') # remove all
-            os.makedirs('.mda')
+            if os.path.exists('.tda'):
+                shutil.rmtree('.tda') # remove all
+            os.makedirs('.tda')
 
             # default value
             default = {

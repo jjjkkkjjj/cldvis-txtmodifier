@@ -15,11 +15,13 @@ class MenuBar(QMenuBar):
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
+        self.menu_about = self.addMenu('&About')
 
 
     def establish_connection(self, mainWidget):
+        ##### File #####
         # open folder
-        self.action_openfolder =  _create_action(self, "&Open Folder", slot=lambda: mainWidget.leftdock.openDialog('folder'),
+        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: mainWidget.leftdock.openDialog('folder'),
                                                  shortcut="Ctrl+F", tip="open folder")
 
         # open files
@@ -28,6 +30,7 @@ class MenuBar(QMenuBar):
 
         _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None))
 
+        ##### About #####
 
 
 def _add_actions(target, actions):
