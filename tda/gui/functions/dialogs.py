@@ -67,6 +67,8 @@ class AboutDialog(QDialog):
                'by <a href="https://icons8.com/icons">icons8.com</a>;<br><br>' \
                '<a href="https://icons8.com/icon/XWoSyGbnshH2/file">File icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/dINnkNb1FBl4/folder">Folder icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/80323/next-page">Next page icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/80689/back">Back icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/63650/plus">Plus icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/12386/minus">Minus icon by Icons8</a>'
         label_text.setText(text)

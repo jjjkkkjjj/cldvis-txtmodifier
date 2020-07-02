@@ -9,6 +9,7 @@ from ..baseWidget import BaseWidget
 class LeftDockWidget(BaseWidget):
     imgChanged = Signal(str, int) # emit imgpath and zoomvalue
     ratioChanged = Signal(str, int) # emit imgpath and zoomvalue
+    enableChecking = Signal()
 
     def __init__(self, mainWidget):
         super().__init__(mainWidget)
@@ -20,6 +21,7 @@ class LeftDockWidget(BaseWidget):
         vbox = QVBoxLayout()
 
         ###### open ######
+        # open folder and file
         vbox_open = QVBoxLayout()
         self.groupBox_open = QGroupBox('Open', self)
 
@@ -28,6 +30,16 @@ class LeftDockWidget(BaseWidget):
 
         self.button_openfile = Button('file.png')
         vbox_open.addWidget(self.button_openfile)
+
+        # open back and next
+        hbox_backnext = QHBoxLayout()
+        self.button_back = Button('back.png')
+        hbox_backnext.addWidget(self.button_back)
+
+        self.button_next = Button('next.png')
+        hbox_backnext.addWidget(self.button_next)
+
+        vbox_open.addLayout(hbox_backnext)
 
         self.groupBox_open.setLayout(vbox_open)
         vbox.addWidget(self.groupBox_open)
@@ -57,21 +69,23 @@ class LeftDockWidget(BaseWidget):
         self.setLayout(vbox)
 
     def establish_connection(self):
-        self.button_openfolder.clicked.connect(lambda: self.openDialog('folder'))
-        self.button_openfile.clicked.connect(lambda: self.openDialog('file'))
+        self.button_openfolder.clicked.connect(lambda: self.openDialog(True))
+        self.button_openfile.clicked.connect(lambda: self.openDialog(False))
+
+        self.button_back.clicked.connect(lambda: self.backnext(True))
+        self.button_next.clicked.connect(lambda: self.backnext(False))
 
         self.button_zoomin.clicked.connect(lambda: self.buttonZoomClicked(True))
         self.button_zoomout.clicked.connect(lambda: self.buttonZoomClicked(False))
 
         self.spinBox_zoom.valueChanged.connect(self.spinBoxZoomValueChanged)
 
-    def openDialog(self, opentype):
-        if opentype == 'folder':
+    ##### connection func #####
+    def openDialog(self, isFolder):
+        if isFolder:
             filenames = openDir(self)
-        elif opentype == 'file':
-            filenames = openFiles(self)
         else:
-            assert False, "Invalid Error"
+            filenames = openFiles(self)
 
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
@@ -80,9 +94,17 @@ class LeftDockWidget(BaseWidget):
             self.model.set_imgPaths(filenames)
 
         self.imgChanged.emit(self.model.imgpath, self.spinBox_zoom.value())
+        self.enableChecking.emit()
 
-    def buttonZoomClicked(self, zoomin):
-        if zoomin:
+    def backnext(self, isBack):
+        if isBack:
+            pass
+        else:
+            pass
+
+    ##### signal #####
+    def buttonZoomClicked(self, isZoomIn):
+        if isZoomIn:
             r = min(self.spinBox_zoom.value() + 10, 200)
         else:
             r = max(self.spinBox_zoom.value() - 10, 20)
@@ -91,3 +113,12 @@ class LeftDockWidget(BaseWidget):
 
     def spinBoxZoomValueChanged(self, value):
         self.ratioChanged.emit(self.model.imgpath, value)
+
+    ##### check enable #####
+    def check_enable_backnext(self):
+        self.button_back.setEnabled(self.model.isExistBackImg)
+        self.button_next.setEnabled(self.model.isExistNextImg)
+
+    def check_enable_zoom(self):
+        self.button_zoomin.setEnabled(self.model.isExistImg)
+        self.button_zoomout.setEnabled(self.model.isExistImg)

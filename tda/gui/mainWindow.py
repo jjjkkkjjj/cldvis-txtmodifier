@@ -32,15 +32,31 @@ class MainWidget(QWidget):
         self.leftdock.imgChanged.connect(self.canvas.set_img)
         self.leftdock.ratioChanged.connect(self.canvas.set_img)
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.initUI()
+        self.establish_connection()
+
+        self.check_enable()
 
     def initUI(self):
         self.main = MainWidget(self)
         self.setCentralWidget(self.main)
 
-        self.setMenuBar(MenuBar(self.main))
+        self.menu = MenuBar(self.main)
+        self.setMenuBar(self.menu)
 
+    def establish_connection(self):
+        self.main.leftdock.enableChecking.connect(self.check_enable)
+
+    def check_enable(self):
+        # back next
+        self.main.leftdock.check_enable_backnext()
+
+        # zoom
+        self.main.leftdock.check_enable_zoom()
+        self.menu.check_enable_zoom()

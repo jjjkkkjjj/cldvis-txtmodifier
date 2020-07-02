@@ -13,3 +13,17 @@ class BaseWidget(QWidget):
     @property
     def model(self):
         return self.mainWidget.model
+
+class BaseMenuBar(QMenuBar):
+    def __init__(self, mainWidget):
+        from ..mainWindow import MainWidget
+
+        if not isinstance(mainWidget, MainWidget):
+            ValueError('parent must be MainWidget, but got {}'.format(type(mainWidget).__name__))
+
+        super().__init__(parent=mainWidget)
+        self.mainWidget = mainWidget
+
+    @property
+    def model(self):
+        return self.mainWidget.model

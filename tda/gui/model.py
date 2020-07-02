@@ -6,17 +6,33 @@ from .functions.config import Config
 class Model(object):
     def __init__(self):
         self._imgIndex = -1
-        self._imgPaths = None
+        self._imgPaths = []
         self._imgpixmap = None
 
         self.config = Config()
 
     @property
     def imgpath(self):
-        if self._imgPaths is None:
+        if self.isExistImg:
             return None
         else:
             return self._imgPaths[self._imgIndex]
+
+    @property
+    def isExistImg(self):
+        return len(self._imgPaths) > 0
+    @property
+    def isExistNextImg(self):
+        if self.isExistImg:
+            return self._imgIndex != len(self._imgPaths) - 1
+        else:
+            return False
+    @property
+    def isExistBackImg(self):
+        if self.isExistImg:
+            return self._imgIndex != 0
+        else:
+            return False
 
 
     def set_imgPaths(self, paths):
@@ -29,7 +45,7 @@ class Model(object):
             #self._imgIndex = -1
         else:
             self._imgPaths = paths
-            
+
             self._imgIndex = 0
 
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])

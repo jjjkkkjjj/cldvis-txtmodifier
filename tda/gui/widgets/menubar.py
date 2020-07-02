@@ -2,19 +2,16 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 
 from ..functions.dialogs import openAbout
+from .baseWidget import BaseMenuBar
 
 
 # shortcut list: https://doc.qt.io/qtforpython/PySide2/QtGui/QKeySequence.html
-class MenuBar(QMenuBar):
+class MenuBar(BaseMenuBar):
     def __init__(self, mainWidget):
-        super().__init__(parent=mainWidget)
-        from ..mainWindow import MainWidget
-
-        if not isinstance(mainWidget, MainWidget):
-            ValueError('parent must be MainWidget, but got {}'.format(type(mainWidget).__name__))
+        super().__init__(mainWidget)
 
         self.initUI()
-        self.establish_connection(mainWidget)
+        self.establish_connection()
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
@@ -22,33 +19,39 @@ class MenuBar(QMenuBar):
         self.menu_help = self.addMenu('&Help')
 
 
-    def establish_connection(self, mainWidget):
+    def establish_connection(self):
         ##### File #####
         # open folder
-        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: mainWidget.leftdock.openDialog('folder'),
+        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: self.mainWidget.leftdock.openDialog('folder'),
                                                  shortcut="Ctrl+O", tip="open folder")
 
         # open files
-        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: mainWidget.leftdock.openDialog('file'),
+        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: self.mainWidget.leftdock.openDialog('file'),
                                                shortcut="Ctrl+Shift+O", tip="open files")
 
         _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None))
 
         ##### View #####
         # zoom in
-        self.action_zoomin = _create_action(self, '&Zoom In', slot=mainWidget.leftdock.button_zoomin.click,
+        self.action_zoomin = _create_action(self, '&Zoom In', slot=self.mainWidget.leftdock.button_zoomin.click,
                                             shortcut="Ctrl++", tip='Zoom in')
         # zoom out
-        self.action_zoomout = _create_action(self, '&Zoom Out', slot=mainWidget.leftdock.button_zoomout.click,
+        self.action_zoomout = _create_action(self, '&Zoom Out', slot=self.mainWidget.leftdock.button_zoomout.click,
                                              shortcut="Ctrl+-", tip='Zoom out')
 
         _add_actions(self.menu_view, (self.action_zoomin, self.action_zoomout, None))
 
         ##### Help #####
         # about
-        self.action_about = _create_action(self, '&About', slot=lambda: openAbout(mainWidget), tip='about Table Data Analyzer')
+        self.action_about = _create_action(self, '&About', slot=lambda: openAbout(self.mainWidget), tip='about Table Data Analyzer')
 
         _add_actions(self.menu_help, (self.action_about,))
+
+    ##### check enable #####
+    def check_enable_zoom(self):
+        self.action_zoomin.setEnabled(self.model.isExistImg)
+        self.action_zoomout.setEnabled(self.model.isExistImg)
+
 
 def _add_actions(target, actions):
     for action in actions:
