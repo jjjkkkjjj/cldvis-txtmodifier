@@ -1,4 +1,5 @@
 from PySide2.QtWidgets import *
+import os, cv2
 
 from .widgets import *
 from .model import Model
@@ -72,4 +73,24 @@ class MainWindow(QMainWindow):
         self.menu.check_enable_run()
 
     def predict(self, imgpath, tableRect):
-        pass
+        """
+        :param imgpath: str
+        :param tableRect: tuple = (left, top, right, bottom) with percent mode
+        :return:
+        """
+
+        def save(directory='./img'):
+            img = cv2.imread(imgpath)
+            h, w, _ = img.shape
+
+            xmin, ymin, xmax, ymax = tableRect
+            xmin, xmax = int(xmin * w), int(xmax * w)
+            ymin, ymax = int(ymin * h), int(ymax * h)
+
+            filename, ext = os.path.splitext(os.path.basename(imgpath))
+            apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
+            savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
+
+            cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+
+        save()
