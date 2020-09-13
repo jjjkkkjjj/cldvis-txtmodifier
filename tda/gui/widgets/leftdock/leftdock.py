@@ -11,6 +11,7 @@ class LeftDockWidget(BaseWidget):
     ratioChanged = Signal(str, int) # emit imgpath and zoomvalue
     enableChecking = Signal()
     rectRemoved = Signal()
+    datasetAdding = Signal()
     predicting = Signal(str, tuple)
 
     def __init__(self, mainWidget):
@@ -77,6 +78,10 @@ class LeftDockWidget(BaseWidget):
         self.button_removeRect = Button('remove.png')
         vbox_run.addWidget(self.button_removeRect)
 
+        # add dataset
+        self.button_addDataset = Button('add-dataset.png')
+        vbox_run.addWidget(self.button_addDataset)
+
         # predict
         self.button_predictTable = Button('predict.png')
         vbox_run.addWidget(self.button_predictTable)
@@ -97,6 +102,7 @@ class LeftDockWidget(BaseWidget):
         self.button_zoomout.clicked.connect(lambda: self.buttonZoomClicked(False))
 
         self.button_removeRect.clicked.connect(self.buttonRemoveRectClicked)
+        self.button_addDataset.clicked.connect(self.buttonAddDatasetClicked)
         self.button_predictTable.clicked.connect(self.buttonPredictTableClicked)
 
         self.spinBox_zoom.valueChanged.connect(self.spinBoxZoomValueChanged)
@@ -140,6 +146,9 @@ class LeftDockWidget(BaseWidget):
     def buttonRemoveRectClicked(self):
         self.rectRemoved.emit()
 
+    def buttonAddDatasetClicked(self):
+        self.datasetAdding.emit()
+
     def buttonPredictTableClicked(self):
         self.predicting.emit(self.model.imgpath, self.model.rubberPercentRect)
 
@@ -155,4 +164,5 @@ class LeftDockWidget(BaseWidget):
 
     def check_enable_run(self):
         self.button_removeRect.setEnabled(self.model.isExistRubberPercentRect)
+        self.button_addDataset.setEnabled(self.model.isExistRubberPercentRect)
         self.button_predictTable.setEnabled(self.model.isExistRubberPercentRect)
