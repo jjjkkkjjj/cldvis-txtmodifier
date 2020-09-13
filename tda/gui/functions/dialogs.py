@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 
-import glob, os
+import glob, os, sys
 
 from .utils import check_instance
 from ..widgets.baseWidget import BaseWidget
@@ -169,3 +169,7 @@ class CredentialDialog(QDialog):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = self.jsonpath
         self.pathSet.emit(self.jsonpath)
         self.close()
+
+    def closeEvent(self, event):
+        if not self.isSetPath:
+            sys.exit()
