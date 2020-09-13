@@ -78,13 +78,13 @@ class LeftDockWidget(BaseWidget):
         self.button_removeRect = Button('remove.png')
         vbox_run.addWidget(self.button_removeRect)
 
+        # predict
+        self.button_predictTable = Button('cloud-vision.png')
+        vbox_run.addWidget(self.button_predictTable)
+
         # add dataset
         self.button_addDataset = Button('add-dataset.png')
         vbox_run.addWidget(self.button_addDataset)
-
-        # predict
-        self.button_predictTable = Button('predict.png')
-        vbox_run.addWidget(self.button_predictTable)
 
         self.groupBox_run.setLayout(vbox_run)
         vbox.addWidget(self.groupBox_run, 1)

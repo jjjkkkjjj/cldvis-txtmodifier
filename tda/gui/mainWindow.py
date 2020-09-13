@@ -34,6 +34,7 @@ class MainWidget(QWidget):
         self.leftdock.imgChanged.connect(self.canvas.set_img)
         self.leftdock.ratioChanged.connect(self.canvas.set_img)
         self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
+        #self.leftdock.datasetAdding.connect()
 
 
 class MainWindow(QMainWindow):
