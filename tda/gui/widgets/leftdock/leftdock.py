@@ -112,7 +112,7 @@ class LeftDockWidget(BaseWidget):
         if isFolder:
             filenames = openDir(self)
         else:
-            filenames = openFiles(self)
+            filenames = openFiles(self, "Images", SUPPORTED_EXTENSIONS)
 
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)

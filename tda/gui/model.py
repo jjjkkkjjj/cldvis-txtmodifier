@@ -10,7 +10,7 @@ class Model(object):
         self._imgpixmap = None
 
         self._rubberPercentRect = None
-
+        self.credentialJsonpath = None
         self.config = Config()
 
     @property

@@ -3,6 +3,7 @@ import os, cv2
 
 from .widgets import *
 from .model import Model
+from .functions.dialogs import CredentialDialog
 from ..estimator.wrapper import Estimator
 
 class MainWidget(QWidget):
@@ -13,6 +14,8 @@ class MainWidget(QWidget):
         self.establish_connection()
 
         self.model = Model()
+
+        self.check_credential()
 
     def initUI(self):
         hbox = QHBoxLayout(self)
@@ -36,6 +39,15 @@ class MainWidget(QWidget):
         self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
         #self.leftdock.datasetAdding.connect()
 
+    def check_credential(self):
+        jsonpath = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+        if jsonpath is None:
+            dialog = CredentialDialog(self)
+            dialog.pathSet.connect(lambda path: self.set_credential(path))
+            dialog.exec_()
+
+    def set_credential(self, path):
+        self.model.credentialJsonpath = path
 
 class MainWindow(QMainWindow):
     def __init__(self):
