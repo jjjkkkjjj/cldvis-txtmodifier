@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import *
 import os, cv2
+from google.auth.exceptions import DefaultCredentialsError
 
 from .widgets import *
 from .model import Model
@@ -40,14 +41,34 @@ class MainWidget(QWidget):
         #self.leftdock.datasetAdding.connect()
 
     def check_credential(self):
-        jsonpath = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-        if jsonpath is None:
-            dialog = CredentialDialog(self)
-            dialog.pathSet.connect(lambda path: self.set_credential(path))
-            dialog.exec_()
+        #jsonpath = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+
+        if self.model.isExistCredPath:
+            self.set_credential(self.model.credentialJsonpath)
+        else:
+            self.show_credentialDialog()
 
     def set_credential(self, path):
-        self.model.credentialJsonpath = path
+        """
+        This method must be called in initialization
+        :param path: str, credential json path
+        :return:
+        """
+        try:
+            self.model.set_credentialJsonpath(path)
+        except DefaultCredentialsError:
+            ret = QMessageBox.critical(self, 'Invalid', '{} is invalid!'.format(path), QMessageBox.Yes)
+            if ret == QMessageBox.Yes:
+                self.show_credentialDialog()
+        #ここらへんからapiとの接続を頑張る
+        #https://cloud.google.com/vision/docs/ocr
+        #https://www.youtube.com/watch?v=HMaoUdJQEgY
+        #https://cloud.google.com/vision/docs/pdf
+
+    def show_credentialDialog(self):
+        dialog = CredentialDialog(self)
+        dialog.pathSet.connect(lambda path: self.set_credential(path))
+        dialog.exec_()
 
 class MainWindow(QMainWindow):
     def __init__(self):

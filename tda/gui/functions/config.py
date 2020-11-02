@@ -20,6 +20,16 @@ class Config(object):
         self.config['settings']['last_opendir'] = last_dir
         self.writeConfig()
 
+    @property
+    def credentialJsonpath(self):
+        if self.config['settings']['credentialJsonpath'] == 'None':
+            return None
+        return self.config['settings']['credentialJsonpath']
+    @credentialJsonpath.setter
+    def credentialJsonpath(self, path):
+        self.config['settings']['credentialJsonpath'] = path
+        self.writeConfig()
+
     def _initialReadConfig(self):
         if not os.path.exists(self.configpath):
             # initial creation
@@ -29,8 +39,8 @@ class Config(object):
 
             # default value
             default = {
-                'last_opendir': path_desktop()
-
+                'last_opendir': path_desktop(),
+                'credentialJsonpath': 'None'
             }
 
             self.config['default'] = default

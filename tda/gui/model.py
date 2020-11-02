@@ -1,6 +1,7 @@
 from PySide2.QtGui import *
 import os
 
+from ..estimator.vision import Vision
 from .functions.config import Config
 
 class Model(object):
@@ -10,9 +11,11 @@ class Model(object):
         self._imgpixmap = None
 
         self._rubberPercentRect = None
-        self.credentialJsonpath = None
         self.config = Config()
 
+    """
+    image
+    """
     @property
     def imgpath(self):
         if not self.isExistImg:
@@ -57,6 +60,9 @@ class Model(object):
 
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])
 
+    """
+    rubber
+    """
     @property
     def rubberPercentRect(self):
         return self._rubberPercentRect
@@ -68,3 +74,17 @@ class Model(object):
     def set_rubberPercentRect(self, rubberPercentRect):
         self._rubberPercentRect = rubberPercentRect
 
+    """
+    gcp
+    """
+    @property
+    def credentialJsonpath(self):
+        return self.config.credentialJsonpath
+
+    @property
+    def isExistCredPath(self):
+        return self.config.credentialJsonpath is not None
+
+    def set_credentialJsonpath(self, path):
+        self.config.credentialJsonpath = path
+        self.vision = Vision(path)
