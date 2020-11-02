@@ -1,29 +1,29 @@
 from PySide2.QtWidgets import *
 
 class BaseWidget(QWidget):
-    def __init__(self, mainWidget):
-        from ..mainWindow import MainWidget
+    def __init__(self, mainWC):
+        from ..mainWC import MainWindowController
 
-        if not isinstance(mainWidget, MainWidget):
-            ValueError('parent must be MainWidget, but got {}'.format(type(mainWidget).__name__))
+        if not isinstance(mainWC, MainWindowController):
+            ValueError('argument must be MainWidgetController, but got {}'.format(type(mainWC).__name__))
 
-        super().__init__(parent=mainWidget)
-        self.mainWidget = mainWidget
+        super().__init__(parent=mainWC)
+        self.mainWC = mainWC
 
     @property
     def model(self):
-        return self.mainWidget.model
+        return self.mainWC.model
 
 class BaseMenuBar(QMenuBar):
-    def __init__(self, mainWidget):
-        from ..mainWindow import MainWidget
+    def __init__(self, mainWC):
+        from ..mainWC import MainWindowController
 
-        if not isinstance(mainWidget, MainWidget):
-            ValueError('parent must be MainWidget, but got {}'.format(type(mainWidget).__name__))
+        if not isinstance(mainWC, MainWindowController):
+            ValueError('argument must be MainWidgetController, but got {}'.format(type(mainWC).__name__))
 
-        super().__init__(parent=mainWidget)
-        self.mainWidget = mainWidget
+        super().__init__(parent=mainWC)
+        self.mainWC = mainWC
 
     @property
     def model(self):
-        return self.mainWidget.model
+        return self.mainWC.model

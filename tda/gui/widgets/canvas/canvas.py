@@ -9,8 +9,8 @@ from ...functions.utils import cvimg2qpixmap
 
 class CanvasWidget(BaseWidget):
     enableChecking = Signal()
-    def __init__(self, mainWidget):
-        super().__init__(mainWidget)
+    def __init__(self, mainWidgetController):
+        super().__init__(mainWidgetController)
 
         self.rubbers = []
 

@@ -46,10 +46,10 @@ def openDir(self):
     return filenames
 
 def openAbout(mainWidget):
-    from ..mainWindow import MainWidget
-    _ = check_instance('mainWidget', mainWidget, MainWidget)
+    from ..mainWC import MainWidget
+    _ = check_instance('mainWidgetController', mainWidget, MainWidget)
 
-    #msgBox = QMessageBox.information(mainWidget, 'About Table Data Analyzer', 'aaaa')
+    #msgBox = QMessageBox.information(mainWidgetController, 'About Table Data Analyzer', 'aaaa')
     aboutBox = AboutDialog(mainWidget)
     aboutBox.show()
 
@@ -93,8 +93,8 @@ class AboutDialog(QDialog):
         self.setFixedSize(400, 300)
 
 def openCredential(mainWidget):
-    from ..mainWindow import MainWidget
-    _ = check_instance('mainWidget', mainWidget, MainWidget)
+    from ..mainWC import MainWidget
+    _ = check_instance('mainWidgetController', mainWidget, MainWidget)
 
     credential = CredentialDialog(mainWidget)
     credential.show()

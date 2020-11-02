@@ -1,1 +1,1 @@
-from .mainWindow import MainWindow
+from .mainWC import MainWindowController

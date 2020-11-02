@@ -14,8 +14,8 @@ class LeftDockWidget(BaseWidget):
     datasetAdding = Signal()
     predicting = Signal(str, tuple)
 
-    def __init__(self, mainWidget):
-        super().__init__(mainWidget)
+    def __init__(self, mainWidgetController):
+        super().__init__(mainWidgetController)
 
         self.initUI()
         self.establish_connection()
@@ -79,6 +79,9 @@ class LeftDockWidget(BaseWidget):
         vbox_run.addWidget(self.button_removeRect)
 
         # predict
+        self.comboBox_mode = QComboBox(self)
+        self.comboBox_mode.addItems(['image', 'file'])
+        vbox_run.addWidget(self.comboBox_mode)
         self.button_predictTable = Button('cloud-vision.png')
         vbox_run.addWidget(self.button_predictTable)
 

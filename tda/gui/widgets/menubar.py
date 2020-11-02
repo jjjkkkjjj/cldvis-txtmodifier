@@ -7,8 +7,8 @@ from .baseWidget import BaseMenuBar
 
 # shortcut list: https://doc.qt.io/qtforpython/PySide2/QtGui/QKeySequence.html
 class MenuBar(BaseMenuBar):
-    def __init__(self, mainWidget):
-        super().__init__(mainWidget)
+    def __init__(self, mainWC):
+        super().__init__(mainWC)
 
         self.initUI()
         self.establish_connection()
@@ -23,44 +23,44 @@ class MenuBar(BaseMenuBar):
     def establish_connection(self):
         ##### File #####
         # open folder
-        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: self.mainWidget.leftdock.openDialog(True),
+        self.action_openfolder = _create_action(self, "&Open Folder", slot=lambda: self.mainWC.leftdock.openDialog(True),
                                                 shortcut="Ctrl+O", tip="open folder")
         # open files
-        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: self.mainWidget.leftdock.openDialog(False),
+        self.action_openfiles = _create_action(self, "&Open Files", slot=lambda: self.mainWC.leftdock.openDialog(False),
                                                shortcut="Ctrl+Shift+O", tip="open files")
 
         # back file
-        self.action_backfile = _create_action(self, "&Back File", slot=lambda: self.mainWidget.leftdock.backforward(True),
+        self.action_backfile = _create_action(self, "&Back File", slot=lambda: self.mainWC.leftdock.backforward(True),
                                               shortcut="Alt+Left", tip="Back file")
         # forward file
-        self.action_forwardfile = _create_action(self, "&Forward File", slot=lambda: self.mainWidget.leftdock.backforward(False),
+        self.action_forwardfile = _create_action(self, "&Forward File", slot=lambda: self.mainWC.leftdock.backforward(False),
                                                  shortcut="Alt+Right", tip="Forward file")
 
         _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None, self.action_backfile, self.action_forwardfile))
 
         ##### View #####
         # zoom in
-        self.action_zoomin = _create_action(self, '&Zoom In', slot=self.mainWidget.leftdock.button_zoomin.click,
+        self.action_zoomin = _create_action(self, '&Zoom In', slot=self.mainWC.leftdock.button_zoomin.click,
                                             shortcut="Ctrl++", tip='Zoom in')
         # zoom out
-        self.action_zoomout = _create_action(self, '&Zoom Out', slot=self.mainWidget.leftdock.button_zoomout.click,
+        self.action_zoomout = _create_action(self, '&Zoom Out', slot=self.mainWC.leftdock.button_zoomout.click,
                                              shortcut="Ctrl+-", tip='Zoom out')
 
         _add_actions(self.menu_view, (self.action_zoomin, self.action_zoomout, None))
 
         ##### Run #####
         # remove
-        self.action_removeRect = _create_action(self, '&Remove Rectangle', slot=self.mainWidget.leftdock.button_removeRect.click,
+        self.action_removeRect = _create_action(self, '&Remove Rectangle', slot=self.mainWC.leftdock.button_removeRect.click,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
         # predict
-        self.action_predictTable = _create_action(self, '&Predict Table', slot=self.mainWidget.leftdock.button_predictTable.click,
+        self.action_predictTable = _create_action(self, '&Predict Table', slot=self.mainWC.leftdock.button_predictTable.click,
                                                   shortcut="Ctrl+R", tip='Predict table')
 
         _add_actions(self.menu_run, (self.action_removeRect, self.action_predictTable, None))
 
         ##### Help #####
         # about
-        self.action_about = _create_action(self, '&About', slot=lambda: openAbout(self.mainWidget), tip='about Table Data Analyzer')
+        self.action_about = _create_action(self, '&About', slot=lambda: openAbout(self.mainWC), tip='about Table Data Analyzer')
 
         _add_actions(self.menu_help, (self.action_about,))
 

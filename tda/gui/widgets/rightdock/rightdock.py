@@ -5,8 +5,8 @@ from PySide2.QtCore import *
 from ..baseWidget import BaseWidget
 
 class RightDockWidget(BaseWidget):
-    def __init__(self, mainWidget):
-        super().__init__(mainWidget)
+    def __init__(self, mainWidgetController):
+        super().__init__(mainWidgetController)
 
         self.initUI()
 
