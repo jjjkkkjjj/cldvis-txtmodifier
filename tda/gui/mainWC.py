@@ -5,8 +5,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from .widgets import *
 from .model import Model
 from .functions.dialogs import CredentialDialog
-from .functions.utils import reconstruct_coordinates
-from ..estimator.wrapper import Estimator
+from ..estimator.vision import Vision, PredictError
 
 
 class MainWindowController(QMainWindow):
@@ -17,8 +16,6 @@ class MainWindowController(QMainWindow):
         self.establish_connection()
 
         self.model = Model()
-
-        self.estimator = Estimator()
 
         self.check_enable()
         self.check_credential()
@@ -63,20 +60,25 @@ class MainWindowController(QMainWindow):
         :param mode: str, 'image' or 'file'
         :return:
         """
+        if mode == 'image':
 
-        def save(directory='./img'):
-            img = cv2.imread(imgpath)
-            h, w, _ = img.shape
+            # save tmp image
+            #tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
+            try:
+                # detect
+                #self.vision.detect_localImg(tmpimgpath)
+                pass
+            except PredictError as e:
+                ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+                if ret == QMessageBox.Yes:
+                    # remove tmp files
+                    self.model.remove_tmpimg()
 
-            xmin, ymin, xmax, ymax = reconstruct_coordinates(tableRect, w, h)
+        elif mode == 'file':
+            pass
+        else:
+            raise ValueError('Invalid mode was passed')
 
-            filename, ext = os.path.splitext(os.path.basename(imgpath))
-            apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
-            savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
-
-            cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
-
-        save()
 
     """
     credential
@@ -96,6 +98,7 @@ class MainWindowController(QMainWindow):
         :return:
         """
         try:
+            self.vision = Vision(path)
             self.model.set_credentialJsonpath(path)
         except DefaultCredentialsError:
             ret = QMessageBox.critical(self, 'Invalid', '{} is invalid!'.format(path), QMessageBox.Yes)

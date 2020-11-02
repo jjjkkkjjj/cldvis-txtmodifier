@@ -36,6 +36,7 @@ class Config(object):
             if os.path.exists('.tda'):
                 shutil.rmtree('.tda') # remove all
             os.makedirs('.tda')
+            os.makedirs(os.path.join('.tda', 'tmp'))
 
             # default value
             default = {

@@ -1,8 +1,8 @@
 from PySide2.QtGui import *
-import os
+import os, cv2, glob
 
-from ..estimator.vision import Vision
 from .functions.config import Config
+from .functions.utils import reconstruct_coordinates
 
 class Model(object):
     def __init__(self):
@@ -87,4 +87,21 @@ class Model(object):
 
     def set_credentialJsonpath(self, path):
         self.config.credentialJsonpath = path
-        self.vision = Vision(path)
+
+    def save_tmpimg(self, imgpath, tableRect, directory=os.path.join('.', '.tda', 'tmp')):
+        img = cv2.imread(imgpath)
+        h, w, _ = img.shape
+
+        xmin, ymin, xmax, ymax = reconstruct_coordinates(tableRect, w, h)
+
+        filename, ext = os.path.splitext(os.path.basename(imgpath))
+        apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
+        savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
+
+        cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+        return savepath
+
+    def remove_tmpimg(self, directory=os.path.join('.', '.tda', 'tmp')):
+        files = glob.glob(os.path.join(directory, '*.jpg'))
+        for f in files:
+            os.remove(f)
