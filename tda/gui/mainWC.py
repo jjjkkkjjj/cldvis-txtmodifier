@@ -5,6 +5,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from .widgets import *
 from .model import Model
 from .functions.dialogs import CredentialDialog
+from .functions.utils import reconstruct_coordinates
 from ..estimator.wrapper import Estimator
 
 
@@ -39,7 +40,7 @@ class MainWindowController(QMainWindow):
     def establish_connection(self):
         self.leftdock.enableChecking.connect(self.check_enable)
         self.canvas.enableChecking.connect(self.check_enable)
-        self.leftdock.predicting.connect(lambda imgpath, tableRect: self.predict(imgpath, tableRect))
+        self.leftdock.predicting.connect(lambda imgpath, tableRect, mode: self.predict(imgpath, tableRect, mode))
 
     def check_enable(self):
         # back forward
@@ -55,10 +56,11 @@ class MainWindowController(QMainWindow):
         self.leftdock.check_enable_run()
         self.menu.check_enable_run()
 
-    def predict(self, imgpath, tableRect):
+    def predict(self, imgpath, tableRect, mode):
         """
         :param imgpath: str
         :param tableRect: tuple = (left, top, right, bottom) with percent mode
+        :param mode: str, 'image' or 'file'
         :return:
         """
 
@@ -66,9 +68,7 @@ class MainWindowController(QMainWindow):
             img = cv2.imread(imgpath)
             h, w, _ = img.shape
 
-            xmin, ymin, xmax, ymax = tableRect
-            xmin, xmax = int(xmin * w), int(xmax * w)
-            ymin, ymax = int(ymin * h), int(ymax * h)
+            xmin, ymin, xmax, ymax = reconstruct_coordinates(tableRect, w, h)
 
             filename, ext = os.path.splitext(os.path.basename(imgpath))
             apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
@@ -79,9 +79,8 @@ class MainWindowController(QMainWindow):
         save()
 
     """
-        credential
-        """
-
+    credential
+    """
     def check_credential(self):
         # jsonpath = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 

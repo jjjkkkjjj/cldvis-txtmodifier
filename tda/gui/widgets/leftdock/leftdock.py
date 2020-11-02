@@ -12,7 +12,7 @@ class LeftDockWidget(BaseWidget):
     enableChecking = Signal()
     rectRemoved = Signal()
     datasetAdding = Signal()
-    predicting = Signal(str, tuple)
+    predicting = Signal(str, tuple, str)
 
     def __init__(self, mainWidgetController):
         super().__init__(mainWidgetController)
@@ -153,7 +153,7 @@ class LeftDockWidget(BaseWidget):
         self.datasetAdding.emit()
 
     def buttonPredictTableClicked(self):
-        self.predicting.emit(self.model.imgpath, self.model.rubberPercentRect)
+        self.predicting.emit(self.model.imgpath, self.model.rubberPercentRect, self.comboBox_mode.currentText())
 
     ##### check enable #####
     def check_enable_backforward(self):

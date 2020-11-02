@@ -22,3 +22,15 @@ def cvimg2qpixmap(cvimg):
     bytesPerLine = 3 * width
     qImg = QImage(cvimg.data, width, height, bytesPerLine, QImage.Format_RGB888)
     return QPixmap(qImg)
+
+def reconstruct_coordinates(percentRect, w, h):
+    """
+    :param percentRect: tuple-like, (xmin, ymin, xmax, ymax)
+    :param w: int, width
+    :param h: int, height
+    :return:
+    """
+    xmin, ymin, xmax, ymax = percentRect
+    xmin, xmax = int(xmin * w), int(xmax * w)
+    ymin, ymax = int(ymin * h), int(ymax * h)
+    return xmin, ymin, xmax, ymax
