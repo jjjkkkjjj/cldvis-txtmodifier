@@ -2,7 +2,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-from .rubber import Rubber, MoveActionState
+from .rubber import Rubber, MoveActionState, PredictedRubber
 
 class ImgWidget(QLabel):
     rubberCreated = Signal(tuple)
@@ -15,6 +15,8 @@ class ImgWidget(QLabel):
 
         self.rubberBand = Rubber(self)
         self.rubberPercentRect = (0., 0., 0., 0.)
+
+        self.predictedRubberBand = PredictedRubber(self)
 
     @property
     def left_percent(self):
@@ -60,12 +62,10 @@ class ImgWidget(QLabel):
 
     def setPixmap(self, pixmap: QPixmap):
         super().setPixmap(pixmap)
-        if self.rubberBand.isHidden():
-            return
 
         newImgSize = pixmap.size()
 
-        # to percent
+        # to absolute
         tlX = int(self.left_percent * newImgSize.width())
         tlY = int(self.top_percent * newImgSize.height())
         brX = int(self.right_percent * newImgSize.width())
@@ -73,8 +73,34 @@ class ImgWidget(QLabel):
 
         newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
 
-        self.rubberBand.setGeometry(newRect)
+        if self.rubberBand.isHidden():
+            self.predictedRubberBand.setGeometry(newRect)
+        else:
+            self.rubberBand.setGeometry(newRect)
+
 
     def refresh_rubberBand(self):
         self.rubberBand.hide()
         self.rubberBand = Rubber(self)
+
+    def predictedRubber2rubber(self):
+        self.rubberBand.show()
+        self.predictedRubberBand = PredictedRubber(self)
+
+    def rubber2predictedRubber(self):
+        self.rubberBand.hide()
+
+        # for debug
+        # to absolute
+        self.rubberPercentRect = (368/9928.0, 324/7016.0, 2624/9928.0, 1792/7016.0)
+        tlX = int(self.left_percent * self.pixmap().width())
+        tlY = int(self.top_percent * self.pixmap().height())
+        brX = int(self.right_percent * self.pixmap().width())
+        brY = int(self.bottom_percent * self.pixmap().height())
+
+        rect = QRect(tlX, tlY, brX - tlX, brY - tlY)
+        self.predictedRubberBand.setGeometry(rect)
+
+        #self.predictedRubberBand.setGeometry(self.rubberBand.geometry())
+        
+        self.predictedRubberBand.show()

@@ -58,5 +58,7 @@ class Vision(object):
                 'https://cloud.google.com/apis/design/errors'.format(
                     response.error.message))
 
+        return results
+
 class PredictError(Exception):
     pass

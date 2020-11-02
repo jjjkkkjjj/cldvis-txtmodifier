@@ -76,5 +76,9 @@ class CanvasWidget(BaseWidget):
             self.img.refresh_rubberBand()
         self.enableChecking.emit()
 
+    def set_predictedRubber(self, results):
+        # convert rubber into predictedRubber
+        self.img.rubber2predictedRubber()
+
     def check_enable(self):
         self.setEnabled(self.model.isExistImg)

@@ -63,11 +63,19 @@ class MainWindowController(QMainWindow):
         if mode == 'image':
 
             # save tmp image
-            #tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
+            # tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
             try:
                 # detect
-                #self.vision.detect_localImg(tmpimgpath)
-                pass
+                # results = self.vision.detect_localImg(tmpimgpath)
+
+                # for debug
+                with open('.tda/tmp/result.json', 'r') as f:
+                    import json
+                    results = json.load(f)
+
+                self.canvas.set_predictedRubber(results)
+                #ここからRightDockに結果表示→選択されると，そのBBoxが表示されるようになる
+
             except PredictError as e:
                 ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:

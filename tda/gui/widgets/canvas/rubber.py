@@ -99,6 +99,14 @@ class Rubber(QRubberBand):
         self.resizeRBButtomLeft.hide()
         self.resizeRBButtomRight.hide()
 
+class PredictedRubber(QRubberBand):
+    def __init__(self, parent=None):
+        super().__init__(QRubberBand.Rectangle, parent)
+
+        pal = QPalette()
+        pal.setBrush(QPalette.Highlight, QBrush(Qt.red))
+        self.setPalette(pal)
+
 
 class MoveActionState(Enum):
     CREATE = 0
