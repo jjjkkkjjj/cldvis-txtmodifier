@@ -7,6 +7,7 @@ class Vision(object):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentialJsonpath
 
         self.client = vision.ImageAnnotatorClient()
+        self.result = []
 
     def detect_localImg(self, imgpath):
 

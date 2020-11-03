@@ -7,12 +7,13 @@ from ...functions.dialogs import *
 from ..baseWidget import BaseWidget
 
 class LeftDockWidget(BaseWidget):
-    imgChanged = Signal(str, int) # emit imgpath and zoomvalue
+    imgChanged = Signal(bool, int) # emit imgpath and zoomvalue
+    imgSet = Signal(object, int)
     ratioChanged = Signal(str, int) # emit imgpath and zoomvalue
     enableChecking = Signal()
     rectRemoved = Signal()
     datasetAdding = Signal()
-    predicting = Signal(str, tuple, str)
+    predicting = Signal(str)
 
     def __init__(self, mainWidgetController):
         super().__init__(mainWidgetController)
@@ -108,31 +109,25 @@ class LeftDockWidget(BaseWidget):
         self.button_addDataset.clicked.connect(self.buttonAddDatasetClicked)
         self.button_predictTable.clicked.connect(self.buttonPredictTableClicked)
 
-        self.spinBox_zoom.valueChanged.connect(self.spinBoxZoomValueChanged)
+        self.ratioChanged = self.spinBox_zoom.valueChanged
 
     ##### connection func #####
     def openDialog(self, isFolder):
         if isFolder:
-            filenames = openDir(self)
+            filenames = openDir(self.mainWC)
         else:
-            filenames = openFiles(self, "Images", SUPPORTED_EXTENSIONS)
+            filenames = openFiles(self.mainWC, "Images", SUPPORTED_EXTENSIONS)
 
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
-            self.model.set_imgPaths(None)
-        else:
-            self.model.set_imgPaths(filenames)
+            filenames = None
+        assert isinstance(filenames, (str, list)) or filenames is None
 
-        self.imgChanged.emit(self.model.imgpath, self.spinBox_zoom.value())
+        self.imgSet.emit(filenames, self.spinBox_zoom.value())
         self.enableChecking.emit()
 
     def backforward(self, isBack):
-        if isBack:
-            self.model.back()
-        else:
-            self.model.forward()
-
-        self.imgChanged.emit(self.model.imgpath, self.spinBox_zoom.value())
+        self.imgChanged.emit(isBack, self.spinBox_zoom.value())
         self.enableChecking.emit()
 
     def buttonZoomClicked(self, isZoomIn):
@@ -143,9 +138,6 @@ class LeftDockWidget(BaseWidget):
 
         self.spinBox_zoom.setValue(r)
 
-    def spinBoxZoomValueChanged(self, value):
-        self.ratioChanged.emit(self.model.imgpath, value)
-
     def buttonRemoveRectClicked(self):
         self.rectRemoved.emit()
 
@@ -153,19 +145,19 @@ class LeftDockWidget(BaseWidget):
         self.datasetAdding.emit()
 
     def buttonPredictTableClicked(self):
-        self.predicting.emit(self.model.imgpath, self.model.rubberPercentRect, self.comboBox_mode.currentText())
+        self.predicting.emit(self.comboBox_mode.currentText())
 
     ##### check enable #####
-    def check_enable_backforward(self):
-        self.button_back.setEnabled(self.model.isExistBackImg)
-        self.button_forward.setEnabled(self.model.isExistForwardImg)
+    def check_enable_backforward(self, isExistBackImg, isExistForwardImg):
+        self.button_back.setEnabled(isExistBackImg)
+        self.button_forward.setEnabled(isExistForwardImg)
 
-    def check_enable_zoom(self):
-        self.spinBox_zoom.setEnabled(self.model.isExistImg)
-        self.button_zoomin.setEnabled(self.model.isExistImg)
-        self.button_zoomout.setEnabled(self.model.isExistImg)
+    def check_enable_zoom(self, isExistImg):
+        self.spinBox_zoom.setEnabled(isExistImg)
+        self.button_zoomin.setEnabled(isExistImg)
+        self.button_zoomout.setEnabled(isExistImg)
 
-    def check_enable_run(self):
-        self.button_removeRect.setEnabled(self.model.isExistRubberPercentRect)
-        self.button_addDataset.setEnabled(self.model.isExistRubberPercentRect)
-        self.button_predictTable.setEnabled(self.model.isExistRubberPercentRect)
+    def check_enable_run(self, isExistRubberPercentRect):
+        self.button_removeRect.setEnabled(isExistRubberPercentRect)
+        self.button_addDataset.setEnabled(isExistRubberPercentRect)
+        self.button_predictTable.setEnabled(isExistRubberPercentRect)

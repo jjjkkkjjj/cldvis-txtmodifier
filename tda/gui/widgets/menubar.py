@@ -65,17 +65,17 @@ class MenuBar(BaseMenuBar):
         _add_actions(self.menu_help, (self.action_about,))
 
     ##### check enable #####
-    def check_enable_backforward(self):
-        self.action_backfile.setEnabled(self.model.isExistBackImg)
-        self.action_forwardfile.setEnabled(self.model.isExistForwardImg)
+    def check_enable_backforward(self, isExistBackImg, isExistForwardImg):
+        self.action_backfile.setEnabled(isExistBackImg)
+        self.action_forwardfile.setEnabled(isExistForwardImg)
 
-    def check_enable_zoom(self):
-        self.action_zoomin.setEnabled(self.model.isExistImg)
-        self.action_zoomout.setEnabled(self.model.isExistImg)
+    def check_enable_zoom(self, isExistImg):
+        self.action_zoomin.setEnabled(isExistImg)
+        self.action_zoomout.setEnabled(isExistImg)
 
-    def check_enable_run(self):
-        self.action_removeRect.setEnabled(self.model.isExistRubberPercentRect)
-        self.action_predictTable.setEnabled(self.model.isExistRubberPercentRect)
+    def check_enable_run(self, isExistRubberPercentRect):
+        self.action_removeRect.setEnabled(isExistRubberPercentRect)
+        self.action_predictTable.setEnabled(isExistRubberPercentRect)
 
 
 def _add_actions(target, actions):

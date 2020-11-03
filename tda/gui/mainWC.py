@@ -35,23 +35,35 @@ class MainWindowController(QMainWindow):
         return self.main.canvas
 
     def establish_connection(self):
+        # check enable
         self.leftdock.enableChecking.connect(self.check_enable)
         self.canvas.enableChecking.connect(self.check_enable)
-        self.leftdock.predicting.connect(lambda imgpath, tableRect, mode: self.predict(imgpath, tableRect, mode))
+
+        # button action
+        self.leftdock.imgSet.connect(lambda paths, value: self.set_imgpath(paths, value))
+        self.leftdock.imgChanged.connect(lambda isBack, value: self.change_img(isBack, value))
+        self.leftdock.ratioChanged.connect(lambda value: self.set_img(value))
+        self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
+        # self.leftdock.datasetAdding.connect()
+        self.leftdock.predicting.connect(lambda mode: self.predict(self.model.imgpath, self.model.rubberPercentRect, mode))
+
+        # rubber
+        self.canvas.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
+
 
     def check_enable(self):
         # back forward
-        self.leftdock.check_enable_backforward()
-        self.menu.check_enable_backforward()
+        self.leftdock.check_enable_backforward(self.model.isExistBackImg, self.model.isExistForwardImg)
+        self.menu.check_enable_backforward(self.model.isExistBackImg, self.model.isExistForwardImg)
 
         # zoom
-        self.leftdock.check_enable_zoom()
-        self.menu.check_enable_zoom()
+        self.leftdock.check_enable_zoom(self.model.isExistImg)
+        self.menu.check_enable_zoom(self.model.isExistImg)
 
         # run
-        self.canvas.check_enable()
-        self.leftdock.check_enable_run()
-        self.menu.check_enable_run()
+        self.canvas.check_enable(self.model.isExistImg)
+        self.leftdock.check_enable_run(self.model.isExistRubberPercentRect)
+        self.menu.check_enable_run(self.model.isExistRubberPercentRect)
 
     def predict(self, imgpath, tableRect, mode):
         """
@@ -87,6 +99,29 @@ class MainWindowController(QMainWindow):
         else:
             raise ValueError('Invalid mode was passed')
 
+    """
+    rubber
+    """
+    def set_rubber(self, rubberPercentRect):
+        self.model.set_rubberPercentRect(rubberPercentRect)
+        self.canvas.set_rubber(rubberPercentRect)
+
+    """
+    img
+    """
+    def set_imgpath(self, paths, value):
+        self.model.set_imgPaths(paths)
+        self.set_img(value)
+
+    def change_img(self, isBack, value):
+        if isBack:
+            self.model.back()
+        else:
+            self.model.forward()
+        self.set_img(value)
+
+    def set_img(self, value):
+        self.canvas.set_img(self.model.imgpath, value)
 
     """
     credential

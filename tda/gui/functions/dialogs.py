@@ -4,12 +4,12 @@ from PySide2.QtCore import *
 import glob, os, sys
 
 from .utils import check_instance
-from ..widgets.baseWidget import BaseWidget
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm', '.pxm', '.pnm', '.hdr', '.pic']
 
 def openFiles(self, name, exts):
-    _ = check_instance('self', self, BaseWidget)
+    from ..mainWC import MainWindowController
+    _ = check_instance('self', self, MainWindowController)
 
     #filters = 'Images (*.jpeg *.jpg *.png *.tif *.tiff *.bmp *.die *.pbm *.pgm *.ppm *.pxm *.pnm *.hdr *.pic)'
     if isinstance(exts, (list, tuple)):
@@ -33,7 +33,8 @@ def openFiles(self, name, exts):
     """
 
 def openDir(self):
-    _ = check_instance('self', self, BaseWidget)
+    from ..mainWC import MainWindowController
+    _ = check_instance('self', self, MainWindowController)
 
     dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir, QFileDialog.DontUseNativeDialog)
 

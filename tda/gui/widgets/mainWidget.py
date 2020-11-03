@@ -9,7 +9,6 @@ class MainWidget(QWidget):
         self.mainWC = mainWC
 
         self.initUI()
-        self.establish_connection()
 
 
     def initUI(self):
@@ -28,8 +27,3 @@ class MainWidget(QWidget):
         hbox.addWidget(self.rightdock, 2)
         self.setLayout(hbox)
 
-    def establish_connection(self):
-        self.leftdock.imgChanged.connect(self.canvas.set_img)
-        self.leftdock.ratioChanged.connect(self.canvas.set_img)
-        self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
-        #self.leftdock.datasetAdding.connect()

@@ -11,8 +11,8 @@ class BaseWidget(QWidget):
         self.mainWC = mainWC
 
     @property
-    def model(self):
-        return self.mainWC.model
+    def vision(self):
+        return self.mainWC.vision
 
 class BaseMenuBar(QMenuBar):
     def __init__(self, mainWC):
@@ -25,5 +25,5 @@ class BaseMenuBar(QMenuBar):
         self.mainWC = mainWC
 
     @property
-    def model(self):
-        return self.mainWC.model
+    def vision(self):
+        return self.mainWC.vision
