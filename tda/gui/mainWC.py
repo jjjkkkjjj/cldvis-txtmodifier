@@ -76,27 +76,30 @@ class MainWindowController(QMainWindow):
         :return:
         """
         if mode == 'image':
-
-            # save tmp image
-            # tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
-            try:
-                # detect
-                # results = self.vision.detect_localImg(tmpimgpath)
-
+            from ..debug._utils import DEBUG
+            if DEBUG:
                 # for debug
-                with open('.tda/tmp/result.json', 'r') as f:
+                with open('tda/debug/result.json', 'r') as f:
                     import json
                     results = json.load(f)
-
                 self.canvas.set_predictedRubber(results)
-                #ここからRightDockに結果表示→選択されると，そのBBoxが表示されるようになる
                 self.rightdock.set_results(results)
 
-            except PredictError as e:
-                ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
-                if ret == QMessageBox.Yes:
-                    # remove tmp files
-                    self.model.remove_tmpimg()
+            else:
+                # save tmp image
+                tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
+                try:
+                    # detect
+                    results = self.vision.detect_localImg(tmpimgpath)
+
+                    self.canvas.set_predictedRubber(results)
+                    self.rightdock.set_results(results)
+
+                except PredictError as e:
+                    ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+                    if ret == QMessageBox.Yes:
+                        # remove tmp files
+                        self.model.remove_tmpimg()
 
         elif mode == 'file':
             pass

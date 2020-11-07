@@ -2,6 +2,8 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
+from enum import Enum
+
 from .rubber import Rubber, MoveActionState, PredictedRubber
 
 class ImgWidget(QLabel):
@@ -12,6 +14,7 @@ class ImgWidget(QLabel):
         self.startPosition = None
 
         self.moveActionState = MoveActionState.CREATE
+        self.mode = RubberMode.SELECTION
 
         self.rubberBand = Rubber(self)
         self.rubberPercentRect = (0., 0., 0., 0.)
@@ -32,33 +35,36 @@ class ImgWidget(QLabel):
         return self.rubberPercentRect[3]
 
     def mousePressEvent(self, e: QMouseEvent):
-        self.startPosition, self.moveActionState = self.rubberBand.press(e.pos())
+        if self.mode == RubberMode.SELECTION:
+            self.startPosition, self.moveActionState = self.rubberBand.press(e.pos())
 
     def mouseMoveEvent(self, e: QMouseEvent):
         endPosition = e.pos()
-        if self.moveActionState == MoveActionState.MOVE:  # move
-            movedPosition = endPosition - self.startPosition
-            # clipping
-            movedPosition.setX(min(max(movedPosition.x(), 0), self.geometry().width() - self.rubberBand.width()))
-            movedPosition.setY(min(max(movedPosition.y(), 0), self.geometry().height() - self.rubberBand.height()))
-            self.rubberBand.move(movedPosition)
-        else:
-            # clipping
-            endPosition.setX(min(max(endPosition.x(), 0), self.geometry().width()))
-            endPosition.setY(min(max(endPosition.y(), 0), self.geometry().height()))
+        if self.mode == RubberMode.SELECTION:
+            if self.moveActionState == MoveActionState.MOVE:  # move
+                movedPosition = endPosition - self.startPosition
+                # clipping
+                movedPosition.setX(min(max(movedPosition.x(), 0), self.geometry().width() - self.rubberBand.width()))
+                movedPosition.setY(min(max(movedPosition.y(), 0), self.geometry().height() - self.rubberBand.height()))
+                self.rubberBand.move(movedPosition)
+            else:
+                # clipping
+                endPosition.setX(min(max(endPosition.x(), 0), self.geometry().width()))
+                endPosition.setY(min(max(endPosition.y(), 0), self.geometry().height()))
 
-            self.rubberBand.setGeometry(QRect(self.startPosition, endPosition).normalized())
+                self.rubberBand.setGeometry(QRect(self.startPosition, endPosition).normalized())
 
 
     def mouseReleaseEvent(self, e: QMouseEvent):
-        rect = self.rubberBand.geometry()
-        self.rubberBand.setGeometry(rect)
+        if self.mode == RubberMode.SELECTION:
+            rect = self.rubberBand.geometry()
+            self.rubberBand.setGeometry(rect)
 
-        self.rubberPercentRect = (self.rubberBand.geometry().left()/self.width(), self.rubberBand.geometry().top()/self.height(),
-                                  self.rubberBand.geometry().right()/self.width(), self.rubberBand.geometry().bottom()/self.height())
+            self.rubberPercentRect = (self.rubberBand.geometry().left()/self.width(), self.rubberBand.geometry().top()/self.height(),
+                                      self.rubberBand.geometry().right()/self.width(), self.rubberBand.geometry().bottom()/self.height())
 
-        self.startPosition = None
-        self.rubberCreated.emit(self.rubberPercentRect)
+            self.startPosition = None
+            self.rubberCreated.emit(self.rubberPercentRect)
 
     def setPixmap(self, pixmap: QPixmap):
         super().setPixmap(pixmap)
@@ -86,21 +92,30 @@ class ImgWidget(QLabel):
     def predictedRubber2rubber(self):
         self.rubberBand.show()
         self.predictedRubberBand = PredictedRubber(self)
+        self.mode = RubberMode.SELECTION
 
     def rubber2predictedRubber(self):
         self.rubberBand.hide()
 
-        # for debug
-        # to absolute
-        self.rubberPercentRect = (368/9928.0, 324/7016.0, 2624/9928.0, 1792/7016.0)
-        tlX = int(self.left_percent * self.pixmap().width())
-        tlY = int(self.top_percent * self.pixmap().height())
-        brX = int(self.right_percent * self.pixmap().width())
-        brY = int(self.bottom_percent * self.pixmap().height())
+        from ....debug._utils import DEBUG
+        if DEBUG:
+            # for debug
+            # to absolute
+            self.rubberPercentRect = (368/9928.0, 324/7016.0, 2624/9928.0, 1792/7016.0)
+            tlX = int(self.left_percent * self.pixmap().width())
+            tlY = int(self.top_percent * self.pixmap().height())
+            brX = int(self.right_percent * self.pixmap().width())
+            brY = int(self.bottom_percent * self.pixmap().height())
 
-        rect = QRect(tlX, tlY, brX - tlX, brY - tlY)
-        self.predictedRubberBand.setGeometry(rect)
-
-        #self.predictedRubberBand.setGeometry(self.rubberBand.geometry())
+            rect = QRect(tlX, tlY, brX - tlX, brY - tlY)
+            self.predictedRubberBand.setGeometry(rect)
+        else:
+            self.predictedRubberBand.setGeometry(self.rubberBand.geometry())
         
         self.predictedRubberBand.show()
+
+        self.mode = RubberMode.PREDICTION
+
+class RubberMode(Enum):
+    SELECTION = 0
+    PREDICTION = 1
