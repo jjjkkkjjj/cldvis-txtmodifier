@@ -61,5 +61,8 @@ class Vision(object):
 
         return results
 
+    #def select_prediction(self, index):
+    #    pass
+
 class PredictError(Exception):
     pass

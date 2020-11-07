@@ -33,6 +33,9 @@ class MainWindowController(QMainWindow):
     @property
     def canvas(self):
         return self.main.canvas
+    @property
+    def rightdock(self):
+        return self.main.rightdock
 
     def establish_connection(self):
         # check enable
@@ -87,6 +90,7 @@ class MainWindowController(QMainWindow):
 
                 self.canvas.set_predictedRubber(results)
                 #ここからRightDockに結果表示→選択されると，そのBBoxが表示されるようになる
+                self.rightdock.set_results(results)
 
             except PredictError as e:
                 ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
