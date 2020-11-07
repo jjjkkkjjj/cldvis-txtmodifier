@@ -46,12 +46,12 @@ def openDir(self):
 
     return filenames
 
-def openAbout(mainWidget):
-    from ..mainWC import MainWidget
-    _ = check_instance('mainWidgetController', mainWidget, MainWidget)
+def openAbout(mainWC):
+    from ..mainWC import MainWindowController
+    _ = check_instance('mainWidgetController', mainWC, MainWindowController)
 
     #msgBox = QMessageBox.information(mainWidgetController, 'About Table Data Analyzer', 'aaaa')
-    aboutBox = AboutDialog(mainWidget)
+    aboutBox = AboutDialog(mainWC)
     aboutBox.show()
 
 
