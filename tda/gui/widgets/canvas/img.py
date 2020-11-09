@@ -128,7 +128,7 @@ class ImgWidget(QLabel):
                 "bbox": list(4 points) of list(2d=(x, y))
         """
 
-        self.polygons.set_offset(self.predictedRubberBand.geometry().topLeft())
+
         # create polygon instances, and then draw polygons
         for result in results["prediction"]:
             self.polygons.append(Polygon(result["bbox"]))
@@ -142,24 +142,44 @@ class ImgWidget(QLabel):
         if not self.pixmap() or self.mode == RubberMode.SELECTION:
             return super().paintEvent(event)
 
-        # pen
-        pen = QPen(QColor(0,0,0))
-        pen.setWidth(3)
-
-        # brush
-        brush = QBrush(QColor(0, 255, 0, 0.4))
 
         # painter
         painter = QPainter(self)
+        painter.drawPixmap(self.rect(), self.pixmap())
+
+        ### draw rubberband area ###
+        self.predictedRubberBand.hide()
+        # pen
+        pen = QPen(QColor(255, 0, 0))
+        pen.setWidth(3)
+
+        # brush
+        brush = QBrush(QColor(255, 0, 0, int(255*0.4)), Qt.FDiagPattern)
+        painter.setPen(pen)
+        painter.setBrush(brush)
+        # set
         painter.setPen(pen)
         painter.setBrush(brush)
 
-        newImgSize = self.pixmap().size()
+        painter.drawRect(self.predictedRubberBand.geometry())
 
-        for polygon in self.polygons.qpolygons():
+
+        ### draw polygon ###
+        # pen
+        pen = QPen(QColor(0, 0, 0))
+        pen.setWidth(3)
+
+        # brush
+        brush = QBrush(QColor(0, 255, 0, int(255*0.4)), Qt.SolidPattern)
+        # set
+        painter.setPen(pen)
+        painter.setBrush(brush)
+
+        self.polygons.set_offset(self.predictedRubberBand.geometry().topLeft())
+        area = self.predictedRubberBand.size()
+        for polygon in self.polygons.qpolygons(area.width(), area.height()):
             painter.drawPolygon(polygon)
 
-        return super().paintEvent(event)
 
 class RubberMode(Enum):
     SELECTION = 0
