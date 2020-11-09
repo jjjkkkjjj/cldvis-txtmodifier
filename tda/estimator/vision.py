@@ -1,5 +1,5 @@
 from google.cloud import vision
-import io, os, json
+import io, os, json, cv2
 
 class Vision(object):
     def __init__(self, credentialJsonpath):
@@ -7,12 +7,15 @@ class Vision(object):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentialJsonpath
 
         self.client = vision.ImageAnnotatorClient()
-        self.result = []
+        self.results = {}
 
     def detect_localImg(self, imgpath):
 
         with open(imgpath, 'rb') as image_file:
             content = image_file.read()
+
+        h, w, _ = cv2.imread(imgpath).shape
+        h, w = float(h), float(w)
         image = vision.Image(content=content)
 
         response = self.client.text_detection(image=image) # type is AnnotateImageResponse
@@ -33,14 +36,15 @@ class Vision(object):
                     y: float
                 
         """
-        results = []
+        results = {}
+        prediction = []
 
         # print('Texts:')
         for text in texts:
             ret = {}
             ret['text'] = text.description
-            ret['bbox'] = [[vertex.x, vertex.y] for vertex in text.bounding_poly.vertices]
-            results += [ret]
+            ret['bbox'] = [[vertex.x / w, vertex.y / h] for vertex in text.bounding_poly.vertices]
+            prediction += [ret]
             """
             print('\n"{}"'.format(text.description))
 
@@ -49,6 +53,9 @@ class Vision(object):
 
             print('bounds: {}'.format(','.join(vertices)))
             """
+        results["info"] = {"width": int(w), "height": int(h), "path": imgpath}
+        results["prediction"] = prediction
+
         # save results as json file
         with open(os.path.join('.', '.tda', 'tmp', 'result.json'), 'w') as f:
             json.dump(results, f)
@@ -59,6 +66,7 @@ class Vision(object):
                 'https://cloud.google.com/apis/design/errors'.format(
                     response.error.message))
 
+        self.results = results
         return results
 
     #def select_prediction(self, index):

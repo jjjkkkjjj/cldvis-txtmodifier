@@ -5,6 +5,7 @@ from PySide2.QtCore import *
 from enum import Enum
 
 from .rubber import Rubber, MoveActionState, PredictedRubber
+from .polygon import Polygon, PolygonManager
 
 class ImgWidget(QLabel):
     rubberCreated = Signal(tuple)
@@ -20,6 +21,8 @@ class ImgWidget(QLabel):
         self.rubberPercentRect = (0., 0., 0., 0.)
 
         self.predictedRubberBand = PredictedRubber(self)
+
+        self.polygons = PolygonManager(offset=(0, 0))
 
     @property
     def left_percent(self):
@@ -94,14 +97,14 @@ class ImgWidget(QLabel):
         self.predictedRubberBand = PredictedRubber(self)
         self.mode = RubberMode.SELECTION
 
-    def rubber2predictedRubber(self):
+    def rubber2predictedRubber(self, results):
         self.rubberBand.hide()
 
         from ....debug._utils import DEBUG
         if DEBUG:
             # for debug
             # to absolute
-            self.rubberPercentRect = (368/9928.0, 324/7016.0, 2624/9928.0, 1792/7016.0)
+            self.rubberPercentRect = (355/9928.0, 337/7016.0, 2640/9928.0, 1787/7016.0)
             tlX = int(self.left_percent * self.pixmap().width())
             tlY = int(self.top_percent * self.pixmap().height())
             brX = int(self.right_percent * self.pixmap().width())
@@ -114,7 +117,49 @@ class ImgWidget(QLabel):
         
         self.predictedRubberBand.show()
 
+        """
+        results: dict
+            "info":
+                "width": int
+                "height": int
+                "path": str
+            "prediction": list of dict whose keys are 'text' and 'bbox'
+                "text": str
+                "bbox": list(4 points) of list(2d=(x, y))
+        """
+
+        self.polygons.set_offset(self.predictedRubberBand.geometry().topLeft())
+        # create polygon instances, and then draw polygons
+        for result in results["prediction"]:
+            self.polygons.append(Polygon(result["bbox"]))
+
         self.mode = RubberMode.PREDICTION
+
+        # draw polygons
+        self.repaint()
+
+    def paintEvent(self, event):
+        if not self.pixmap() or self.mode == RubberMode.SELECTION:
+            return super().paintEvent(event)
+
+        # pen
+        pen = QPen(QColor(0,0,0))
+        pen.setWidth(3)
+
+        # brush
+        brush = QBrush(QColor(0, 255, 0, 0.4))
+
+        # painter
+        painter = QPainter(self)
+        painter.setPen(pen)
+        painter.setBrush(brush)
+
+        newImgSize = self.pixmap().size()
+
+        for polygon in self.polygons.qpolygons():
+            painter.drawPolygon(polygon)
+
+        return super().paintEvent(event)
 
 class RubberMode(Enum):
     SELECTION = 0

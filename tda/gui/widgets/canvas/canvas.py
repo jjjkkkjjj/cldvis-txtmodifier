@@ -79,7 +79,7 @@ class CanvasWidget(BaseWidget):
 
     def set_predictedRubber(self, results):
         # convert rubber into predictedRubber
-        self.img.rubber2predictedRubber()
+        self.img.rubber2predictedRubber(results)
 
     def check_enable(self, isExistImg):
         self.setEnabled(isExistImg)

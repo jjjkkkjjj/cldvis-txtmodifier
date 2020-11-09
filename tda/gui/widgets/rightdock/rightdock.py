@@ -28,9 +28,9 @@ class RightDockWidget(BaseWidget):
 
         self.setLayout(vbox)
 
-    def refresh_table(self, results=[]):
-        self.tableModel = PredictionTableModel(results=results)
+    def refresh_table(self, prediction=[]):
+        self.tableModel = PredictionTableModel(prediction=prediction)
         self.tableview.setModel(self.tableModel)
 
     def set_results(self, results):
-        self.refresh_table(results=results)
+        self.refresh_table(prediction=results["prediction"])

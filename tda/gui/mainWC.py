@@ -86,6 +86,7 @@ class MainWindowController(QMainWindow):
                 self.rightdock.set_results(results)
 
             else:
+                # TODO: show loading dialog
                 # save tmp image
                 tmpimgpath = self.model.save_tmpimg(imgpath, tableRect)
                 try:
