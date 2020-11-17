@@ -68,6 +68,8 @@ class MainWindowController(QMainWindow):
         self.leftdock.check_enable_run(self.model.isExistRubberPercentRect)
         self.menu.check_enable_run(self.model.isExistRubberPercentRect)
 
+        # TODO: check enable function in editing
+
     def predict(self, imgpath, tableRect, mode):
         """
         :param imgpath: str

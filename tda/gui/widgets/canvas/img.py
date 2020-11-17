@@ -6,6 +6,7 @@ from enum import Enum
 
 from .rubber import Rubber, MoveActionState, PredictedRubber
 from .polygon import Polygon, PolygonManager
+from .contextMenu import ImgContextMenu
 
 class ImgWidget(QLabel):
     rubberCreated = Signal(tuple)
@@ -37,9 +38,28 @@ class ImgWidget(QLabel):
     def bottom_percent(self):
         return self.rubberPercentRect[3]
 
+    def contextMenuEvent(self, e):
+        if self.mode == RubberMode.PREDICTION:
+            contextMenu = ImgContextMenu(self)
+
+            action = contextMenu.exec_(self.parent().mapToGlobal(e.pos()))
+            if action == contextMenu.action_remove_polygon:
+                pass
+            elif action == contextMenu.action_duplicate_polygon:
+                pass
+            elif action == contextMenu.action_remove_point:
+                pass
+            elif action == contextMenu.action_duplicate_point:
+                pass
+
     def mousePressEvent(self, e: QMouseEvent):
+        # Note that this method is called earlier than contextMenuEvent
         if self.mode == RubberMode.SELECTION:
             self.startPosition, self.moveActionState = self.rubberBand.press(e.pos())
+        elif self.mode == RubberMode.PREDICTION:
+            if e.button() == Qt.RightButton:
+                pass
+            self.repaint()
 
     def mouseMoveEvent(self, e: QMouseEvent):
         endPosition = e.pos()
@@ -130,8 +150,10 @@ class ImgWidget(QLabel):
 
 
         # create polygon instances, and then draw polygons
+        area = self.predictedRubberBand.size() # QSize
+        offset = self.predictedRubberBand.geometry().topLeft() # QPoint
         for result in results["prediction"]:
-            self.polygons.append(Polygon(result["bbox"]))
+            self.polygons.append(Polygon(result["bbox"], area, offset))
 
         self.mode = RubberMode.PREDICTION
 
@@ -148,18 +170,18 @@ class ImgWidget(QLabel):
         painter.drawPixmap(self.rect(), self.pixmap())
 
         ### draw rubberband area ###
+        # TODO: rubberband to paint
         self.predictedRubberBand.hide()
         # pen
         pen = QPen(QColor(255, 0, 0))
         pen.setWidth(3)
 
         # brush
-        brush = QBrush(QColor(255, 0, 0, int(255*0.4)), Qt.FDiagPattern)
-        painter.setPen(pen)
-        painter.setBrush(brush)
+        #brush = QBrush(QColor(255, 0, 0, int(255*0.4)), Qt.FDiagPattern)
+
         # set
         painter.setPen(pen)
-        painter.setBrush(brush)
+        #painter.setBrush(brush)
 
         painter.drawRect(self.predictedRubberBand.geometry())
 
@@ -175,9 +197,7 @@ class ImgWidget(QLabel):
         painter.setPen(pen)
         painter.setBrush(brush)
 
-        self.polygons.set_offset(self.predictedRubberBand.geometry().topLeft())
-        area = self.predictedRubberBand.size()
-        for polygon in self.polygons.qpolygons(area.width(), area.height()):
+        for polygon in self.polygons.qpolygons():
             painter.drawPolygon(polygon)
 
 

@@ -15,8 +15,9 @@ class PolygonManager(object):
         # attr: offset is QPoint!
         self.offset = QPoint(offset[0], offset[1])
 
-    def set_offset(self, offset):
-        self.offset = offset
+    def set_qpolygons(self, area=None, offset=None):
+        for polygon in self._polygons:
+            polygon.set_qpolygon(area, offset)
 
     @property
     def offset_x(self):
@@ -54,41 +55,68 @@ class PolygonManager(object):
         for polygon in self._polygons:
             yield polygon
 
-    def qpolygons(self, width, height):
+    def qpolygons(self):
         """
         iterate for qpolygon for each polygon. Yield QPolygon class for each iteration
         :return:
         """
         for polygon in self._polygons:
-            yield polygon.scaled_qpolygon(width, height).translated(self.offset)
+            yield polygon.qpolygon
+
+    def set_highlight(self, pos):
+        pass
 
 
 class Polygon(object):
-    def __init__(self, points):
+    def __init__(self, points, area, offset):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
+        :param area: QSize
+        :param offset: QPoint
         """
         self.points_percent = np.array(points) # shape = (*, 2)
+        self._qpolygon = self.set_qpolygon(area, offset)
 
     @property
     def points_number(self):
         return self.points_percent.shape[0]
 
-    def scaled_qpolygon(self, width, height):
+    @property
+    def qpolygon(self):
         """
         return scaled qpolygon. In other words, return qpolygon to fit pixmap.
-        :param width: int
-        :param height: int
         :return:
         """
+        return self._qpolygon
+
+    @property
+    def width(self):
+        return self.area.width()
+    @property
+    def height(self):
+        return self.area.height()
+    @property
+    def offset_x(self):
+        return self.offset.x()
+    @property
+    def offset_y(self):
+        return self.offset.y()
+
+
+    def set_qpolygon(self, area=None, offset=None):
+        if area:
+            self.area = area
+        if offset:
+            self.offset = offset
+
         scaled_qpolygon = QPolygon()
         points = self.points_percent.copy()
-        points[:, 0] *= width
-        points[:, 1] *= height
+        points[:, 0] *= self.width
+        points[:, 1] *= self.height
         for i in range(self.points_number):
             scaled_qpolygon.append(QPoint(points[i, 0], points[i, 1]))
 
-        return scaled_qpolygon
+        return scaled_qpolygon.translated(self.offset)
 
     @property
     def x(self):
@@ -96,3 +124,6 @@ class Polygon(object):
     @property
     def y(self):
         return self.points_percent[:, 1]
+    
+    def paint(self, painter):
+        pass
