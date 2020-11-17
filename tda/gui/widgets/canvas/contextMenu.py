@@ -26,5 +26,11 @@ class ImgContextMenu(QMenu):
         _add_actions(self, (self.action_remove_polygon, self.action_duplicate_polygon, None,
                             self.action_remove_point, self.action_duplicate_point))
 
-    def setEnabled_action(self, mode):
-        pass
+    def setEnabled_action(self, isSelectedPolygon, isSelectedPoint):
+        # polygon
+        self.action_remove_polygon.setEnabled(isSelectedPolygon)
+        self.action_duplicate_polygon.setEnabled(isSelectedPolygon)
+
+        # point
+        self.action_remove_point.setEnabled(isSelectedPoint)
+        self.action_duplicate_point.setEnabled(isSelectedPoint)

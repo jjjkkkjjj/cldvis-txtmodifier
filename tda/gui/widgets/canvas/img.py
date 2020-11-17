@@ -24,6 +24,8 @@ class ImgWidget(QLabel):
         self.predictedRubberBand = PredictedRubber(self)
 
         self.polygons = PolygonManager(offset=(0, 0))
+        # mouseMoveEvent will be fired without any button pressed
+        self.setMouseTracking(True)
 
     @property
     def left_percent(self):
@@ -41,6 +43,7 @@ class ImgWidget(QLabel):
     def contextMenuEvent(self, e):
         if self.mode == RubberMode.PREDICTION:
             contextMenu = ImgContextMenu(self)
+            contextMenu.setEnabled_action(self.polygons.isExistSelectedPolygon, self.polygons.isExistSelectedPoint)
 
             action = contextMenu.exec_(self.parent().mapToGlobal(e.pos()))
             if action == contextMenu.action_remove_polygon:
@@ -62,20 +65,28 @@ class ImgWidget(QLabel):
             self.repaint()
 
     def mouseMoveEvent(self, e: QMouseEvent):
-        endPosition = e.pos()
-        if self.mode == RubberMode.SELECTION:
-            if self.moveActionState == MoveActionState.MOVE:  # move
-                movedPosition = endPosition - self.startPosition
-                # clipping
-                movedPosition.setX(min(max(movedPosition.x(), 0), self.geometry().width() - self.rubberBand.width()))
-                movedPosition.setY(min(max(movedPosition.y(), 0), self.geometry().height() - self.rubberBand.height()))
-                self.rubberBand.move(movedPosition)
-            else:
-                # clipping
-                endPosition.setX(min(max(endPosition.x(), 0), self.geometry().width()))
-                endPosition.setY(min(max(endPosition.y(), 0), self.geometry().height()))
+        # Note that this method is called earlier than contextMenuEvent
+        if e.buttons() == Qt.LeftButton:
+            endPosition = e.pos()
+            if self.mode == RubberMode.SELECTION:
+                if self.moveActionState == MoveActionState.MOVE:  # move
+                    movedPosition = endPosition - self.startPosition
+                    # clipping
+                    movedPosition.setX(min(max(movedPosition.x(), 0), self.geometry().width() - self.rubberBand.width()))
+                    movedPosition.setY(min(max(movedPosition.y(), 0), self.geometry().height() - self.rubberBand.height()))
+                    self.rubberBand.move(movedPosition)
+                else:
+                    # clipping
+                    endPosition.setX(min(max(endPosition.x(), 0), self.geometry().width()))
+                    endPosition.setY(min(max(endPosition.y(), 0), self.geometry().height()))
 
-                self.rubberBand.setGeometry(QRect(self.startPosition, endPosition).normalized())
+                    self.rubberBand.setGeometry(QRect(self.startPosition, endPosition).normalized())
+
+        elif e.buttons() == Qt.NoButton:
+            if self.mode == RubberMode.PREDICTION:
+                self.polygons.set_select(e.pos())
+                self.repaint()
+
 
 
     def mouseReleaseEvent(self, e: QMouseEvent):
@@ -102,10 +113,13 @@ class ImgWidget(QLabel):
 
         newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
 
-        if self.rubberBand.isHidden():
-            self.predictedRubberBand.setGeometry(newRect)
-        else:
+        if self.mode == RubberMode.SELECTION:
             self.rubberBand.setGeometry(newRect)
+
+        elif self.mode == RubberMode.PREDICTION:
+            self.predictedRubberBand.setGeometry(newRect)
+            offset = newRect.topLeft()
+            self.polygons.set_qpolygons(newRect.size(), offset)
 
 
     def refresh_rubberBand(self):
@@ -186,19 +200,8 @@ class ImgWidget(QLabel):
         painter.drawRect(self.predictedRubberBand.geometry())
 
 
-        ### draw polygon ###
-        # pen
-        pen = QPen(QColor(0, 0, 0))
-        pen.setWidth(3)
-
-        # brush
-        brush = QBrush(QColor(0, 255, 0, int(255*0.4)), Qt.SolidPattern)
-        # set
-        painter.setPen(pen)
-        painter.setBrush(brush)
-
-        for polygon in self.polygons.qpolygons():
-            painter.drawPolygon(polygon)
+        for polygon in self.polygons:
+            polygon.paint(painter)
 
 
 class RubberMode(Enum):
