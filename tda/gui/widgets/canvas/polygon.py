@@ -155,14 +155,17 @@ class Polygon(object):
         """
         # note that contains function returns true if passed pos includes vertex only
         if pos:
-            self._isSelectedPolygon = self._qpolygon.containsPoint(pos, Qt.OddEvenFill)
+            # check whether to contain point first
             self._selected_vertex_index = -1
-            if self.isSelectedPolygon:
-                for i, point in enumerate(self._qpolygon):
-                    # QRect constructs a rectangle with the given topLeft corner and the given size.
-                    if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
-                             QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
-                        self._selected_vertex_index = i
+            for i, point in enumerate(self._qpolygon):
+                # QRect constructs a rectangle with the given topLeft corner and the given size.
+                if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
+                         QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
+                    self._selected_vertex_index = i
+
+            self._isSelectedPolygon = self._qpolygon.containsPoint(pos, Qt.OddEvenFill) or self.isSelectedPoint
+
+
         else:
             self._selected_vertex_index = -1
             self._isSelectedPolygon = False
