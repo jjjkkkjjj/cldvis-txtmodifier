@@ -45,7 +45,7 @@ class ImgWidget(QLabel):
             contextMenu = ImgContextMenu(self)
             contextMenu.setEnabled_action(self.polygons.isExistSelectedPolygon, self.polygons.isExistSelectedPoint)
 
-            action = contextMenu.exec_(self.parent().mapToGlobal(e.pos()))
+            action = contextMenu.exec_(self.mapToGlobal(e.pos()))
             if action == contextMenu.action_remove_polygon:
                 pass
             elif action == contextMenu.action_duplicate_polygon:
