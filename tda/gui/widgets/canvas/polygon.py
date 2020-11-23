@@ -46,6 +46,13 @@ class PolygonManager(object):
         else:
             return None
     @property
+    def selected_polygonIndex(self):
+        if self.isExistSelectedPolygon:
+            return self._selected_index
+        else:
+            return None
+
+    @property
     def isExistSelectedPolygon(self):
         return self._selected_index != -1
     @property
@@ -141,6 +148,12 @@ class Polygon(object):
     def selectedPoint(self):
         if self.isSelectedPoint:
             return self._qpolygon.value(self._selected_vertex_index)
+        else:
+            return None
+    @property
+    def selectedPointIndex(self):
+        if self.isSelectedPoint:
+            return self._selected_vertex_index
         else:
             return None
     @property
@@ -242,3 +255,10 @@ class Polygon(object):
             painter.setPen(pen)
             painter.setBrush(brush)
             painter.drawEllipse(self.selectedPoint, self._point_r, self._point_r)
+
+
+    def duplicateMe(self):
+        newpoints_percent = self.points_percent.copy()
+        newpoints_percent[:, 0] += 10 / self.width
+        newpoints_percent[:, 1] += 10 / self.height
+        return Polygon(newpoints_percent, self.area, self.offset)

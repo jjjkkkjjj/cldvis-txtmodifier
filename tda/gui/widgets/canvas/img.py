@@ -2,14 +2,14 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-from enum import Enum
-
-from .rubber import Rubber, MoveActionState, PredictedRubber
+from .rubber import Rubber, PredictedRubber
+from ..eveUtils import *
 from .polygon import Polygon, PolygonManager
 from .contextMenu import ImgContextMenu
 
 class ImgWidget(QLabel):
     rubberCreated = Signal(tuple)
+    contextActionSelected = Signal(object, int)
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -47,13 +47,26 @@ class ImgWidget(QLabel):
 
             action = contextMenu.exec_(self.mapToGlobal(e.pos()))
             if action == contextMenu.action_remove_polygon:
-                pass
+                self.contextActionSelected.emit(ContextActionType.REMOVE_POLYGON, self.polygons.selected_polygonIndex)
             elif action == contextMenu.action_duplicate_polygon:
-                pass
+                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POLYGON, self.polygons.selected_polygonIndex)
             elif action == contextMenu.action_remove_point:
-                pass
+                self.contextActionSelected.emit(ContextActionType.REMOVE_POINT, self.polygons.selected_polygon.selectedPointIndex)
             elif action == contextMenu.action_duplicate_point:
-                pass
+                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POINT, self.polygons.selected_polygon.selectedPointIndex)
+
+    def set_contextAction(self, actionType, index):
+        assert index is not None, "index is None!!"
+
+        if actionType == ContextActionType.REMOVE_POLYGON:
+            del self.polygons[index]
+        elif actionType == ContextActionType.DUPLICATE_POLYGON:
+            self.polygons.append(self.polygons[index].duplicateMe())
+        elif actionType == ContextActionType.REMOVE_POINT:
+            pass
+        elif actionType == ContextActionType.DUPLICATE_POINT:
+            pass
+        self.repaint()
 
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
@@ -66,6 +79,9 @@ class ImgWidget(QLabel):
 
     def mouseMoveEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
+        if isinstance(e, QContextMenuEvent):
+            return
+
         if e.buttons() == Qt.LeftButton:
             endPosition = e.pos()
             if self.mode == RubberMode.SELECTION:
@@ -203,7 +219,3 @@ class ImgWidget(QLabel):
         for polygon in self.polygons:
             polygon.paint(painter)
 
-
-class RubberMode(Enum):
-    SELECTION = 0
-    PREDICTION = 1

@@ -53,6 +53,8 @@ class MainWindowController(QMainWindow):
         # rubber
         self.canvas.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
 
+        # img
+        self.canvas.img.contextActionSelected.connect(lambda actionType, index: self.set_contextAction(actionType, index))
 
     def check_enable(self):
         # back forward
@@ -132,6 +134,14 @@ class MainWindowController(QMainWindow):
 
     def set_img(self, value):
         self.canvas.set_img(self.model.imgpath, value)
+
+    """
+    right dock
+    """
+    def set_contextAction(self, actionType, index):
+        self.canvas.img.set_contextAction(actionType, index)
+        self.rightdock.set_contextAction(actionType, index)
+        #tablemodelとimgのpolygonをまとめて，mvcモデルを作る
 
     """
     credential

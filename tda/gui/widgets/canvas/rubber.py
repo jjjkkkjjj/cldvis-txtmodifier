@@ -2,7 +2,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-from enum import Enum
+from ..eveUtils import MoveActionState
 
 class Rubber(QRubberBand):
     def __init__(self, parent=None):
@@ -108,7 +108,3 @@ class PredictedRubber(QRubberBand):
         self.setPalette(pal)
 
 
-class MoveActionState(Enum):
-    CREATE = 0
-    RESIZE = 1
-    MOVE = 2
