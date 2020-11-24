@@ -7,8 +7,9 @@ from .model import Model
 from .functions.dialogs import CredentialDialog
 from ..estimator.vision import Vision, PredictError
 
+from .mixin import *
 
-class MainWindowController(QMainWindow):
+class MainWindowController(QMainWindow, SelectionMixin):
     def __init__(self):
         super().__init__()
 
