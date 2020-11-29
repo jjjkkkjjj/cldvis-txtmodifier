@@ -3,13 +3,15 @@ from PySide2.QtWidgets import *
 from .mixin import *
 
 class MainWindowController(SelectionMixin, PredictionMixin, UtilMixin, QMainWindow):
+    # static property
+    info = Info()
+    annotation = Annotation()
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.initUI()
         self.establish_connection()
-
-        self.info = Info()
 
         self.check_enable()
         self.check_credential()

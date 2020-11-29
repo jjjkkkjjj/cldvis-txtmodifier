@@ -4,12 +4,14 @@ from PySide2.QtCore import *
 
 from .rubber import Rubber, PredictedRubber
 from ..eveUtils import *
-from ...model.polygon import Polygon, PolygonManager
 from .contextMenu import ImgContextMenu
+
 
 class ImgWidget(QLabel):
     rubberCreated = Signal(tuple)
-    contextActionSelected = Signal(object, int)
+    contextActionSelected = Signal(object)
+    painting = Signal(object)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -23,7 +25,6 @@ class ImgWidget(QLabel):
 
         self.predictedRubberBand = PredictedRubber(self)
 
-        self.polygons = PolygonManager(offset=(0, 0))
         # mouseMoveEvent will be fired without any button pressed
         self.setMouseTracking(True)
 
@@ -39,34 +40,26 @@ class ImgWidget(QLabel):
     @property
     def bottom_percent(self):
         return self.rubberPercentRect[3]
+    @property
+    def annotation(self):
+        from ...mainWC import MainWindowController
+        return MainWindowController.annotation
 
     def contextMenuEvent(self, e):
         if self.mode == RubberMode.PREDICTION:
             contextMenu = ImgContextMenu(self)
-            contextMenu.setEnabled_action(self.polygons.isExistSelectedPolygon, self.polygons.isExistSelectedPoint)
+            contextMenu.setEnabled_action(**self.annotation.enableStatus_contextAction)
 
             action = contextMenu.exec_(self.mapToGlobal(e.pos()))
             if action == contextMenu.action_remove_polygon:
-                self.contextActionSelected.emit(ContextActionType.REMOVE_POLYGON, self.polygons.selected_polygonIndex)
+                self.contextActionSelected.emit(ContextActionType.REMOVE_POLYGON)
             elif action == contextMenu.action_duplicate_polygon:
-                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POLYGON, self.polygons.selected_polygonIndex)
+                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POLYGON)
             elif action == contextMenu.action_remove_point:
-                self.contextActionSelected.emit(ContextActionType.REMOVE_POINT, self.polygons.selected_polygon.selectedPointIndex)
+                self.contextActionSelected.emit(ContextActionType.REMOVE_POINT)
             elif action == contextMenu.action_duplicate_point:
-                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POINT, self.polygons.selected_polygon.selectedPointIndex)
+                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POINT)
 
-    def set_contextAction(self, actionType, index):
-        assert index is not None, "index is None!!"
-
-        if actionType == ContextActionType.REMOVE_POLYGON:
-            del self.polygons[index]
-        elif actionType == ContextActionType.DUPLICATE_POLYGON:
-            self.polygons.append(self.polygons[index].duplicateMe())
-        elif actionType == ContextActionType.REMOVE_POINT:
-            pass
-        elif actionType == ContextActionType.DUPLICATE_POINT:
-            pass
-        self.repaint()
 
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
@@ -100,7 +93,7 @@ class ImgWidget(QLabel):
 
         elif e.buttons() == Qt.NoButton:
             if self.mode == RubberMode.PREDICTION:
-                self.polygons.set_select(e.pos())
+                self.annotation.set_selectPos(e.pos())
                 self.repaint()
 
 
@@ -135,7 +128,7 @@ class ImgWidget(QLabel):
         elif self.mode == RubberMode.PREDICTION:
             self.predictedRubberBand.setGeometry(newRect)
             offset = newRect.topLeft()
-            self.polygons.set_qpolygons(newRect.size(), offset)
+            self.set_qpolygons(newRect.size(), offset)
 
 
     def refresh_rubberBand(self):
@@ -147,7 +140,7 @@ class ImgWidget(QLabel):
         self.predictedRubberBand = PredictedRubber(self)
         self.mode = RubberMode.SELECTION
 
-    def rubber2predictedRubber(self, results):
+    def rubber2predictedRubber(self):
         self.rubberBand.hide()
 
         from ....debug._utils import DEBUG
@@ -167,28 +160,8 @@ class ImgWidget(QLabel):
         
         self.predictedRubberBand.show()
 
-        """
-        results: dict
-            "info":
-                "width": int
-                "height": int
-                "path": str
-            "prediction": list of dict whose keys are 'text' and 'bbox'
-                "text": str
-                "bbox": list(4 points) of list(2d=(x, y))
-        """
-
-
-        # create polygon instances, and then draw polygons
-        area = self.predictedRubberBand.size() # QSize
-        offset = self.predictedRubberBand.geometry().topLeft() # QPoint
-        for result in results["prediction"]:
-            self.polygons.append(Polygon(result["bbox"], area, offset))
-
         self.mode = RubberMode.PREDICTION
 
-        # draw polygons
-        self.repaint()
 
     def paintEvent(self, event):
         if not self.pixmap() or self.mode == RubberMode.SELECTION:
@@ -215,7 +188,5 @@ class ImgWidget(QLabel):
 
         painter.drawRect(self.predictedRubberBand.geometry())
 
-
-        for polygon in self.polygons:
-            polygon.paint(painter)
+        self.painting.emit(painter)
 

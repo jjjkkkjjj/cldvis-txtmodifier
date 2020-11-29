@@ -20,13 +20,13 @@ class PolygonManager(object):
         for i, polygon in enumerate(self._polygons):
             self._polygons[i] = polygon.set_qpolygon(area, offset)
 
-    def set_select(self, pos):
+    def set_selectPos(self, pos):
         # all of polygons are reset selected variable first
         for polygon in self._polygons:
-            polygon.set_select(None)
+            polygon.set_selectPos(None)
 
         for i, polygon in reversed(list(enumerate(self._polygons))):
-            if polygon.set_select(pos):
+            if polygon.set_selectPos(pos):
                 self._selected_index = i
                 return
         # All of polygons are not selected
@@ -161,7 +161,7 @@ class Polygon(object):
         return self._isSelectedPolygon
     
     
-    def set_select(self, pos):
+    def set_selectPos(self, pos):
         """
         :param pos: QPoint or None
         :return:

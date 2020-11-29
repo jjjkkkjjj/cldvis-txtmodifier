@@ -4,6 +4,7 @@ import os, cv2, glob
 from ..functions.config import Config
 from ..functions.utils import reconstruct_coordinates
 from .polygon import PolygonManager, Polygon
+from ..widgets.canvas.img import ContextActionType
 
 class Info(object):
     def __init__(self):
@@ -111,3 +112,45 @@ class Info(object):
 class Annotation(object):
     def __init__(self):
         self.polygons = PolygonManager(offset=(0, 0))
+
+    def set_detectionResult(self, results, area, offset):
+        """
+        :param results: dict, detection result by vision
+        :param area: Qsize, selected area
+        :param offset: QPoint, the topleft coordinates for selected area
+        :return:
+        """
+
+        """
+        results: dict
+            "info":
+                "width": int
+                "height": int
+                "path": str
+            "prediction": list of dict whose keys are 'text' and 'bbox'
+                "text": str
+                "bbox": list(4 points) of list(2d=(x, y))
+        """
+        # create polygon instances, and then draw polygons
+        for result in results["prediction"]:
+            self.polygons.append(Polygon(result["bbox"], area, offset))
+
+    @property
+    def enableStatus_contextAction(self):
+        return {'isSelectedPolygon': self.polygons.isExistSelectedPolygon,
+                'isSelectedPoint': self.polygons.isExistSelectedPoint}
+
+    def change_polygons(self, actionType):
+        if actionType == ContextActionType.REMOVE_POLYGON:
+            del self.polygons[self.polygons.selected_polygonIndex]
+        elif actionType == ContextActionType.DUPLICATE_POLYGON:
+            self.polygons.append(self.polygons[self.polygons.selected_polygonIndex].duplicateMe())
+        elif actionType == ContextActionType.REMOVE_POINT:
+            pass
+        elif actionType == ContextActionType.DUPLICATE_POINT:
+            pass
+
+    def set_selectPos(self, pos):
+        self.polygons.set_selectPos(pos)
+    def set_qpolygons(self, area, offset):
+        self.polygons.set_qpolygons(area, offset)

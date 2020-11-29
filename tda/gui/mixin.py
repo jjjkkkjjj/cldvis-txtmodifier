@@ -124,7 +124,8 @@ class PredictionMixin(MWAbstractMixin):
         self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.rubberPercentRect, mode))
 
         # img
-        self.canvas.img.contextActionSelected.connect(lambda actionType, index: self.set_contextAction(actionType, index))
+        self.canvas.img.painting.connect(lambda painter: self.paint_polygons(painter))
+        self.canvas.img.contextActionSelected.connect(lambda actionType: self.set_contextAction(actionType))
 
 
     def predict(self, imgpath, tableRect, mode):
@@ -156,8 +157,13 @@ class PredictionMixin(MWAbstractMixin):
                         # remove tmp files
                         self.info.remove_tmpimg()
 
+            # TODO: Refactor
+            self.canvas.set_predictedRubber()
+            self.annotation.set_detectionResult(results, area=self.canvas.img.predictedRubberBand.size(),
+                                                offset=self.canvas.img.predictedRubberBand.geometry().topLeft())
+            # draw polygons
+            self.canvas.img.repaint()
 
-            self.canvas.set_predictedRubber(results)
             self.rightdock.set_results(results)
 
         elif mode == 'file':
@@ -165,8 +171,12 @@ class PredictionMixin(MWAbstractMixin):
         else:
             raise ValueError('Invalid mode was passed')
 
+    def paint_polygons(self, painter):
+        for polygon in self.annotation.polygons:
+            polygon.paint(painter)
 
-    def set_contextAction(self, actionType, index):
-        self.canvas.img.set_contextAction(actionType, index)
+    def set_contextAction(self, actionType):
+        self.annotation.change_polygons(actionType)
+        self.canvas.img.repaint()
         self.rightdock.set_contextAction(actionType, index)
         # tablemodelとimgのpolygonをまとめて，mvcモデルを作る
