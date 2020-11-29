@@ -6,6 +6,7 @@ class MainWindowController(SelectionMixin, PredictionMixin, UtilMixin, QMainWind
     # static property
     info = InfoManager()
     annotation = AnnotationManager()
+    selection = SelectionManager()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

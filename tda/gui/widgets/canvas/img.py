@@ -44,6 +44,10 @@ class ImgWidget(QLabel):
     def annotation(self):
         from ...mainWC import MainWindowController
         return MainWindowController.annotation
+    @property
+    def selection(self):
+        from ...mainWC import MainWindowController
+        return MainWindowController.selection
 
     def contextMenuEvent(self, e):
         if self.mode == RubberMode.PREDICTION:

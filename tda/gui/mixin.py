@@ -4,7 +4,7 @@ from PySide2.QtCore import *
 from google.auth.exceptions import DefaultCredentialsError
 
 from .functions.dialogs import CredentialDialog
-from .model import InfoManager, AnnotationManager
+from .model import InfoManager, AnnotationManager, SelectionManager
 from ..estimator.vision import Vision, PredictError
 from .widgets import *
 
@@ -20,6 +20,7 @@ class MWAbstractMixin(object):
     # info
     info: InfoManager
     annotation: AnnotationManager
+    selection: SelectionManager
 
     def establish_connection(self):
         pass
