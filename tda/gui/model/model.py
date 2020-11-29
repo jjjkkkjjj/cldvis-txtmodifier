@@ -1,9 +1,10 @@
 from PySide2.QtGui import *
+from PySide2.QtCore import *
 import os, cv2, glob
 
 from ..functions.config import Config
 from ..functions.utils import reconstruct_coordinates
-from .polygon import PolygonManager, Polygon
+from .polygon import Polygon
 from ..widgets.canvas.img import ContextActionType
 
 class Info(object):
@@ -111,7 +112,99 @@ class Info(object):
 
 class Annotation(object):
     def __init__(self):
-        self.polygons = PolygonManager(offset=(0, 0))
+        self._polygons = []
+        self._selected_index = -1  # -1 if polygon is not selected
+        # attr: offset is QPoint!
+        self.offset = QPoint(0, 0)
+
+    def set_qpolygons(self, area=None, offset=None):
+        for i, polygon in enumerate(self._polygons):
+            self._polygons[i] = polygon.set_qpolygon(area, offset)
+
+    def set_selectPos(self, pos):
+        # all of polygons are reset selected variable first
+        for polygon in self._polygons:
+            polygon.set_selectPos(None)
+
+        for i, polygon in reversed(list(enumerate(self._polygons))):
+            if polygon.set_selectPos(pos):
+                self._selected_index = i
+                return
+        # All of polygons are not selected
+        self._selected_index = -1
+
+    @property
+    def offset_x(self):
+        return self.offset.x()
+
+    @property
+    def offset_y(self):
+        return self.offset.y()
+
+    @property
+    def selected_polygon(self):
+        if self.isExistSelectedPolygon:
+            return self._polygons[self._selected_index]
+        else:
+            return None
+
+    @property
+    def selected_polygonIndex(self):
+        if self.isExistSelectedPolygon:
+            return self._selected_index
+        else:
+            return None
+
+    @property
+    def isExistSelectedPolygon(self):
+        return self._selected_index != -1
+
+    @property
+    def isExistSelectedPoint(self):
+        if self.isExistSelectedPolygon:
+            return self.selected_polygon.isSelectedPoint
+        else:
+            return False
+
+    def refresh(self):
+        self._polygons = []
+
+    def insert(self, index, polygon):
+        self._polygons.insert(index, polygon)
+
+    def append(self, polygon):
+        self._polygons.append(polygon)
+
+    def __len__(self):
+        return len(self._polygons)
+
+    def __setitem__(self, index, polygon):
+        self._polygons[index] = polygon
+
+    def __getitem__(self, index):
+        if not isinstance(index, int):
+            raise ValueError('index must be int, but got {}'.format(type(index).__name__))
+        return self._polygons[index]
+
+    def __delitem__(self, index):
+        if not isinstance(index, int):
+            raise ValueError('index must be int, but got {}'.format(type(index).__name__))
+        del self._polygons[index]
+
+    def __iter__(self):
+        for polygon in self._polygons:
+            yield polygon
+
+    def qpolygons(self):
+        """
+        iterate for qpolygon for each polygon. Yield QPolygon class for each iteration
+        :return:
+        """
+        for polygon in self._polygons:
+            yield polygon.qpolygon
+
+    def set_highlight(self, pos):
+        pass
 
     def set_detectionResult(self, results, area, offset):
         """
@@ -132,25 +225,21 @@ class Annotation(object):
                 "bbox": list(4 points) of list(2d=(x, y))
         """
         # create polygon instances, and then draw polygons
+        self.offset = offset
         for result in results["prediction"]:
-            self.polygons.append(Polygon(result["bbox"], area, offset))
+            self.append(Polygon(result["bbox"], result['text'], area, offset))
 
     @property
     def enableStatus_contextAction(self):
-        return {'isSelectedPolygon': self.polygons.isExistSelectedPolygon,
-                'isSelectedPoint': self.polygons.isExistSelectedPoint}
+        return {'isSelectedPolygon': self.isExistSelectedPolygon,
+                'isSelectedPoint': self.isExistSelectedPoint}
 
     def change_polygons(self, actionType):
         if actionType == ContextActionType.REMOVE_POLYGON:
-            del self.polygons[self.polygons.selected_polygonIndex]
+            del self[self.selected_polygonIndex]
         elif actionType == ContextActionType.DUPLICATE_POLYGON:
-            self.polygons.append(self.polygons[self.polygons.selected_polygonIndex].duplicateMe())
+            self.append(self.selected_polygon.duplicateMe())
         elif actionType == ContextActionType.REMOVE_POINT:
             pass
         elif actionType == ContextActionType.DUPLICATE_POINT:
             pass
-
-    def set_selectPos(self, pos):
-        self.polygons.set_selectPos(pos)
-    def set_qpolygons(self, area, offset):
-        self.polygons.set_qpolygons(area, offset)

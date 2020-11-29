@@ -3,16 +3,16 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 
 class PredictionTableModel(QAbstractTableModel):
-    def __init__(self, prediction):
-        """
-        :param prediction: list of dict whose keys are;
-                    text:
-                    bbox:
-        """
+
+    def __init__(self):
         super().__init__(parent=None)
 
         self._header_labels = ['Text']
-        self._prediction = prediction
+
+    @property
+    def annotation(self):
+        from ...mainWC import MainWindowController
+        return MainWindowController.annotation
 
     def data(self, index, role=None):
         if role == Qt.DisplayRole:
@@ -24,19 +24,20 @@ class PredictionTableModel(QAbstractTableModel):
         return super().headerData(section, orientation, role)
 
     def rowCount(self, parent=None, *args, **kwargs):
-        return len(self._prediction)
+        return len(self.annotation)
 
     def columnCount(self, parent=None, *args, **kwargs):
         return 1
 
     def get_text(self, index):
-        return self._prediction[index]['text']
-    def get_bbox(self, index):
-        return self._prediction[index]['bbox']
+        return self.annotation[index].text
+    def get_bbox_percent(self, index):
+        return self.annotation[index].points_percent
 
+    """
     def __delitem__(self, index):
         self.layoutAboutToBeChanged.emit()
-        del self._prediction[index]
+        del self.annotation[index]
         self.layoutChanged.emit()
 
 
@@ -44,3 +45,4 @@ class PredictionTableModel(QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
         self._prediction += [{'text': text, 'bbox': points}]
         self.layoutChanged.emit()
+    """

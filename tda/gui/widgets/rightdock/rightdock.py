@@ -11,7 +11,8 @@ class RightDockWidget(BaseWidget):
         super().__init__(mainWidgetController)
 
         self.initUI()
-        self.tableModel = PredictionTableModel(prediction=[])
+        self.tableModel = PredictionTableModel()
+        self.tableview.setModel(self.tableModel)
 
     def initUI(self):
         vbox = QVBoxLayout()
@@ -25,17 +26,10 @@ class RightDockWidget(BaseWidget):
 
         self.tableview = QTableView(self)
         self.tableview.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.refresh_table()
         vbox.addWidget(self.tableview)
 
         self.setLayout(vbox)
 
-    def refresh_table(self, prediction=[]):
-        self.tableModel = PredictionTableModel(prediction=prediction)
-        self.tableview.setModel(self.tableModel)
-
-    def set_results(self, results):
-        self.refresh_table(prediction=results["prediction"])
 
     def set_contextAction(self, actionType, index):
         if actionType == ContextActionType.REMOVE_POLYGON:

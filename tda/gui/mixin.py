@@ -161,10 +161,8 @@ class PredictionMixin(MWAbstractMixin):
             self.canvas.set_predictedRubber()
             self.annotation.set_detectionResult(results, area=self.canvas.img.predictedRubberBand.size(),
                                                 offset=self.canvas.img.predictedRubberBand.geometry().topLeft())
-            # draw polygons
-            self.canvas.img.repaint()
+            self.update_contents()
 
-            self.rightdock.set_results(results)
 
         elif mode == 'file':
             pass
@@ -172,11 +170,19 @@ class PredictionMixin(MWAbstractMixin):
             raise ValueError('Invalid mode was passed')
 
     def paint_polygons(self, painter):
-        for polygon in self.annotation.polygons:
+        for polygon in self.annotation:
             polygon.paint(painter)
 
     def set_contextAction(self, actionType):
         self.annotation.change_polygons(actionType)
+        self.update_contents()
+
+    def update_contents(self):
+        """
+        update contents when changing data
+        :return:
+        """
+        # draw polygons
         self.canvas.img.repaint()
-        self.rightdock.set_contextAction(actionType, index)
-        # tablemodelとimgのpolygonをまとめて，mvcモデルを作る
+        # update table contents
+        self.rightdock.tableModel.layoutChanged.emit()

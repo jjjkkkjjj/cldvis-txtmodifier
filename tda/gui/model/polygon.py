@@ -4,113 +4,17 @@ from PySide2.QtCore import *
 
 import numpy as np
 
-class PolygonManager(object):
-    def __init__(self, offset):
-        """
-        :param offset: list(2d=(x,y)), is top-left coordinates of selected rectangle
-        """
-        super().__init__()
-
-        self._polygons = []
-        self._selected_index = -1 # -1 if polygon is not selected
-        # attr: offset is QPoint!
-        self.offset = QPoint(offset[0], offset[1])
-
-    def set_qpolygons(self, area=None, offset=None):
-        for i, polygon in enumerate(self._polygons):
-            self._polygons[i] = polygon.set_qpolygon(area, offset)
-
-    def set_selectPos(self, pos):
-        # all of polygons are reset selected variable first
-        for polygon in self._polygons:
-            polygon.set_selectPos(None)
-
-        for i, polygon in reversed(list(enumerate(self._polygons))):
-            if polygon.set_selectPos(pos):
-                self._selected_index = i
-                return
-        # All of polygons are not selected
-        self._selected_index = -1
-
-    @property
-    def offset_x(self):
-        return self.offset.x()
-    @property
-    def offset_y(self):
-        return self.offset.y()
-
-    @property
-    def selected_polygon(self):
-        if self.isExistSelectedPolygon:
-            return self._polygons[self._selected_index]
-        else:
-            return None
-    @property
-    def selected_polygonIndex(self):
-        if self.isExistSelectedPolygon:
-            return self._selected_index
-        else:
-            return None
-
-    @property
-    def isExistSelectedPolygon(self):
-        return self._selected_index != -1
-    @property
-    def isExistSelectedPoint(self):
-        if self.isExistSelectedPolygon:
-            return self.selected_polygon.isSelectedPoint
-        else:
-            return False
-
-    def refresh(self):
-        self._polygons = []
-
-    def insert(self, index, polygon):
-        self._polygons.insert(index, polygon)
-
-    def append(self, polygon):
-        self._polygons.append(polygon)
-
-    def __len__(self):
-        return len(self._polygons)
-
-    def __setitem__(self, index, polygon):
-        self._polygons[index] = polygon
-
-    def __getitem__(self, index):
-        if not isinstance(index, int):
-            raise ValueError('index must be int, but got {}'.format(type(index).__name__))
-        return self._polygons[index]
-
-    def __delitem__(self, index):
-        if not isinstance(index, int):
-            raise ValueError('index must be int, but got {}'.format(type(index).__name__))
-        del self._polygons[index]
-
-    def __iter__(self):
-        for polygon in self._polygons:
-            yield polygon
-
-    def qpolygons(self):
-        """
-        iterate for qpolygon for each polygon. Yield QPolygon class for each iteration
-        :return:
-        """
-        for polygon in self._polygons:
-            yield polygon.qpolygon
-
-    def set_highlight(self, pos):
-        pass
-
 
 class Polygon(object):
-    def __init__(self, points, area, offset):
+    def __init__(self, points, text, area, offset):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
+        :param text: str
         :param area: QSize
         :param offset: QPoint
         """
         self.points_percent = np.array(points) # shape = (*, 2)
+        self.text = text
         self.set_qpolygon(area, offset)
         self._selected_vertex_index = -1 # -1 if vertices are no selected
         self._isSelectedPolygon = False
