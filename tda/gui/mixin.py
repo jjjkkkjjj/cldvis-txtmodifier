@@ -4,7 +4,7 @@ from PySide2.QtCore import *
 from google.auth.exceptions import DefaultCredentialsError
 
 from .functions.dialogs import CredentialDialog
-from .model import Info, Annotation
+from .model import InfoManager, AnnotationManager
 from ..estimator.vision import Vision, PredictError
 from .widgets import *
 
@@ -18,8 +18,8 @@ class MWAbstractMixin(object):
     # gcp
     vision: Vision
     # info
-    info: Info
-    annotation: Annotation
+    info: InfoManager
+    annotation: AnnotationManager
 
     def establish_connection(self):
         pass
@@ -174,7 +174,7 @@ class PredictionMixin(MWAbstractMixin):
             polygon.paint(painter)
 
     def set_contextAction(self, actionType):
-        self.annotation.change_polygons(actionType)
+        self.annotation.change_annotations(actionType)
         self.update_contents()
 
     def update_contents(self):

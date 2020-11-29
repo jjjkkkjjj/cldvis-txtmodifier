@@ -51,10 +51,10 @@ class ImgWidget(QLabel):
             contextMenu.setEnabled_action(**self.annotation.enableStatus_contextAction)
 
             action = contextMenu.exec_(self.mapToGlobal(e.pos()))
-            if action == contextMenu.action_remove_polygon:
-                self.contextActionSelected.emit(ContextActionType.REMOVE_POLYGON)
-            elif action == contextMenu.action_duplicate_polygon:
-                self.contextActionSelected.emit(ContextActionType.DUPLICATE_POLYGON)
+            if action == contextMenu.action_remove_annotation:
+                self.contextActionSelected.emit(ContextActionType.REMOVE_ANNOTATION)
+            elif action == contextMenu.action_duplicate_annotation:
+                self.contextActionSelected.emit(ContextActionType.DUPLICATE_ANNOTATION)
             elif action == contextMenu.action_remove_point:
                 self.contextActionSelected.emit(ContextActionType.REMOVE_POINT)
             elif action == contextMenu.action_duplicate_point:

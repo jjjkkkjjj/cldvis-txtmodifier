@@ -12,10 +12,10 @@ class ImgContextMenu(QMenu):
 
     def initUI(self):
         # polygon
-        self.action_remove_polygon = _create_action(self, "&Remove Polygon", slot=None,
-                                                    tip="remove selected polygon")
-        self.action_duplicate_polygon = _create_action(self, "&Duplicate Polygon", slot=None,
-                                                       tip="duplicate selected polygon")
+        self.action_remove_annotation = _create_action(self, "&Remove Annotation", slot=None,
+                                                    tip="remove selected annotation")
+        self.action_duplicate_annotation = _create_action(self, "&Duplicate Annotation", slot=None,
+                                                       tip="duplicate selected annotation")
 
         # point
         self.action_remove_point = _create_action(self, "&Remove Point", slot=None,
@@ -23,13 +23,13 @@ class ImgContextMenu(QMenu):
         self.action_duplicate_point = _create_action(self, "&Duplicate Point", slot=None,
                                                        tip="duplicate selected point")
 
-        _add_actions(self, (self.action_remove_polygon, self.action_duplicate_polygon, None,
+        _add_actions(self, (self.action_remove_annotation, self.action_duplicate_annotation, None,
                             self.action_remove_point, self.action_duplicate_point))
 
     def setEnabled_action(self, isSelectedPolygon, isSelectedPoint):
         # polygon
-        self.action_remove_polygon.setEnabled(isSelectedPolygon)
-        self.action_duplicate_polygon.setEnabled(isSelectedPolygon)
+        self.action_remove_annotation.setEnabled(isSelectedPolygon)
+        self.action_duplicate_annotation.setEnabled(isSelectedPolygon)
 
         # point
         self.action_remove_point.setEnabled(isSelectedPoint)

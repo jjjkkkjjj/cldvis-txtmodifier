@@ -32,9 +32,9 @@ class RightDockWidget(BaseWidget):
 
 
     def set_contextAction(self, actionType, index):
-        if actionType == ContextActionType.REMOVE_POLYGON:
+        if actionType == ContextActionType.REMOVE_ANNOTATION:
             del self.tableModel[index]
-        elif actionType == ContextActionType.DUPLICATE_POLYGON:
+        elif actionType == ContextActionType.DUPLICATE_ANNOTATION:
             self.tableModel.append(self.tableModel.get_text(index), self.tableModel.get_bbox(index))
         elif actionType == ContextActionType.REMOVE_POINT:
             pass

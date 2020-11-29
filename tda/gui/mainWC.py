@@ -4,8 +4,8 @@ from .mixin import *
 
 class MainWindowController(SelectionMixin, PredictionMixin, UtilMixin, QMainWindow):
     # static property
-    info = Info()
-    annotation = Annotation()
+    info = InfoManager()
+    annotation = AnnotationManager()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

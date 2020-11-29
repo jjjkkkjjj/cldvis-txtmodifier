@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class ContextActionType(Enum):
-    REMOVE_POLYGON = 0
-    DUPLICATE_POLYGON = 1
+    REMOVE_ANNOTATION = 0
+    DUPLICATE_ANNOTATION = 1
     REMOVE_POINT = 2
     DUPLICATE_POINT = 3
 
