@@ -4,7 +4,7 @@ from PySide2.QtCore import *
 
 from .rubber import Rubber, PredictedRubber
 from ..eveUtils import *
-from .polygon import Polygon, PolygonManager
+from ...model.polygon import Polygon, PolygonManager
 from .contextMenu import ImgContextMenu
 
 class ImgWidget(QLabel):

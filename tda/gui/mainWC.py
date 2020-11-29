@@ -9,7 +9,7 @@ class MainWindowController(SelectionMixin, PredictionMixin, UtilMixin, QMainWind
         self.initUI()
         self.establish_connection()
 
-        self.model = Model()
+        self.info = Info()
 
         self.check_enable()
         self.check_credential()

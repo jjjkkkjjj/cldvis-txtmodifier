@@ -11,6 +11,7 @@ class RightDockWidget(BaseWidget):
         super().__init__(mainWidgetController)
 
         self.initUI()
+        self.tableModel = PredictionTableModel(prediction=[])
 
     def initUI(self):
         vbox = QVBoxLayout()

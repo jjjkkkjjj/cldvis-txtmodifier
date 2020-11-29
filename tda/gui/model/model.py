@@ -1,10 +1,11 @@
 from PySide2.QtGui import *
 import os, cv2, glob
 
-from .functions.config import Config
-from .functions.utils import reconstruct_coordinates
+from ..functions.config import Config
+from ..functions.utils import reconstruct_coordinates
+from .polygon import PolygonManager, Polygon
 
-class Model(object):
+class Info(object):
     def __init__(self):
         self._imgIndex = -1
         self._imgPaths = []
@@ -88,7 +89,7 @@ class Model(object):
     def set_credentialJsonpath(self, path):
         self.config.credentialJsonpath = path
 
-    def save_tmpimg(self, imgpath, tableRect, directory=os.path.join('.', '.tda', 'tmp')):
+    def save_tmpimg(self, imgpath, tableRect, directory=os.path.join('..', '.tda', 'tmp')):
         img = cv2.imread(imgpath)
         h, w, _ = img.shape
 
@@ -101,7 +102,12 @@ class Model(object):
         cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
         return savepath
 
-    def remove_tmpimg(self, directory=os.path.join('.', '.tda', 'tmp')):
+    def remove_tmpimg(self, directory=os.path.join('..', '.tda', 'tmp')):
         files = glob.glob(os.path.join(directory, '*.jpg'))
         for f in files:
             os.remove(f)
+
+
+class Annotation(object):
+    def __init__(self):
+        self.polygons = PolygonManager(offset=(0, 0))
