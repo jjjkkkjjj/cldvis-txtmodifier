@@ -162,6 +162,7 @@ class PredictionMixin(MWAbstractMixin):
             self.canvas.set_predictedRubber()
             self.annotation.set_detectionResult(results, area=self.canvas.img.predictedRubberBand.size(),
                                                 offset=self.canvas.img.predictedRubberBand.geometry().topLeft())
+            self.annotation.show()
             self.update_contents()
 
 

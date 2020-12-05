@@ -4,14 +4,35 @@ from PySide2.QtCore import *
 
 import numpy as np
 
-class Vertexes(object):
+class GeoBase(object):
+    def __init__(self):
+        self._isShow = False
 
-    def __init__(self, points, area, offset):
+        # color
+        self.green = QColor(0, 255, 0, int(255 * 0.8))
+        self.red = QColor(255, 0, 0, int(255 * 0.8))
+        self.light_green = QColor(0, 255, 0, int(255 * 0.4))
+        self.transparency = QColor(0, 255, 0, int(255 * 0))
+
+    @property
+    def isShow(self):
+        return self._isShow
+
+    def show(self):
+        self._isShow = True
+
+    def hide(self):
+        self._isShow = False
+
+class Vertexes(GeoBase):
+
+    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
         """
         :param points: 2(top-left, bottom-right) list of list(2d=(x,y)), Note that these points are in percentage
         :param area: QSize
         :param offset: QPoint
         """
+        super().__init__()
         self.points_percent = np.array(points)
         self.area = area
         self.offset = offset
@@ -20,12 +41,6 @@ class Vertexes(object):
 
         # point radius
         self._point_r = 8
-
-        # color
-        self.green = QColor(0, 255, 0, int(255 * 0.8))
-        self.red = QColor(255, 0, 0, int(255 * 0.8))
-        self.light_green = QColor(0, 255, 0, int(255 * 0.4))
-        self.transparency = QColor(0, 255, 0, int(255 * 0))
 
     @property
     def points_number(self):
@@ -68,6 +83,8 @@ class Vertexes(object):
 
 
     def paint(self, painter):
+        if not self.isShow:
+            return
         ### draw edge point ###
         # pen
         pen = QPen(self.transparency)  # transparent
@@ -97,18 +114,19 @@ class Vertexes(object):
 
 
 class Rect(Vertexes):
-    def __init__(self, points, area, offset):
+    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
         """
         :param points: 2(top-left, bottom-right) list of list(2d=(x,y)), Note that these points are in percentage
         :param area: QSize
         :param offset: QPoint
         """
-        assert np.array(points) == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
+        _points = np.array(points)
+        assert _points.shape == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
         # append top-right and bottom-left
-        points.insert(1, [points[0, 0], points[1, 1]])  # top-right
-        points.insert(3, [points[1, 0], points[0, 1]])  # bottom-left
+        _points = np.insert(_points, 1, [points[0, 0], points[1, 1]], axis=0) # top-right
+        _points = np.insert(_points, 3, [points[1, 0], points[0, 1]], axis=0)  # bottom-left
 
-        super().__init__(points, area, offset)
+        super().__init__(_points, area, offset)
         self.set_qrect(area, offset)
 
         self._isSelectedRect = False
@@ -173,6 +191,8 @@ class Rect(Vertexes):
         return self._isSelectedRect
 
     def paint(self, painter):
+        if not self.isShow:
+            return
         ### draw polygon ###
         # pen
         pen = QPen(self.green)
@@ -199,7 +219,7 @@ class Rect(Vertexes):
         return Polygon(newpoints_percent[::2], self.area, self.offset)
 
 class Polygon(Vertexes):
-    def __init__(self, points, area, offset):
+    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
         :param area: QSize
@@ -271,6 +291,9 @@ class Polygon(Vertexes):
 
 
     def paint(self, painter):
+        if not self.isShow:
+            return
+
         ### draw polygon ###
         # pen
         pen = QPen(self.green)

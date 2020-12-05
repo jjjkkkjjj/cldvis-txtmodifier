@@ -92,6 +92,14 @@ class AnnotationManager(object):
         for annotation in self._annotations:
             yield annotation
 
+    def show(self):
+        for anno in self._annotations:
+            anno.show()
+
+    def hide(self):
+        for anno in self._annotations:
+            anno.hide()
+
     def qpolygons(self):
         """
         iterate for qpolygon for each polygon. Yield QPolygon class for each iteration
