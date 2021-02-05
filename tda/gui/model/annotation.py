@@ -114,8 +114,8 @@ class AnnotationManager(object):
     def set_detectionResult(self, results, area, offset):
         """
         :param results: dict, detection result by vision
-        :param area: Qsize, selected area
-        :param offset: QPoint, the topleft coordinates for selected area
+        :param area: Qsize, selected parentSize
+        :param offset: QPoint, the topleft coordinates for selected parentSize
         :return:
         """
 
@@ -143,7 +143,9 @@ class AnnotationManager(object):
         if actionType == ContextActionType.REMOVE_ANNOTATION:
             del self[self.selected_annotationIndex]
         elif actionType == ContextActionType.DUPLICATE_ANNOTATION:
-            self.append(self.selected_annotation.duplicateMe())
+            newanno = self.selected_annotation.duplicateMe()
+            newanno.show()
+            self.append(newanno)
         elif actionType == ContextActionType.REMOVE_POINT:
             pass
         elif actionType == ContextActionType.DUPLICATE_POINT:
@@ -151,18 +153,18 @@ class AnnotationManager(object):
 
 
 class Annotation(Polygon):
-    def __init__(self, points, text, area, offset):
+    def __init__(self, points, text, parentSize, offset):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
         :param text: str
-        :param area: QSize
+        :param parentSize: QSize
         :param offset: QPoint
         """
-        super().__init__(points, area, offset)
+        super().__init__(points, parentSize, offset)
         self.text = text
 
     def duplicateMe(self):
-        newpoints_percent = self.points_percent.copy()
-        newpoints_percent[:, 0] += 10 / self.width
-        newpoints_percent[:, 1] += 10 / self.height
-        return Annotation(newpoints_percent, self.area, self.offset)
+        newpoints_percent = self.percent_points.copy()
+        newpoints_percent[:, 0] += 10.0 / self.parentWidth
+        newpoints_percent[:, 1] += 10.0 / self.parentHeight
+        return Annotation(newpoints_percent, self.text, self.parentSize, self.offset)

@@ -4,47 +4,23 @@ from PySide2.QtCore import *
 
 import numpy as np
 
-class GeoBase(object):
-    def __init__(self):
-        self._isShow = False
+from .percent_geometry import PercentVertexes
 
-        # color
-        self.green = QColor(0, 255, 0, int(255 * 0.8))
-        self.red = QColor(255, 0, 0, int(255 * 0.8))
-        self.light_green = QColor(0, 255, 0, int(255 * 0.4))
-        self.transparency = QColor(0, 255, 0, int(255 * 0))
-
-    @property
-    def isShow(self):
-        return self._isShow
-
-    def show(self):
-        self._isShow = True
-
-    def hide(self):
-        self._isShow = False
-
-class Vertexes(GeoBase):
+class Vertexes(PercentVertexes):
 
     def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
         """
-        :param points: 2(top-left, bottom-right) list of list(2d=(x,y)), Note that these points are in percentage
+        :param points: list(n) of list(2d=(x,y)), Note that these points are in percentage
         :param area: QSize
         :param offset: QPoint
         """
-        super().__init__()
-        self.points_percent = np.array(points)
-        self.area = area
-        self.offset = offset
+        super().__init__(points, area, offset)
 
         self._selected_vertex_index = -1  # -1 if vertices are no selected
 
         # point radius
         self._point_r = 8
 
-    @property
-    def points_number(self):
-        return self.points_percent.shape[0]
 
     @property
     def isSelectedPoint(self):
@@ -59,27 +35,6 @@ class Vertexes(GeoBase):
     @property
     def selectedPoint(self):
         raise NotImplementedError()
-
-    @property
-    def parentWidth(self):
-        return self.area.width()
-    @property
-    def parentHeight(self):
-        return self.area.height()
-
-    @property
-    def offset_x(self):
-        return self.offset.x()
-    @property
-    def offset_y(self):
-        return self.offset.y()
-
-    @property
-    def x(self):
-        return self.points_percent[:, 0]
-    @property
-    def y(self):
-        return self.points_percent[:, 1]
 
 
     def paint(self, painter):
@@ -111,6 +66,15 @@ class Vertexes(GeoBase):
             painter.setPen(pen)
             painter.setBrush(brush)
             painter.drawEllipse(self.selectedPoint, self._point_r, self._point_r)
+
+    def move(self, movedAmount):
+        """
+        :param movedAmount: QPoint, move amount. Note that this position is represented as absolute coordinates system in parent widget
+        :return:
+        """
+        new_dx_percent = movedAmount.x() / self.parentWidth
+        new_dy_percent = movedAmount.y() / self.parentHeight
+        self.points_percent += np.array(((new_dx_percent, new_dy_percent)))
 
 
 class Rect(Vertexes):
@@ -156,7 +120,7 @@ class Rect(Vertexes):
             self.offset = offset
 
 
-        points = self.points_percent.copy()
+        points = self.percent_points.copy()
         # note that points = (tl, tr, br, bl)
         points[:, 0] *= self.parentWidth
         points[:, 1] *= self.parentHeight
@@ -214,21 +178,26 @@ class Rect(Vertexes):
 
     def duplicateMe(self):
         newpoints_percent = self.points_percent.copy()
+        # slightly moved
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
         return Polygon(newpoints_percent[::2], self.area, self.offset)
 
 class Polygon(Vertexes):
-    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
-        :param area: QSize
+        :param parentSize: QSize
         :param offset: QPoint
         """
-        super().__init__(points, area, offset)
-        self.set_qpolygon(area, offset)
+        super().__init__(points, parentSize, offset)
+        self.set_qpolygon(parentSize, offset)
 
         self._isSelectedPolygon = False
+
+    @classmethod
+    def fromQPolygon(cls):
+        return cls()
 
     @property
     def qpolygon(self):
@@ -275,18 +244,16 @@ class Polygon(Vertexes):
 
     def set_qpolygon(self, area=None, offset=None):
         if area:
-            self.area = area
+            self.parentSize = area
         if offset:
             self.offset = offset
 
-        scaled_qpolygon = QPolygon()
-        points = self.points_percent.copy()
-        points[:, 0] *= self.parentWidth
-        points[:, 1] *= self.parentHeight
-        for i in range(self.points_number):
-            scaled_qpolygon.append(QPoint(points[i, 0], points[i, 1]))
+        qpolygon = QPolygon()
 
-        self._qpolygon = scaled_qpolygon.translated(self.offset)
+        for qpoint in self.gen_qpoints():
+            qpolygon.append(qpoint)
+
+        self._qpolygon = qpolygon.translated(self.offset)
         return self
 
 

@@ -66,7 +66,7 @@ class Rubber(QRubberBand):
         """
         super().setGeometry(newRBRect)
 
-        # calculate resize rubber band area
+        # calculate resize rubber band parentSize
         if min(newRBRect.width(), newRBRect.height()) < 80:
             self.editingRBArea = min(newRBRect.width(), newRBRect.height()) * 0.25
         else:

@@ -71,7 +71,7 @@ class CanvasWidget(BaseWidget):
         """
         :param rubberPercentRect: tuple or None, if it's None, remove rubber band
         :return:
-        """
+        """#ラバーからペイントにリファクタ
         if rubberPercentRect is None:
             # remove
             self.img.refresh_rubberBand()

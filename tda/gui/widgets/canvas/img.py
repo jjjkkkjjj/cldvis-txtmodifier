@@ -176,7 +176,7 @@ class ImgWidget(QLabel):
         painter = QPainter(self)
         painter.drawPixmap(self.rect(), self.pixmap())
 
-        ### draw rubberband area ###
+        ### draw rubberband parentSize ###
         # TODO: rubberband to paint
         self.predictedRubberBand.hide()
         # pen
