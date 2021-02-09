@@ -8,13 +8,13 @@ from .percent_geometry import PercentVertexes
 
 class Vertexes(PercentVertexes):
 
-    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
         """
-        :param points: list(n) of list(2d=(x,y)), Note that these points are in percentage
-        :param area: QSize
-        :param offset: QPoint
+        :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
+        :param parentSize: QSize, the parent widget's size
+        :param offset: QPoint, the offset coordinates to parent widget
         """
-        super().__init__(points, area, offset)
+        super().__init__(points, parentSize, offset)
 
         self._selected_vertex_index = -1  # -1 if vertices are no selected
 
@@ -50,7 +50,7 @@ class Vertexes(PercentVertexes):
         # set
         painter.setPen(pen)
         painter.setBrush(brush)
-        for qpoint in self.qpolygon:
+        for qpoint in self.gen_qpoints():
             # drawEllipse(center, rx, ry)
             painter.drawEllipse(qpoint, self._point_r, self._point_r)
 
@@ -74,15 +74,15 @@ class Vertexes(PercentVertexes):
         """
         new_dx_percent = movedAmount.x() / self.parentWidth
         new_dy_percent = movedAmount.y() / self.parentHeight
-        self.points_percent += np.array(((new_dx_percent, new_dy_percent)))
+        self.percent_points += np.array(((new_dx_percent, new_dy_percent)))
 
 
 class Rect(Vertexes):
-    def __init__(self, points, area=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
         """
-        :param points: 2(top-left, bottom-right) list of list(2d=(x,y)), Note that these points are in percentage
-        :param area: QSize
-        :param offset: QPoint
+        :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
+        :param parentSize: QSize, the parent widget's size
+        :param offset: QPoint, the offset coordinates to parent widget
         """
         _points = np.array(points)
         assert _points.shape == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
@@ -90,8 +90,8 @@ class Rect(Vertexes):
         _points = np.insert(_points, 1, [points[0, 0], points[1, 1]], axis=0) # top-right
         _points = np.insert(_points, 3, [points[1, 0], points[0, 1]], axis=0)  # bottom-left
 
-        super().__init__(_points, area, offset)
-        self.set_qrect(area, offset)
+        super().__init__(_points, parentSize, offset)
+        self.set_qrect(parentSize, offset)
 
         self._isSelectedRect = False
 
@@ -113,9 +113,13 @@ class Rect(Vertexes):
     def isSelectedRect(self):
         return self._isSelectedRect
 
-    def set_qrect(self, area=None, offset=None):
-        if area:
-            self.area = area
+    def set_qrect(self, parentSize=None, offset=None):
+        """
+        :param parentSize: QSize, the parent widget's size
+        :param offset: QPoint, the offset coordinates to parent widget
+        """
+        if parentSize:
+            self.parentSize = parentSize
         if offset:
             self.offset = offset
 
@@ -141,7 +145,7 @@ class Rect(Vertexes):
             # check whether to contain point first
             self._selected_vertex_index = -1
             for i, point in enumerate(self.gen_qrectPoints()):
-                # QRect constructs a rectangle with the given topLeft corner and the given size.
+                # QRect constructs a rectangle with the given topLeft corner and the given parentSize.
                 if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
                          QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
                     self._selected_vertex_index = i
@@ -177,18 +181,18 @@ class Rect(Vertexes):
         super().paint(painter)
 
     def duplicateMe(self):
-        newpoints_percent = self.points_percent.copy()
+        newpoints_percent = self.percent_points.copy()
         # slightly moved
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
-        return Polygon(newpoints_percent[::2], self.area, self.offset)
+        return Polygon(newpoints_percent[::2], self.parentSize, self.offset)
 
 class Polygon(Vertexes):
     def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
         """
-        :param points: list of list(2d=(x,y)), Note that these points are in percentage
-        :param parentSize: QSize
-        :param offset: QPoint
+        :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
+        :param parentSize: QSize, the parent widget's size
+        :param offset: QPoint, the offset coordinates to parent widget
         """
         super().__init__(points, parentSize, offset)
         self.set_qpolygon(parentSize, offset)
@@ -229,7 +233,7 @@ class Polygon(Vertexes):
             # check whether to contain point first
             self._selected_vertex_index = -1
             for i, point in enumerate(self._qpolygon):
-                # QRect constructs a rectangle with the given topLeft corner and the given size.
+                # QRect constructs a rectangle with the given topLeft corner and the given parentSize.
                 if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
                          QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
                     self._selected_vertex_index = i
@@ -242,9 +246,9 @@ class Polygon(Vertexes):
             self._isSelectedPolygon = False
         return self._isSelectedPolygon
 
-    def set_qpolygon(self, area=None, offset=None):
-        if area:
-            self.parentSize = area
+    def set_qpolygon(self, parentSize=None, offset=None):
+        if parentSize:
+            self.parentSize = parentSize
         if offset:
             self.offset = offset
 
@@ -281,7 +285,7 @@ class Polygon(Vertexes):
         super().paint(painter)
 
     def duplicateMe(self):
-        newpoints_percent = self.points_percent.copy()
+        newpoints_percent = self.percent_points.copy()
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
-        return Polygon(newpoints_percent, self.area, self.offset)
+        return Polygon(newpoints_percent, self.parentSize, self.offset)
