@@ -34,21 +34,48 @@ class PercentVertexes(GeoBase):
         """
         super().__init__()
 
-        self.percent_points = np.array(percent_pts)
-        self.parentSize = parentSize
-        self.offset = offset
+        self._percent_points = np.array(percent_pts)
+        self._parentSize = parentSize
+        self._offset = offset
 
+    def set_parentVals(self, parentSize=None, offset=None):
+        """
+        :param parentSize: QSize
+        :param offset: QPoint
+        """
+        if parentSize:
+            self._parentSize = parentSize
+        if offset:
+            self._offset = offset
+
+    def set_percent_points(self, percent_pts=None):
+        """
+        :param percent_pts: array-like, shape=(n, 2). Note that these points are in percentage
+        """
+        if percent_pts is not None:
+            self._percent_points = percent_pts
+
+
+    @property
+    def percent_points(self):
+        return self._percent_points
     @property
     def points_number(self):
-        return self.percent_points.shape[0]
+        return self._percent_points.shape[0]
 
+    @property
+    def parentSize(self):
+        return self._parentSize
     @property
     def parentWidth(self):
-        return self.parentSize.width()
+        return self._parentSize.width()
     @property
     def parentHeight(self):
-        return self.parentSize.height()
+        return self._parentSize.height()
 
+    @property
+    def offset(self):
+        return self._offset
     @property
     def offset_x(self):
         return self.offset.x()
@@ -58,10 +85,10 @@ class PercentVertexes(GeoBase):
 
     @property
     def percent_x(self):
-        return self.percent_points[:, 0]
+        return self._percent_points[:, 0]
     @property
     def percent_y(self):
-        return self.percent_points[:, 1]
+        return self._percent_points[:, 1]
 
     @property
     def x(self):

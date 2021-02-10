@@ -91,14 +91,16 @@ class SelectionMixin(MWAbstractMixin):
         self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
 
         # rubber
-        self.canvas.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
-
+        #self.canvas.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
+        self.canvas.img.painting.connect(lambda painter: self.paint_area(painter))
     """
     rubber
     """
     def set_rubber(self, rubberPercentRect):
         self.info.set_rubberPercentRect(rubberPercentRect)
         self.canvas.set_rubber(rubberPercentRect)
+    def paint_area(self, painter):
+        self.selection.area.paint(painter)
 
     """
     img

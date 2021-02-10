@@ -14,9 +14,9 @@ class AnnotationManager(object):
         # attr: offset is QPoint!
         self.offset = QPoint(0, 0)
 
-    def set_qpolygons(self, area=None, offset=None):
+    def set_qpolygons(self, parentSize=None, offset=None):
         for i, annotation in enumerate(self._annotations):
-            self._annotations[i] = annotation.set_qpolygon(area, offset)
+            self._annotations[i] = annotation.set_qpolygon(parentSize, offset)
 
     def set_selectPos(self, pos):
         # all of polygons are reset selected variable first
@@ -164,7 +164,7 @@ class Annotation(Polygon):
         self.text = text
 
     def duplicateMe(self):
-        newpoints_percent = self.percent_points.copy()
+        newpoints_percent = self._percent_points.copy()
         newpoints_percent[:, 0] += 10.0 / self.parentWidth
         newpoints_percent[:, 1] += 10.0 / self.parentHeight
         return Annotation(newpoints_percent, self.text, self.parentSize, self.offset)
