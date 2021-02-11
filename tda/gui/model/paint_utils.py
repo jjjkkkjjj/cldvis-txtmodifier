@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 
 green = QColor(0, 255, 0, int(255 * 0.8))
 red = QColor(255, 0, 0, int(255 * 0.8))
+orange = QColor(255, 165, 0)
 light_green = QColor(0, 255, 0, int(255 * 0.4))
 transparency = QColor(0, 255, 0, int(255 * 0))
 
@@ -20,9 +21,16 @@ class PaintMaster(object):
         return brush
 
     @staticmethod
-    def set_pen_brush(painter, pen_color, pen_width, brush_color, brush_pattern):
-        pen = PaintMaster.pen(pen_color, pen_width)
-        brush = PaintMaster.brush(brush_color, brush_pattern)
+    def set_pen_brush(painter, color):
+        pen = PaintMaster.pen(color.border, color.borderSize)
+        brush = PaintMaster.brush(color.fill, color.fill_pattern)
         # set
         painter.setPen(pen)
         painter.setBrush(brush)
+
+class Color(object):
+    def __init__(self, border=transparency, fill=transparency, borderSize=3, fill_pattern=Qt.SolidPattern):
+        self.border = border
+        self.fill = fill
+        self.borderSize = borderSize
+        self.fill_pattern = fill_pattern
