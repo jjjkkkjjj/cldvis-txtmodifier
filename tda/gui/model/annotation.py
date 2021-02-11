@@ -164,7 +164,7 @@ class Annotation(Polygon):
         self.text = text
 
     def duplicateMe(self):
-        newpoints_percent = self._percent_points.copy()
+        newpoints_percent = self.percent_points.copy()
         newpoints_percent[:, 0] += 10.0 / self.parentWidth
         newpoints_percent[:, 1] += 10.0 / self.parentHeight
-        return Annotation(newpoints_percent, self.text, self.parentSize, self.offset)
+        return Annotation(newpoints_percent, self.text, self.parentQSize, self.offsetQPoint)
