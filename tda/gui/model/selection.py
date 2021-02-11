@@ -42,10 +42,18 @@ class SelectionManager(object):
         self._selectionArea.set_parentVals(parentQSize=parentSize)
         self._selectionArea.set_selectPos(pos)
         self._selectionArea.show()
+
+        # TODO: chanege relative position
+        self._startPosition = pos
+
         if self._selectionArea.isSelectedPoint:
             # if pressed position is edge
             # expand or shrink parentQSize
             self.moveActionState = MoveActionState.RESIZE
+            # [tl, tr, br, bl] -> [br, bl, tl, tr]
+            diagIndex = [2, 3, 0, 1]
+            diagPos = self._selectionArea.qpoints[diagIndex[self._selectionArea.selectedPointIndex]]
+            self._startPosition = diagPos
 
         elif self._selectionArea.isSelectedRect:
             # if pressed position is contained in parentQSize
@@ -57,8 +65,7 @@ class SelectionManager(object):
             self.moveActionState = MoveActionState.CREATE
             qrect = QRect(pos, pos)
             self._selectionArea.set_qrect(qrect)
-        # TODO: chanege relative position
-        self._startPosition = pos
+
 
     def mouseMove(self, pos):
         """
@@ -72,6 +79,9 @@ class SelectionManager(object):
 
 
         elif self.moveActionState == MoveActionState.CREATE or self.moveActionState == MoveActionState.RESIZE:
+            if self.moveActionState.RESIZE:
+                # for changing selected Point
+                self._selectionArea.set_selectPos(pos)
             # clipping
             pos.setX(min(max(pos.x(), 0), self.parentWidth))
             pos.setY(min(max(pos.y(), 0), self.parentHeight))
@@ -80,4 +90,6 @@ class SelectionManager(object):
             self._selectionArea.set_qrect(qrect)
 
     def mouseRelease(self):
+        if self.moveActionState.RESIZE:
+            self._selectionArea.deselect()
         self._startPosition = QPoint(0, 0)

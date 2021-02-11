@@ -34,8 +34,28 @@ class Vertexes(PercentVertexes):
 
     @property
     def selectedPoint(self):
-        raise NotImplementedError()
+        if self.isSelectedPoint:
+            return self.qpoints[self._selected_vertex_index]
+        else:
+            return None
 
+    def deselect(self):
+        self._selected_vertex_index = -1
+
+    def set_selectPos(self, pos):
+        # note that contains function returns true if passed pos includes vertex only
+        if pos:
+            # check whether to contain point first
+            self._selected_vertex_index = -1
+            for i, point in enumerate(self.qpoints):
+                # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
+                if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
+                         QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
+                    self._selected_vertex_index = i
+        else:
+            self._selected_vertex_index = -1
+
+        return self.isSelectedPoint
 
     def paint(self, painter):
         if not self.isShow:
@@ -107,13 +127,6 @@ class Rect(Vertexes):
         return self.qrect.height()
 
     @property
-    def selectedPoint(self):
-        if self.isSelectedPoint:
-            return self.qpoints[self._selected_vertex_index]
-        else:
-            return None
-
-    @property
     def isSelectedRect(self):
         return self._isSelectedRect
 
@@ -134,23 +147,9 @@ class Rect(Vertexes):
         :param pos: QPoint or None
         :return:
         """
-        # note that contains function returns true if passed pos includes vertex only
-        if pos:
-            # check whether to contain point first
-            self._selected_vertex_index = -1
-            for i, point in enumerate(self.qpoints):
-                # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
-                if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
-                         QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
-                    self._selected_vertex_index = i
-
-            self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
-
-
-        else:
-            self._selected_vertex_index = -1
-            self._isSelectedRect = False
-        return self._isSelectedRect
+        super().set_selectPos(pos)
+        self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
+        return self.isSelectedRect
 
 
     def paint(self, painter):
