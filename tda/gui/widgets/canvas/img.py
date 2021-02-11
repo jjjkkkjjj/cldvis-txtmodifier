@@ -95,8 +95,8 @@ class ImgWidget(QLabel):
 
         elif self.mode == RubberMode.PREDICTION:
             self.predictedRubberBand.setGeometry(newRect)
-            offset = newRect.topLeft()
-            self.set_qpolygons(newRect.size(), offset)
+            offsetQPoint = newRect.topLeft()
+            self.set_qpolygons(newRect.size(), offsetQPoint)
         """
 
     def refresh_rubberBand(self):
@@ -140,7 +140,7 @@ class ImgWidget(QLabel):
         painter = QPainter(self)
         painter.drawPixmap(self.rect(), self.pixmap())
 
-        ### draw rubberband parentSize ###
+        ### draw rubberband parentQSize ###
         # TODO: rubberband to paint
         #self.predictedRubberBand.hide()
 

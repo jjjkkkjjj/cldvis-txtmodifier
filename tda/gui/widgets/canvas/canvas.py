@@ -58,7 +58,7 @@ class CanvasWidget(BaseWidget):
             # below code is not good resizing
             pixmap = QPixmap(imgpath)
             self.img.setPixmap(None)
-            self.img.setPixmap(pixmap.scaled(pixmap.parentSize() * zoomvalue / 100., Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.img.setPixmap(pixmap.scaled(pixmap.parentQSize() * zoomvalue / 100., Qt.KeepAspectRatio, Qt.SmoothTransformation))
             """
             cvimg = cv2.imread(imgpath)
             h, w, c = cvimg.shape

@@ -11,7 +11,7 @@ class AnnotationManager(object):
     def __init__(self):
         self._annotations = []
         self._selected_index = -1  # -1 if polygon is not selected
-        # attr: offset is QPoint!
+        # attr: offsetQPoint is QPoint!
         self.offset = QPoint(0, 0)
 
     def set_qpolygons(self, parentSize=None, offset=None):
@@ -114,8 +114,8 @@ class AnnotationManager(object):
     def set_detectionResult(self, results, area, offset):
         """
         :param results: dict, detection result by vision
-        :param area: Qsize, selected parentSize
-        :param offset: QPoint, the topleft coordinates for selected parentSize
+        :param area: Qsize, selected parentQSize
+        :param offset: QPoint, the topleft coordinates for selected parentQSize
         :return:
         """
 
@@ -153,14 +153,14 @@ class AnnotationManager(object):
 
 
 class Annotation(Polygon):
-    def __init__(self, points, text, parentSize, offset):
+    def __init__(self, points, text, parentQSize, offsetQPoint):
         """
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
         :param text: str
-        :param parentSize: QSize
-        :param offset: QPoint
+        :param parentQSize: QSize
+        :param offsetQPoint: QPoint
         """
-        super().__init__(points, parentSize, offset)
+        super().__init__(points, parentQSize, offsetQPoint)
         self.text = text
 
     def duplicateMe(self):

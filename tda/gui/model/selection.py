@@ -34,26 +34,26 @@ class SelectionManager(object):
 
     def mousePress(self, parentSize, pos):
         """
-        :param parentSize: QSize, the parentSize
+        :param parentSize: QSize, the parentQSize
         :param pos: QPoint, pressed position
         :return:
         """
-        # set parentSize and position
-        self._selectionArea.set_parentVals(parentSize=parentSize)
+        # set parentQSize and position
+        self._selectionArea.set_parentVals(parentQSize=parentSize)
         self._selectionArea.set_selectPos(pos)
         self._selectionArea.show()
         if self._selectionArea.isSelectedPoint:
             # if pressed position is edge
-            # expand or shrink parentSize
+            # expand or shrink parentQSize
             self.moveActionState = MoveActionState.RESIZE
 
         elif self._selectionArea.isSelectedRect:
-            # if pressed position is contained in parentSize
-            # move the parentSize
+            # if pressed position is contained in parentQSize
+            # move the parentQSize
             self.moveActionState = MoveActionState.MOVE
 
         else:
-            # create new parentSize
+            # create new parentQSize
             self.moveActionState = MoveActionState.CREATE
             qrect = QRect(pos, pos)
             self._selectionArea.set_qrect(qrect)
@@ -68,10 +68,11 @@ class SelectionManager(object):
         if self.moveActionState == MoveActionState.MOVE:
             movedAmount = pos - self._startPosition
             # clipping
-            movedAmount.setX(min(max(movedAmount.x(), 0), self.parentWidth - self.width))
-            movedAmount.setY(min(max(movedAmount.y(), 0), self.parentHeight - self.height))
+            #movedAmount.setX(min(max(movedAmount.x(), 0), self.parentWidth - self.width))
+            #movedAmount.setY(min(max(movedAmount.y(), 0), self.parentHeight - self.height))
 
             self._selectionArea.move(movedAmount)
+
 
         elif self.moveActionState == MoveActionState.CREATE or self.moveActionState == MoveActionState.RESIZE:
             # clipping
@@ -82,4 +83,6 @@ class SelectionManager(object):
             self._selectionArea.set_qrect(qrect)
 
     def mouseRelease(self):
+        if self.moveActionState == MoveActionState.MOVE:
+            self._selectionArea.moved()
         self._startPosition = QPoint(0, 0)

@@ -8,13 +8,13 @@ from .percent_geometry import PercentVertexes
 
 class Vertexes(PercentVertexes):
 
-    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
-        :param parentSize: QSize, the parent widget's parentSize
-        :param offset: QPoint, the _offset coordinates to parent widget
+        :param parentQSize: QSize, the parent widget's parentQSize
+        :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
         """
-        super().__init__(points, parentSize, offset)
+        super().__init__(points, parentQSize, offsetQPoint)
 
         self._selected_vertex_index = -1  # -1 if vertices are no selected
 
@@ -67,22 +67,13 @@ class Vertexes(PercentVertexes):
             painter.setBrush(brush)
             painter.drawEllipse(self.selectedPoint, self._point_r, self._point_r)
 
-    def move(self, movedAmount):
-        """
-        :param movedAmount: QPoint, move amount. Note that this position is represented as absolute coordinates system in parent widget
-        :return:
-        """
-        new_dx_percent = movedAmount.x() / self.parentWidth
-        new_dy_percent = movedAmount.y() / self.parentHeight
-        self._percent_points += np.array(((new_dx_percent, new_dy_percent)))
-
 
 class Rect(Vertexes):
-    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
-        :param parentSize: QSize, the parent widget's parentSize
-        :param offset: QPoint, the _offset coordinates to parent widget
+        :param parentQSize: QSize, the parent widget's parentQSize
+        :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
         """
         _points = np.array(points)
         assert _points.shape == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
@@ -90,30 +81,35 @@ class Rect(Vertexes):
         _points = np.insert(_points, 1, [points[0, 0], points[1, 1]], axis=0) # top-right
         _points = np.insert(_points, 3, [points[1, 0], points[0, 1]], axis=0)  # bottom-left
 
-        super().__init__(_points, parentSize, offset)
-
-        self._qrect = self._create_qrect().translated(self.offset)
+        super().__init__(_points, parentQSize, offsetQPoint)
 
         self._isSelectedRect = False
 
+    @property
+    def qrect(self):
+        """
+        :return: QRect
+        """
+        # note that order is (tl, tr, br, bl)
+        qpoints = self.qpoints
+        return QRect(qpoints[0], qpoints[2]).translated(self.offsetQPoint)
 
-    def gen_qrectPoints(self):
-        yield self._qrect.topLeft()
-        yield self._qrect.topRight()
-        yield self._qrect.bottomRight()
-        yield self._qrect.bottomLeft()
+    def set_qrect(self, qrect):
+        qpts = qrect.topLeft(), qrect.topRight(), qrect.bottomRight(),  qrect.bottomLeft()
+        new_percent_pts = np.array(tuple((float(qpt.x())/self.parentWidth, float(qpt.y())/self.parentHeight) for qpt in qpts))
+        self.set_percent_points(new_percent_pts)
 
     @property
     def width(self):
-        return self._qrect.width()
+        return self.qrect.width()
     @property
     def height(self):
-        return self._qrect.height()
+        return self.qrect.height()
 
     @property
     def selectedPoint(self):
         if self.isSelectedPoint:
-            return list(self.gen_qrectPoints())[self._selected_vertex_index]
+            return self.qpoints[self._selected_vertex_index]
         else:
             return None
 
@@ -121,33 +117,17 @@ class Rect(Vertexes):
     def isSelectedRect(self):
         return self._isSelectedRect
 
-    def _create_qrect(self):
-        qpts = tuple(qpt for qpt in self.gen_qpoints())
-        # note that points = (tl, tr, br, bl)
-        # topleft and bottomright
-        return QRect(*qpts[::2])
-
     def _update_percent_pts(self):
         if self.parentWidth > 0 and self.parentHeight > 0:
             new_percent_pts = np.array(tuple(
-                (float(pt.x()) / self.parentWidth, float(pt.y()) / self.parentHeight) for pt in self.gen_qrectPoints()))
+                (float(pt.x()) / self.parentWidth, float(pt.y()) / self.parentHeight) for pt in self.gen_qpoints()))
             self.set_percent_points(new_percent_pts)
 
-    def set_parentVals(self, parentSize=None, offset=None):
-        super().set_parentVals(parentSize, offset)
-        if parentSize is not None or offset is not None:
-            self._qrect = self._create_qrect().translated(self.offset)
+    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
+        super().set_parentVals(parentQSize, offsetQPoint)
+        if parentQSize is not None or offsetQPoint is not None:
             self._update_percent_pts()
 
-    def set_qrect(self, qrect=None):
-        """
-        :param qrect: QRect
-        """
-        if qrect:
-            self._qrect = qrect.translated(self.offset)
-            self._update_percent_pts()
-
-        return self
 
     def set_selectPos(self, pos):
         """
@@ -158,19 +138,20 @@ class Rect(Vertexes):
         if pos:
             # check whether to contain point first
             self._selected_vertex_index = -1
-            for i, point in enumerate(self.gen_qrectPoints()):
-                # QRect constructs a rectangle with the given topLeft corner and the given parentSize.
+            for i, point in enumerate(self.qpoints):
+                # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
                 if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
                          QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
                     self._selected_vertex_index = i
 
-            self._isSelectedRect = self._qrect.contains(pos) or self.isSelectedPoint
+            self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
 
 
         else:
             self._selected_vertex_index = -1
             self._isSelectedRect = False
         return self._isSelectedRect
+
 
     def paint(self, painter):
         if not self.isShow:
@@ -190,7 +171,7 @@ class Rect(Vertexes):
         painter.setPen(pen)
         painter.setBrush(brush)
 
-        painter.drawRect(self._qrect)
+        painter.drawRect(self.qrect)
 
         super().paint(painter)
 
@@ -199,17 +180,17 @@ class Rect(Vertexes):
         # slightly moved
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
-        return Polygon(newpoints_percent[::2], self.parentSize, self.offset)
+        return Polygon(newpoints_percent[::2], self.parentQSize, self.offsetQPoint)
 
 class Polygon(Vertexes):
-    def __init__(self, points, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
-        :param parentSize: QSize, the parent widget's parentSize
-        :param offset: QPoint, the _offset coordinates to parent widget
+        :param parentQSize: QSize, the parent widget's parentQSize
+        :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
         """
-        super().__init__(points, parentSize, offset)
-        self.set_qpolygon(parentSize, offset)
+        super().__init__(points, parentQSize, offsetQPoint)
+        self.set_qpolygon(parentQSize, offsetQPoint)
 
         self._isSelectedPolygon = False
 
@@ -247,7 +228,7 @@ class Polygon(Vertexes):
             # check whether to contain point first
             self._selected_vertex_index = -1
             for i, point in enumerate(self._qpolygon):
-                # QRect constructs a rectangle with the given topLeft corner and the given parentSize.
+                # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
                 if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
                          QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
                     self._selected_vertex_index = i

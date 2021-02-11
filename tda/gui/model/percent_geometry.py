@@ -26,27 +26,28 @@ class GeoBase(object):
 
 class PercentVertexes(GeoBase):
 
-    def __init__(self, percent_pts, parentSize=QSize(0, 0), offset=QPoint(0, 0)):
+    def __init__(self, percent_pts, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
         :param percent_pts: array-like, shape=(n, 2). Note that these points are in percentage
-        :param parentSize: QSize
-        :param offset: QPoint
+        :param parentQSize: QSize
+        :param offsetQPoint: QPoint
         """
         super().__init__()
 
         self._percent_points = np.array(percent_pts)
-        self._parentSize = parentSize
-        self._offset = offset
+        self._parentQSize = parentQSize
+        self._offsetQPoint = offsetQPoint
+        self._moved_points = np.zeros(shape=(1, 2)) # for broadcast
 
-    def set_parentVals(self, parentSize=None, offset=None):
+    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
         """
-        :param parentSize: QSize
-        :param offset: QPoint
+        :param parentQSize: QSize
+        :param offsetQPoint: QPoint
         """
-        if parentSize:
-            self._parentSize = parentSize
-        if offset:
-            self._offset = offset
+        if parentQSize:
+            self._parentQSize = parentQSize
+        if offsetQPoint:
+            self._offsetQPoint = offsetQPoint
 
     def set_percent_points(self, percent_pts=None):
         """
@@ -58,37 +59,40 @@ class PercentVertexes(GeoBase):
 
     @property
     def percent_points(self):
-        return self._percent_points
+        return self._percent_points + self._moved_points
     @property
     def points_number(self):
         return self._percent_points.shape[0]
 
     @property
-    def parentSize(self):
-        return self._parentSize
+    def parentQSize(self):
+        return self._parentQSize
     @property
     def parentWidth(self):
-        return self._parentSize.width()
+        return self.parentQSize.width()
     @property
     def parentHeight(self):
-        return self._parentSize.height()
+        return self.parentQSize.height()
 
     @property
-    def offset(self):
-        return self._offset
+    def offsetQPoint(self):
+        """
+        :return: offsetQPoint QPoint
+        """
+        return self._offsetQPoint
     @property
     def offset_x(self):
-        return self.offset.x()
+        return self.offsetQPoint.x()
     @property
     def offset_y(self):
-        return self.offset.y()
+        return self.offsetQPoint.y()
 
     @property
     def percent_x(self):
-        return self._percent_points[:, 0]
+        return self.percent_points[:, 0]
     @property
     def percent_y(self):
-        return self._percent_points[:, 1]
+        return self.percent_points[:, 1]
 
     @property
     def x(self):
@@ -97,7 +101,32 @@ class PercentVertexes(GeoBase):
     def y(self):
         return self.percent_y * self.parentHeight
 
+    @property
+    def qpoints(self):
+        """
+        :return: tuple of QPoints
+        """
+        return tuple(self.gen_qpoints())
+
     def gen_qpoints(self):
         x, y = self.x, self.y
         for i in range(self.points_number):
             yield QPoint(x[i], y[i])
+
+    def move(self, movedAmount):
+        """
+        :param movedAmount: QPoint, move amount. Note that this position is represented as absolute coordinates system in parent widget
+        :return:
+        """
+        new_dx_percent = float(movedAmount.x()) / self.parentWidth
+        new_dy_percent = float(movedAmount.y()) / self.parentHeight
+        self._moved_points = np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
+        #self._percent_points += np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
+
+    def moved(self):
+        """
+        Must be called releaseEvent after moving
+        :return:
+        """
+        self._percent_points += self._moved_points
+        self._moved_points = np.zeros(shape=(1, 2)) # for broadcast
