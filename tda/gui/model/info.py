@@ -12,7 +12,7 @@ class InfoManager(object):
         self._imgPaths = []
         self._imgpixmap = None
 
-        self._rubberPercentRect = None
+        self._areaPercentRect = None
         self.config = Config()
 
     """
@@ -63,18 +63,18 @@ class InfoManager(object):
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])
 
     """
-    rubber
+    area
     """
     @property
-    def rubberPercentRect(self):
-        return self._rubberPercentRect
+    def areaPercentRect(self):
+        return self._areaPercentRect
 
     @property
-    def isExistRubberPercentRect(self):
-        return self._rubberPercentRect is not None
+    def isExistAreaPercentRect(self):
+        return self._areaPercentRect is not None
 
-    def set_rubberPercentRect(self, rubberPercentRect):
-        self._rubberPercentRect = rubberPercentRect
+    def set_selectionArea(self, areaPercentRect):
+        self._areaPercentRect = areaPercentRect
 
     """
     gcp

@@ -43,8 +43,8 @@ class UtilMixin(MWAbstractMixin):
 
         # run
         self.canvas.check_enable(self.info.isExistImg)
-        self.leftdock.check_enable_run(self.info.isExistRubberPercentRect)
-        self.menu.check_enable_run(self.info.isExistRubberPercentRect)
+        self.leftdock.check_enable_run(self.info.isExistAreaPercentRect)
+        self.menu.check_enable_run(self.info.isExistAreaPercentRect)
 
         # TODO: check enable function in editing
 
@@ -88,17 +88,18 @@ class SelectionMixin(MWAbstractMixin):
         self.leftdock.imgSet.connect(lambda paths, value: self.set_imgpath(paths, value))
         self.leftdock.imgChanged.connect(lambda isBack, value: self.change_img(isBack, value))
         self.leftdock.ratioChanged.connect(lambda value: self.set_img(value))
-        self.leftdock.rectRemoved.connect(lambda: self.canvas.set_rubber(None))
+        self.leftdock.rectRemoved.connect(lambda: self.canvas.set_selectionArea(None))
 
         # rubber
-        #self.canvas.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
+        self.canvas.selectionAreaCreated.connect(lambda areaPercentRect: self.set_selectionArea(areaPercentRect))
         self.canvas.img.painting.connect(lambda painter: self.paint_area(painter))
     """
     rubber
     """
-    def set_rubber(self, rubberPercentRect):
-        self.info.set_rubberPercentRect(rubberPercentRect)
-        self.canvas.set_rubber(rubberPercentRect)
+    def set_selectionArea(self, areaPercentRect):
+        self.info.set_selectionArea(areaPercentRect)
+        self.canvas.set_selectionArea(areaPercentRect)
+
     def paint_area(self, painter):
         self.selection.area.paint(painter)
 
@@ -124,7 +125,7 @@ class PredictionMixin(MWAbstractMixin):
     def establish_connection(self):
         # button action
         # self.leftdock.datasetAdding.connect()
-        self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.rubberPercentRect, mode))
+        self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.areaPercentRect, mode))
 
         # img
         self.canvas.img.painting.connect(lambda painter: self.paint_polygons(painter))

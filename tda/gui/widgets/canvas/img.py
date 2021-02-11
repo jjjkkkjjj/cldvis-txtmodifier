@@ -8,7 +8,7 @@ from .contextMenu import ImgContextMenu
 
 
 class ImgWidget(QLabel):
-    rubberCreated = Signal(tuple)
+    selectionAreaCreated = Signal(tuple)
     contextActionSelected = Signal(object)
     painting = Signal(object)
 
@@ -74,6 +74,7 @@ class ImgWidget(QLabel):
     def mouseReleaseEvent(self, e: QMouseEvent):
         if self.mode == RubberMode.SELECTION:
             self.selection.mouseRelease()
+            self.selectionAreaCreated.emit(self.selection.area.percent_points)
         self.repaint()
 
     def setPixmap(self, pixmap: QPixmap):
@@ -99,9 +100,9 @@ class ImgWidget(QLabel):
             self.set_qpolygons(newRect.size(), offsetQPoint)
         """
 
-    def refresh_rubberBand(self):
-        self.rubberBand.hide()
-        self.rubberBand = Rubber(self)
+    def hide_selectionArea(self):
+        self.selection.area.hide()
+        self.repaint()
 
     def predictedRubber2rubber(self):
         self.rubberBand.show()

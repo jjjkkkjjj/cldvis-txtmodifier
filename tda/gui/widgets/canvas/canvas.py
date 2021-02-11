@@ -8,7 +8,7 @@ from ..baseWidget import BaseWidget
 from ...functions.utils import cvimg2qpixmap
 
 class CanvasWidget(BaseWidget):
-    rubberCreated = Signal(tuple)
+    selectionAreaCreated = Signal(tuple)
     enableChecking = Signal()
     def __init__(self, mainWidgetController):
         super().__init__(mainWidgetController)
@@ -40,8 +40,8 @@ class CanvasWidget(BaseWidget):
         self.setLayout(vbox)
 
     def establish_connection(self):
-        self.rubberCreated = self.img.rubberCreated
-        #self.img.rubberCreated.connect(lambda rubberPercentRect: self.set_rubber(rubberPercentRect))
+        self.selectionAreaCreated = self.img.selectionAreaCreated
+        #self.img.selectionAreaCreated.connect(lambda areaPercentRect: self.set_selectionArea(areaPercentRect))
 
 
     def set_img(self, imgpath, zoomvalue):
@@ -67,14 +67,14 @@ class CanvasWidget(BaseWidget):
 
             self.img.setPixmap(pixmap)
 
-    def set_rubber(self, rubberPercentRect):
+    def set_selectionArea(self, areaPercentRect):
         """
-        :param rubberPercentRect: tuple or None, if it's None, remove rubber band
+        :param areaPercentRect: tuple or None, if it's None, remove rubber band
         :return:
-        """#ラバーからペイントにリファクタ
-        if rubberPercentRect is None:
+        """
+        if areaPercentRect is None:
             # remove
-            self.img.refresh_rubberBand()
+            self.img.hide_selectionArea()
         self.enableChecking.emit()
 
     def set_predictedRubber(self):
