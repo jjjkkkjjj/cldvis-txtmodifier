@@ -1,9 +1,12 @@
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
+black = QColor(0, 0, 0)
 green = QColor(0, 255, 0, int(255 * 0.8))
 red = QColor(255, 0, 0, int(255 * 0.8))
 orange = QColor(255, 165, 0)
+purple = QColor(255, 0, 255)
+light_orange = QColor(255, 165, 0, int(255 * 0.4))
 light_green = QColor(0, 255, 0, int(255 * 0.4))
 transparency = QColor(0, 255, 0, int(255 * 0))
 

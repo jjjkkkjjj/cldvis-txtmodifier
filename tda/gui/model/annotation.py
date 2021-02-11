@@ -6,6 +6,7 @@ import numpy as np
 
 from ..widgets.canvas.img import ContextActionType
 from .geometry import Polygon
+from .paint_utils import *
 
 class AnnotationManager(object):
     def __init__(self):
@@ -163,6 +164,13 @@ class Annotation(Polygon):
         super().__init__(points, parentQSize, offsetQPoint)
         self.text = text
 
+        self.vertex_default_color = Color(fill=green)
+        self.poly_default_color = Color(border=green, fill=light_green)
+        self.vertex_selected_color = Color(fill=red)
+        self.poly_selected_color = Color(border=green, fill=light_orange)
+
+        self.text_color = Color(border=black)
+
     def duplicateMe(self):
         newpoints_percent = self.percent_points.copy()
         newpoints_percent[:, 0] += 10.0 / self.parentWidth
@@ -176,4 +184,17 @@ class Annotation(Polygon):
         # draw area first
         super().paint(painter)
 
-        # draw annotated text later
+        if self.isSelectedPolygon:
+            return
+        else:
+            # draw annotated text later
+            PaintMaster.set_pen_brush(painter, self.text_color)
+
+            rect = self.qpolygon.boundingRect()
+            factor = rect.width() / painter.fontMetrics().width(self.text + '   ')
+            font = painter.font()
+            font.setPointSizeF(font.pointSizeF()*factor)
+            painter.setFont(font)
+
+            painter.drawText(self.qpolygon.boundingRect(), Qt.AlignCenter, self.text)
+            #painter.drawText(QFontMetrics(painter.font()).size(Qt.TextSingleLine, self.text).width(), self.text)
