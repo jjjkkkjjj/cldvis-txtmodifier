@@ -20,7 +20,9 @@ class Vertexes(PercentVertexes):
         self._selected_vertex_index = -1  # -1 if vertices are no selected
 
         # point radius
-        self._point_r = 8
+        self.vertex_r = 8
+        self.vertex_default_color = Color(border=transparency, fill=green)
+        self.vertex_selected_color = Color(border=transparency, fill=red)
 
 
     @property
@@ -34,7 +36,7 @@ class Vertexes(PercentVertexes):
             return None
 
     @property
-    def selectedPoint(self):
+    def selectedQPoint(self):
         if self.isSelectedPoint:
             return self.qpoints[self._selected_vertex_index]
         else:
@@ -50,29 +52,46 @@ class Vertexes(PercentVertexes):
             self._selected_vertex_index = -1
             for i, point in enumerate(self.qpoints):
                 # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
-                if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
-                         QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
+                if QRect(point - QPoint(self.vertex_r / 2, self.vertex_r / 2),
+                         QSize(self.vertex_r * 2, self.vertex_r * 2)).contains(pos):
                     self._selected_vertex_index = i
         else:
             self._selected_vertex_index = -1
 
         return self.isSelectedPoint
 
+    def set_color(self, vertex_default_color=None, vertex_selected_color=None):
+        """
+        :param vertex_default_color: Color, default color
+        :param vertex_selected_color: Color, the color if selected
+        :return:
+        """
+        if vertex_default_color:
+            self.vertex_default_color = vertex_default_color
+        else:
+            self.vertex_default_color = Color(border=transparency, fill=green)
+
+        if vertex_selected_color:
+            self.vertex_selected_color = vertex_selected_color
+        else:
+            self.vertex_selected_color = Color(border=transparency, fill=red)
+
+
     def paint(self, painter):
         if not self.isShow:
             return
         ### draw edge point ###
-        PaintMaster.set_pen_brush(painter, pen_color=transparency, pen_width=0,
-                                  brush_color=green, brush_pattern=Qt.SolidPattern)
+        PaintMaster.set_pen_brush(painter, pen_color=self.vertex_default_color.border, pen_width=0,
+                                  brush_color=self.vertex_default_color.fill, brush_pattern=Qt.SolidPattern)
         for qpoint in self.gen_qpoints():
             # drawEllipse(center, rx, ry)
-            painter.drawEllipse(qpoint, self._point_r, self._point_r)
+            painter.drawEllipse(qpoint, self.vertex_r, self.vertex_r)
 
         # if selected
         if self.isSelectedPoint:
-            PaintMaster.set_pen_brush(painter, pen_color=transparency, pen_width=0,
-                                      brush_color=red, brush_pattern=Qt.SolidPattern)
-            painter.drawEllipse(self.selectedPoint, self._point_r, self._point_r)
+            PaintMaster.set_pen_brush(painter, pen_color=self.vertex_selected_color.border, pen_width=0,
+                                      brush_color=self.vertex_selected_color.fill, brush_pattern=Qt.SolidPattern)
+            painter.drawEllipse(self.selectedQPoint, self.vertex_r, self.vertex_r)
 
 
 class Rect(Vertexes):
@@ -91,6 +110,9 @@ class Rect(Vertexes):
         super().__init__(_points, parentQSize, offsetQPoint)
 
         self._isSelectedRect = False
+
+        self.rect_default_color = Color(border=green, fill=transparency)
+        self.rect_selected_color = Color(border=green, fill=light_green)
 
     @property
     def qrect(self):
@@ -145,17 +167,36 @@ class Rect(Vertexes):
             self._isSelectedRect = False
         return self.isSelectedRect
 
+    def set_color(self, rect_default_color=None, rect_selected_color=None, **kwargs):
+        """
+        :param vertex_default_color: Color, default color
+        :param vertex_selected_color: Color, the color if selected
+        :param rect_default_color: QColor, default color
+        :param rect_selected_color: QColor, the color if selected
+        :return:
+        """
+        super().set_color(**kwargs)
+        if rect_default_color:
+            self.rect_default_color = rect_default_color
+        else:
+            self.rect_default_color = Color(border=green, fill=transparency)
+
+        if rect_selected_color:
+            self.rect_selected_color = rect_selected_color
+        else:
+            self.rect_selected_color = Color(border=green, fill=light_green)
+
 
     def paint(self, painter):
         if not self.isShow:
             return
         ### draw annotation ###
         if self.isSelectedRect:
-            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
-                                      brush_color=light_green, brush_pattern=Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=self.rect_selected_color.border, pen_width=6,
+                                      brush_color=self.rect_selected_color.fill, brush_pattern=Qt.SolidPattern)
         else:
-            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
-                                      brush_color=transparency, brush_pattern=Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=self.rect_default_color.border, pen_width=6,
+                                      brush_color=self.rect_default_color.fill, brush_pattern=Qt.SolidPattern)
 
         painter.drawRect(self.qrect)
 
@@ -191,6 +232,9 @@ class Polygon(Vertexes):
 
         self._isSelectedPolygon = False
 
+        self.poly_default_color = Color(border=green, fill=transparency)
+        self.poly_selected_color = Color(border=green, fill=light_green)
+
     @classmethod
     def fromQPolygon(cls):
         return cls()
@@ -208,7 +252,7 @@ class Polygon(Vertexes):
 
 
     @property
-    def selectedPoint(self):
+    def selectedQPoint(self):
         if self.isSelectedPoint:
             return self.qpoints[self._selected_vertex_index]
         else:
@@ -230,17 +274,37 @@ class Polygon(Vertexes):
             self._isSelectedPolygon = False
         return self.isSelectedPolygon
 
+    def set_color(self, poly_default_color=None, poly_selected_color=None, **kwargs):
+        """
+        :param vertex_default_color: Color, default color
+        :param vertex_selected_color: Color, the color if selected
+        :param poly_default_color: QColor, default color
+        :param poly_selected_color: QColor, the color if selected
+        :return:
+        """
+        super().set_color(**kwargs)
+        if poly_default_color:
+            self.poly_default_color = poly_default_color
+        else:
+            self.poly_default_color = Color(border=green, fill=transparency)
+
+        if poly_selected_color:
+            self.poly_selected_color = poly_selected_color
+        else:
+            self.poly_selected_color = Color(border=green, fill=light_green)
+
+
     def paint(self, painter):
         if not self.isShow:
             return
 
         ### draw annotation ###
         if self.isSelectedPolygon:
-            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
-                                      brush_color=light_green, brush_pattern=Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=self.poly_selected_color.border, pen_width=6,
+                                      brush_color=self.poly_selected_color.fill, brush_pattern=Qt.SolidPattern)
         else:
-            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
-                                      brush_color=transparency, brush_pattern=Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=self.poly_default_color.border, pen_width=6,
+                                      brush_color=self.poly_default_color.fill, brush_pattern=Qt.SolidPattern)
 
         painter.drawPolygon(self.qpolygon)
 
@@ -250,4 +314,4 @@ class Polygon(Vertexes):
         newpoints_percent = self._percent_points.copy()
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
-        return Polygon(newpoints_percent, self.parentSize, self.offset)
+        return Polygon(newpoints_percent, self.parentQSize, self.offsetQPoint)

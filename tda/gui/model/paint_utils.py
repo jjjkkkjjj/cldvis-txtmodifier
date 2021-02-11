@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 
 green = QColor(0, 255, 0, int(255 * 0.8))
 red = QColor(255, 0, 0, int(255 * 0.8))
+orange = QColor(255, 165, 0)
 light_green = QColor(0, 255, 0, int(255 * 0.4))
 transparency = QColor(0, 255, 0, int(255 * 0))
 
@@ -26,3 +27,8 @@ class PaintMaster(object):
         # set
         painter.setPen(pen)
         painter.setBrush(brush)
+
+class Color(object):
+    def __init__(self, border=transparency, fill=transparency):
+        self.border = border
+        self.fill = fill

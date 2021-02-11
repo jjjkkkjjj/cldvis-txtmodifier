@@ -4,6 +4,7 @@ from PySide2.QtCore import *
 
 from ..eveUtils import *
 from .contextMenu import ImgContextMenu
+from ...model.paint_utils import *
 
 
 class ImgWidget(QLabel):
@@ -93,7 +94,8 @@ class ImgWidget(QLabel):
         self.mode = mode
 
         if mode == AreaMode.SELECTION:
-            return
+            # revert default color
+            self.selection.area.set_color()
 
         elif mode == AreaMode.PREDICTION:
             from ....debug._utils import DEBUG
@@ -106,6 +108,10 @@ class ImgWidget(QLabel):
                 rect = Rect(points=points, parentQSize=self.pixmap().size())
 
                 self.selection._selectionArea = rect
+
+            self.selection.area.set_color(vertex_default_color=Color(), vertex_selected_color=Color(),
+                                          rect_default_color=Color(border=orange),
+                                          rect_selected_color=Color(border=orange))
 
             self.selection.area.show()
 
