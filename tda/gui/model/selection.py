@@ -67,11 +67,8 @@ class SelectionManager(object):
         """
         if self.moveActionState == MoveActionState.MOVE:
             movedAmount = pos - self._startPosition
-            # clipping
-            #movedAmount.setX(min(max(movedAmount.x(), 0), self.parentWidth - self.width))
-            #movedAmount.setY(min(max(movedAmount.y(), 0), self.parentHeight - self.height))
-
             self._selectionArea.move(movedAmount)
+            self._startPosition = pos
 
 
         elif self.moveActionState == MoveActionState.CREATE or self.moveActionState == MoveActionState.RESIZE:
@@ -83,6 +80,4 @@ class SelectionManager(object):
             self._selectionArea.set_qrect(qrect)
 
     def mouseRelease(self):
-        if self.moveActionState == MoveActionState.MOVE:
-            self._selectionArea.moved()
         self._startPosition = QPoint(0, 0)

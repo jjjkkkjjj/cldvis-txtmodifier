@@ -92,7 +92,7 @@ class Rect(Vertexes):
         """
         # note that order is (tl, tr, br, bl)
         qpoints = self.qpoints
-        return QRect(qpoints[0], qpoints[2]).translated(self.offsetQPoint)
+        return QRect(qpoints[0], qpoints[2])
 
     def set_qrect(self, qrect):
         qpts = qrect.topLeft(), qrect.topRight(), qrect.bottomRight(),  qrect.bottomLeft()
@@ -175,12 +175,24 @@ class Rect(Vertexes):
 
         super().paint(painter)
 
+    def move(self, movedAmount):
+        # check moved rect is with in parent
+        tl, _, br, _ = self.qpoints
+        new_tl, new_br = tl + movedAmount, br + movedAmount
+
+        revertAmount = QPoint(0, 0)
+        revertAmount -= QPoint(min(new_tl.x(), 0), min(new_tl.y(), 0))
+        revertAmount -= QPoint(max(new_br.x()-self.parentWidth, 0), max(new_br.y()-self.parentHeight, 0))
+
+        super().move(movedAmount + revertAmount)
+
+
     def duplicateMe(self):
         newpoints_percent = self.percent_points.copy()
         # slightly moved
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
-        return Polygon(newpoints_percent[::2], self.parentQSize, self.offsetQPoint)
+        return Rect(newpoints_percent[::2], self.parentQSize, self.offsetQPoint)
 
 class Polygon(Vertexes):
     def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):

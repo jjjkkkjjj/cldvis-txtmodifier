@@ -34,10 +34,9 @@ class PercentVertexes(GeoBase):
         """
         super().__init__()
 
-        self._percent_points = np.array(percent_pts)
+        self._percent_points = sort_clockwise(np.array(percent_pts))
         self._parentQSize = parentQSize
         self._offsetQPoint = offsetQPoint
-        self._moved_points = np.zeros(shape=(1, 2)) # for broadcast
 
     def set_parentVals(self, parentQSize=None, offsetQPoint=None):
         """
@@ -54,12 +53,12 @@ class PercentVertexes(GeoBase):
         :param percent_pts: array-like, shape=(n, 2). Note that these points are in percentage
         """
         if percent_pts is not None:
-            self._percent_points = percent_pts
+            self._percent_points = sort_clockwise(percent_pts)
 
 
     @property
     def percent_points(self):
-        return self._percent_points + self._moved_points
+        return self._percent_points
     @property
     def points_number(self):
         return self._percent_points.shape[0]
@@ -111,7 +110,7 @@ class PercentVertexes(GeoBase):
     def gen_qpoints(self):
         x, y = self.x, self.y
         for i in range(self.points_number):
-            yield QPoint(x[i], y[i])
+            yield QPoint(x[i], y[i]) + self.offsetQPoint
 
     def move(self, movedAmount):
         """
@@ -120,13 +119,20 @@ class PercentVertexes(GeoBase):
         """
         new_dx_percent = float(movedAmount.x()) / self.parentWidth
         new_dy_percent = float(movedAmount.y()) / self.parentHeight
-        self._moved_points = np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
-        #self._percent_points += np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
+        self._percent_points += np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
 
-    def moved(self):
-        """
-        Must be called releaseEvent after moving
-        :return:
-        """
-        self._percent_points += self._moved_points
-        self._moved_points = np.zeros(shape=(1, 2)) # for broadcast
+
+def sort_clockwise(a):
+    """
+    Sort corners points (x1, y1, x2, y2, ... clockwise from topleft)
+    :ref https://gist.github.com/flashlib/e8261539915426866ae910d55a3f9959
+    :param a: ndarray, shape is (points nums, 2=(x,y))
+    :return a: ndarray, shape is (points nums... clockwise from topleft, 2=(x,y))
+    """
+
+    # get centroids, shape=(1,2=(cx,cy))
+    center = a.mean(axis=0).reshape((1, 2))
+
+    sorted_inds = np.argsort(np.arctan2(a[:, 1]-center[:, 1], a[:, 0]-center[:, 0]))
+
+    return np.take(a, sorted_inds, axis=0)
