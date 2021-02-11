@@ -26,6 +26,9 @@ class SelectionManager(object):
         return self._selectionArea.height
 
     @property
+    def parentQSize(self):
+        return self._selectionArea.parentQSize
+    @property
     def parentWidth(self):
         return self._selectionArea.parentWidth
     @property

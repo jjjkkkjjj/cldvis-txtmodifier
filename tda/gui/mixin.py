@@ -7,6 +7,7 @@ from .functions.dialogs import CredentialDialog
 from .model import InfoManager, AnnotationManager, SelectionManager
 from ..estimator.vision import Vision, PredictError
 from .widgets import *
+from .widgets.eveUtils import AreaMode
 
 class MWAbstractMixin(object):
     # widget
@@ -161,10 +162,9 @@ class PredictionMixin(MWAbstractMixin):
                         # remove tmp files
                         self.info.remove_tmpimg()
 
-            # TODO: Refactor
-            self.canvas.set_predictedRubber()
-            self.annotation.set_detectionResult(results, area=self.canvas.img.predictedRubberBand.size(),
-                                                offset=self.canvas.img.predictedRubberBand.geometry().topLeft())
+            self.canvas.switch_areaMode(mode=AreaMode.PREDICTION)
+            self.annotation.set_detectionResult(results, parentQSize=self.selection.area.qsize,
+                                                offsetQPoint=self.selection.area.topLeft)
             self.annotation.show()
             self.update_contents()
 

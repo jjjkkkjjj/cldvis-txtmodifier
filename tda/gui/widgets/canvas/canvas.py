@@ -73,12 +73,12 @@ class CanvasWidget(BaseWidget):
         :return:
         """
         if areaPercentRect is None:
-            # remove
+            # hide
             self.img.hide_selectionArea()
         self.enableChecking.emit()
 
-    def set_predictedRubber(self):
-        self.img.rubber2predictedRubber()
+    def switch_areaMode(self, mode):
+        self.img.switch_areaMode(mode)
 
     def check_enable(self, isExistImg):
         self.setEnabled(isExistImg)

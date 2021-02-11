@@ -2,7 +2,6 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-from .rubber import Rubber, PredictedRubber
 from ..eveUtils import *
 from .contextMenu import ImgContextMenu
 
@@ -16,7 +15,7 @@ class ImgWidget(QLabel):
         super().__init__(parent)
 
         self.moveActionState = MoveActionState.CREATE
-        self.mode = RubberMode.SELECTION
+        self.mode = AreaMode.SELECTION
 
         # mouseMoveEvent will be fired without any button pressed
         self.setMouseTracking(True)
@@ -31,7 +30,7 @@ class ImgWidget(QLabel):
         return MainWindowController.selection
 
     def contextMenuEvent(self, e):
-        if self.mode == RubberMode.PREDICTION:
+        if self.mode == AreaMode.PREDICTION:
             contextMenu = ImgContextMenu(self)
             contextMenu.setEnabled_action(**self.annotation.enableStatus_contextAction)
 
@@ -48,9 +47,9 @@ class ImgWidget(QLabel):
 
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
-        if self.mode == RubberMode.SELECTION:
+        if self.mode == AreaMode.SELECTION:
             self.selection.mousePress(self.size(), e.pos())
-        elif self.mode == RubberMode.PREDICTION:
+        elif self.mode == AreaMode.PREDICTION:
             if e.button() == Qt.RightButton:
                 pass
         self.repaint()
@@ -61,18 +60,18 @@ class ImgWidget(QLabel):
             return
 
         if e.buttons() == Qt.LeftButton:
-            if self.mode == RubberMode.SELECTION:
+            if self.mode == AreaMode.SELECTION:
                 self.selection.mouseMove(e.pos())
 
         elif e.buttons() == Qt.NoButton:
-            if self.mode == RubberMode.PREDICTION:
+            if self.mode == AreaMode.PREDICTION:
                 self.annotation.set_selectPos(e.pos())
         self.repaint()
 
 
 
     def mouseReleaseEvent(self, e: QMouseEvent):
-        if self.mode == RubberMode.SELECTION:
+        if self.mode == AreaMode.SELECTION:
             self.selection.mouseRelease()
             self.selectionAreaCreated.emit(self.selection.area.percent_points)
         self.repaint()
@@ -91,10 +90,10 @@ class ImgWidget(QLabel):
 
         newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
 
-        if self.mode == RubberMode.SELECTION:
+        if self.mode == AreaMode.SELECTION:
             self.rubberBand.setGeometry(newRect)
 
-        elif self.mode == RubberMode.PREDICTION:
+        elif self.mode == AreaMode.PREDICTION:
             self.predictedRubberBand.setGeometry(newRect)
             offsetQPoint = newRect.topLeft()
             self.set_qpolygons(newRect.size(), offsetQPoint)
@@ -104,32 +103,25 @@ class ImgWidget(QLabel):
         self.selection.area.hide()
         self.repaint()
 
-    def predictedRubber2rubber(self):
-        self.rubberBand.show()
-        self.predictedRubberBand = PredictedRubber(self)
-        self.mode = RubberMode.SELECTION
+    def switch_areaMode(self, mode):
+        self.mode = mode
 
-    def rubber2predictedRubber(self):
-        self.rubberBand.hide()
+        if mode == AreaMode.SELECTION:
+            return
 
-        from ....debug._utils import DEBUG
-        if DEBUG:
-            # for debug
-            # to absolute
-            self.rubberPercentRect = (355/9928.0, 337/7016.0, 2640/9928.0, 1787/7016.0)
-            tlX = int(self.left_percent * self.pixmap().width())
-            tlY = int(self.top_percent * self.pixmap().height())
-            brX = int(self.right_percent * self.pixmap().width())
-            brY = int(self.bottom_percent * self.pixmap().height())
+        elif mode == AreaMode.PREDICTION:
+            from ....debug._utils import DEBUG
+            if DEBUG:
+                # for debug
+                # to absolute
+                from ...model.geometry import Rect
+                import numpy as np
+                points = np.array((355/9928.0, 337/7016.0, 2640/9928.0, 1787/7016.0)).reshape(2, 2)
+                rect = Rect(points=points, parentQSize=self.pixmap().size())
 
-            rect = QRect(tlX, tlY, brX - tlX, brY - tlY)
-            self.predictedRubberBand.setGeometry(rect)
-        else:
-            self.predictedRubberBand.setGeometry(self.rubberBand.geometry())
-        
-        self.predictedRubberBand.show()
+                self.selection._selectionArea = rect
 
-        self.mode = RubberMode.PREDICTION
+            self.selection.area.show()
 
 
     def paintEvent(self, event):

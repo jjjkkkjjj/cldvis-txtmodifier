@@ -125,6 +125,21 @@ class Rect(Vertexes):
     @property
     def height(self):
         return self.qrect.height()
+    @property
+    def qsize(self):
+        return self.qrect.size()
+    @property
+    def topLeft(self):
+        return self.qpoints[0]
+    @property
+    def topRight(self):
+        return self.qpoints[1]
+    @property
+    def bottomRight(self):
+        return self.qpoints[2]
+    @property
+    def bottomLeft(self):
+        return self.qpoints[3]
 
     @property
     def isSelectedRect(self):

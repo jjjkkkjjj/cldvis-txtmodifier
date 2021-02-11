@@ -12,7 +12,7 @@ class AnnotationManager(object):
         self._annotations = []
         self._selected_index = -1  # -1 if polygon is not selected
         # attr: offsetQPoint is QPoint!
-        self.offset = QPoint(0, 0)
+        self.offsetQPoint = QPoint(0, 0)
 
     def set_qpolygons(self, parentSize=None, offset=None):
         for i, annotation in enumerate(self._annotations):
@@ -32,11 +32,11 @@ class AnnotationManager(object):
 
     @property
     def offset_x(self):
-        return self.offset.x()
+        return self.offsetQPoint.x()
 
     @property
     def offset_y(self):
-        return self.offset.y()
+        return self.offsetQPoint.y()
 
     @property
     def selected_annotation(self):
@@ -111,11 +111,11 @@ class AnnotationManager(object):
     def set_highlight(self, pos):
         pass
 
-    def set_detectionResult(self, results, area, offset):
+    def set_detectionResult(self, results, parentQSize, offsetQPoint):
         """
         :param results: dict, detection result by vision
-        :param area: Qsize, selected parentQSize
-        :param offset: QPoint, the topleft coordinates for selected parentQSize
+        :param parentQSize: Qsize, selected parentQSize
+        :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
         :return:
         """
 
@@ -130,9 +130,9 @@ class AnnotationManager(object):
                 "bbox": list(4 points) of list(2d=(x, y))
         """
         # create polygon instances, and then draw polygons
-        self.offset = offset
+        self.offsetQPoint = offsetQPoint
         for result in results["prediction"]:
-            self.append(Annotation(result["bbox"], result['text'], area, offset))
+            self.append(Annotation(result["bbox"], result['text'], parentQSize, offsetQPoint))
 
     @property
     def enableStatus_contextAction(self):

@@ -8,7 +8,7 @@ class ContextActionType(Enum):
     DUPLICATE_POINT = 3
 
 
-class RubberMode(Enum):
+class AreaMode(Enum):
     SELECTION = 0
     PREDICTION = 1
 

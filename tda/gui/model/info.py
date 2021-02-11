@@ -63,7 +63,7 @@ class InfoManager(object):
             self.config.last_opendir = os.path.dirname(self._imgPaths[0])
 
     """
-    area
+    parentQSize
     """
     @property
     def areaPercentRect(self):
