@@ -35,6 +35,9 @@ class SelectionManager(object):
     def parentHeight(self):
         return self._selectionArea.parentHeight
 
+    def set_selectPos(self, pos):
+        self.area.set_selectPos(pos)
+
     def mousePress(self, parentSize, pos):
         """
         :param parentSize: QSize, the parentQSize

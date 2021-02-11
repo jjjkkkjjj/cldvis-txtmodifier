@@ -64,11 +64,11 @@ class ImgWidget(QLabel):
                 self.selection.mouseMove(e.pos())
 
         elif e.buttons() == Qt.NoButton:
-            if self.mode == AreaMode.PREDICTION:
+            if self.mode == AreaMode.SELECTION:
+                self.selection.set_selectPos(e.pos())
+            elif self.mode == AreaMode.PREDICTION:
                 self.annotation.set_selectPos(e.pos())
         self.repaint()
-
-
 
     def mouseReleaseEvent(self, e: QMouseEvent):
         if self.mode == AreaMode.SELECTION:
@@ -76,28 +76,6 @@ class ImgWidget(QLabel):
             self.selectionAreaCreated.emit(self.selection.area.percent_points)
         self.repaint()
 
-    def setPixmap(self, pixmap: QPixmap):
-        super().setPixmap(pixmap)
-
-        """
-        newImgSize = pixmap.size()
-        
-        # to absolute
-        tlX = int(self.left_percent * newImgSize.width())
-        tlY = int(self.top_percent * newImgSize.height())
-        brX = int(self.right_percent * newImgSize.width())
-        brY = int(self.bottom_percent * newImgSize.height())
-
-        newRect = QRect(tlX, tlY, brX - tlX, brY - tlY)
-
-        if self.mode == AreaMode.SELECTION:
-            self.rubberBand.setGeometry(newRect)
-
-        elif self.mode == AreaMode.PREDICTION:
-            self.predictedRubberBand.setGeometry(newRect)
-            offsetQPoint = newRect.topLeft()
-            self.set_qpolygons(newRect.size(), offsetQPoint)
-        """
 
     def hide_selectionArea(self):
         self.selection.area.hide()
