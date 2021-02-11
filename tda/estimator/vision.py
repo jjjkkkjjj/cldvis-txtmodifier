@@ -27,7 +27,7 @@ class Vision(object):
         See https://googleapis.dev/python/vision/latest/vision_v1/types.html for more details
         text
             description: str, predicted text
-            bounding_poly: A bounding polygon for the detected image annotation.
+            bounding_poly: A bounding annotation for the detected image annotation.
                 vertices: vertex sequence
                     x: int
                     y: int

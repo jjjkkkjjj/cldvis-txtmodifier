@@ -76,6 +76,14 @@ class ImgWidget(QLabel):
             self.selectionAreaCreated.emit(self.selection.area.percent_points)
         self.repaint()
 
+    def setPixmap(self, pixmap: QPixmap):
+        super().setPixmap(pixmap)
+        # mode is not related
+        self.selection.area.set_parentVals(parentQSize=pixmap.size())
+
+        if self.mode == AreaMode.PREDICTION:
+            self.annotation.set_parentVals(parentQSize=self.selection.area.qsize, offsetQPoint=self.selection.area.topLeft)
+
 
     def hide_selectionArea(self):
         self.selection.area.hide()

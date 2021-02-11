@@ -145,17 +145,6 @@ class Rect(Vertexes):
     def isSelectedRect(self):
         return self._isSelectedRect
 
-    def _update_percent_pts(self):
-        if self.parentWidth > 0 and self.parentHeight > 0:
-            new_percent_pts = np.array(tuple(
-                (float(pt.x()) / self.parentWidth, float(pt.y()) / self.parentHeight) for pt in self.gen_qpoints()))
-            self.set_percent_points(new_percent_pts)
-
-    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
-        super().set_parentVals(parentQSize, offsetQPoint)
-        if parentQSize is not None or offsetQPoint is not None:
-            self._update_percent_pts()
-
 
     def set_selectPos(self, pos):
         """
@@ -173,7 +162,7 @@ class Rect(Vertexes):
     def paint(self, painter):
         if not self.isShow:
             return
-        ### draw polygon ###
+        ### draw annotation ###
         # pen
         pen = QPen(self.green)
         pen.setWidth(6)
@@ -265,7 +254,7 @@ class Polygon(Vertexes):
         if not self.isShow:
             return
 
-        ### draw polygon ###
+        ### draw annotation ###
         # pen
         pen = QPen(self.green)
         pen.setWidth(6)

@@ -10,13 +10,13 @@ from .geometry import Polygon
 class AnnotationManager(object):
     def __init__(self):
         self._annotations = []
-        self._selected_index = -1  # -1 if polygon is not selected
+        self._selected_index = -1  # -1 if annotation is not selected
         # attr: offsetQPoint is QPoint!
         self.offsetQPoint = QPoint(0, 0)
 
-    def set_qpolygons(self, parentSize=None, offset=None):
-        for i, annotation in enumerate(self._annotations):
-            self._annotations[i] = annotation.set_qpolygon(parentSize, offset)
+    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
+        for annotation in self._annotations:
+            annotation.set_parentVals(parentQSize, offsetQPoint)
 
     def set_selectPos(self, pos):
         # all of polygons are reset selected variable first
@@ -66,11 +66,11 @@ class AnnotationManager(object):
     def refresh(self):
         self._annotations = []
 
-    def insert(self, index, polygon):
-        self._annotations.insert(index, polygon)
+    def insert(self, index, annotation):
+        self._annotations.insert(index, annotation)
 
-    def append(self, polygon):
-        self._annotations.append(polygon)
+    def append(self, annotation):
+        self._annotations.append(annotation)
 
     def __len__(self):
         return len(self._annotations)
@@ -102,11 +102,11 @@ class AnnotationManager(object):
 
     def qpolygons(self):
         """
-        iterate for qpolygon for each polygon. Yield QPolygon class for each iteration
+        iterate for qpolygon for each annotation. Yield QPolygon class for each iteration
         :return:
         """
-        for polygon in self._annotations:
-            yield polygon.qpolygon
+        for anno in self._annotations:
+            yield anno.qpolygon
 
     def set_highlight(self, pos):
         pass
@@ -129,7 +129,7 @@ class AnnotationManager(object):
                 "text": str
                 "bbox": list(4 points) of list(2d=(x, y))
         """
-        # create polygon instances, and then draw polygons
+        # create annotation instances, and then draw polygons
         self.offsetQPoint = offsetQPoint
         for result in results["prediction"]:
             self.append(Annotation(result["bbox"], result['text'], parentQSize, offsetQPoint))

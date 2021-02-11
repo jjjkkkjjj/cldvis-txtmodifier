@@ -129,7 +129,7 @@ class PredictionMixin(MWAbstractMixin):
         self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.areaPercentRect, mode))
 
         # img
-        self.canvas.img.painting.connect(lambda painter: self.paint_polygons(painter))
+        self.canvas.img.painting.connect(lambda painter: self.paint_annotations(painter))
         self.canvas.img.contextActionSelected.connect(lambda actionType: self.set_contextAction(actionType))
 
 
@@ -174,9 +174,9 @@ class PredictionMixin(MWAbstractMixin):
         else:
             raise ValueError('Invalid mode was passed')
 
-    def paint_polygons(self, painter):
-        for polygon in self.annotation:
-            polygon.paint(painter)
+    def paint_annotations(self, painter):
+        for anno in self.annotation:
+            anno.paint(painter)
 
     def set_contextAction(self, actionType):
         self.annotation.change_annotations(actionType)

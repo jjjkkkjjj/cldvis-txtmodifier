@@ -48,6 +48,7 @@ class PercentVertexes(GeoBase):
         if offsetQPoint:
             self._offsetQPoint = offsetQPoint
 
+
     def set_percent_points(self, percent_pts=None):
         """
         :param percent_pts: array-like, shape=(n, 2). Note that these points are in percentage
