@@ -163,7 +163,10 @@ class Rect(Vertexes):
         :return:
         """
         super().set_selectPos(pos)
-        self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
+        if pos:
+            self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
+        else:
+            self._isSelectedRect = False
         return self.isSelectedRect
 
 
@@ -216,7 +219,6 @@ class Polygon(Vertexes):
         :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
         """
         super().__init__(points, parentQSize, offsetQPoint)
-        self.set_qpolygon(parentQSize, offsetQPoint)
 
         self._isSelectedPolygon = False
 
@@ -230,13 +232,16 @@ class Polygon(Vertexes):
         return scaled qpolygon. In other words, return qpolygon to fit pixmap.
         :return:
         """
-        return self._qpolygon
+        qpolygon = QPolygon()
+        for qpt in self.gen_qpoints():
+            qpolygon.append(qpt)
+        return qpolygon
 
 
     @property
     def selectedPoint(self):
         if self.isSelectedPoint:
-            return self._qpolygon.value(self._selected_vertex_index)
+            return self.qpoints[self._selected_vertex_index]
         else:
             return None
 
@@ -249,38 +254,12 @@ class Polygon(Vertexes):
         :param pos: QPoint or None
         :return:
         """
-        # note that contains function returns true if passed pos includes vertex only
+        super().set_selectPos(pos)
         if pos:
-            # check whether to contain point first
-            self._selected_vertex_index = -1
-            for i, point in enumerate(self._qpolygon):
-                # QRect constructs a rectangle with the given topLeft corner and the given parentQSize.
-                if QRect(point - QPoint(self._point_r / 2, self._point_r / 2),
-                         QSize(self._point_r * 2, self._point_r * 2)).contains(pos):
-                    self._selected_vertex_index = i
-
-            self._isSelectedPolygon = self._qpolygon.containsPoint(pos, Qt.OddEvenFill) or self.isSelectedPoint
-
-
+            self._isSelectedPolygon = self.qpolygon.containsPoint(pos, Qt.OddEvenFill) or self.isSelectedPoint
         else:
-            self._selected_vertex_index = -1
             self._isSelectedPolygon = False
-        return self._isSelectedPolygon
-
-    def set_qpolygon(self, parentSize=None, offset=None):
-        if parentSize:
-            self.parentSize = parentSize
-        if offset:
-            self.offset = offset
-
-        qpolygon = QPolygon()
-
-        for qpoint in self.gen_qpoints():
-            qpolygon.append(qpoint)
-
-        self._qpolygon = qpolygon.translated(self.offset)
-        return self
-
+        return self.isSelectedPolygon
 
     def paint(self, painter):
         if not self.isShow:
@@ -301,7 +280,7 @@ class Polygon(Vertexes):
         painter.setPen(pen)
         painter.setBrush(brush)
 
-        painter.drawPolygon(self._qpolygon)
+        painter.drawPolygon(self.qpolygon)
 
         super().paint(painter)
 
