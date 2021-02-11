@@ -168,3 +168,12 @@ class Annotation(Polygon):
         newpoints_percent[:, 0] += 10.0 / self.parentWidth
         newpoints_percent[:, 1] += 10.0 / self.parentHeight
         return Annotation(newpoints_percent, self.text, self.parentQSize, self.offsetQPoint)
+
+    def paint(self, painter):
+        if not self.isShow:
+            return
+
+        # draw area first
+        super().paint(painter)
+
+        # draw annotated text later

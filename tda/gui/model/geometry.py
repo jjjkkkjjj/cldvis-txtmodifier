@@ -5,6 +5,7 @@ from PySide2.QtCore import *
 import numpy as np
 
 from .percent_geometry import PercentVertexes
+from .paint_utils import *
 
 class Vertexes(PercentVertexes):
 
@@ -61,30 +62,16 @@ class Vertexes(PercentVertexes):
         if not self.isShow:
             return
         ### draw edge point ###
-        # pen
-        pen = QPen(self.transparency)  # transparent
-        pen.setWidth(0)
-
-        # brush
-        brush = QBrush(self.green, Qt.SolidPattern)
-        # set
-        painter.setPen(pen)
-        painter.setBrush(brush)
+        PaintMaster.set_pen_brush(painter, pen_color=transparency, pen_width=0,
+                                  brush_color=green, brush_pattern=Qt.SolidPattern)
         for qpoint in self.gen_qpoints():
             # drawEllipse(center, rx, ry)
             painter.drawEllipse(qpoint, self._point_r, self._point_r)
 
         # if selected
         if self.isSelectedPoint:
-            # pen
-            pen = QPen(self.transparency)  # transparent
-            pen.setWidth(0)
-
-            # brush
-            brush = QBrush(self.red, Qt.SolidPattern)
-            # set
-            painter.setPen(pen)
-            painter.setBrush(brush)
+            PaintMaster.set_pen_brush(painter, pen_color=transparency, pen_width=0,
+                                      brush_color=red, brush_pattern=Qt.SolidPattern)
             painter.drawEllipse(self.selectedPoint, self._point_r, self._point_r)
 
 
@@ -163,19 +150,12 @@ class Rect(Vertexes):
         if not self.isShow:
             return
         ### draw annotation ###
-        # pen
-        pen = QPen(self.green)
-        pen.setWidth(6)
-
-        # brush
         if self.isSelectedRect:
-            brush = QBrush(self.light_green, Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
+                                      brush_color=light_green, brush_pattern=Qt.SolidPattern)
         else:
-            # transparent
-            brush = QBrush(self.transparency)
-        # set
-        painter.setPen(pen)
-        painter.setBrush(brush)
+            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
+                                      brush_color=transparency, brush_pattern=Qt.SolidPattern)
 
         painter.drawRect(self.qrect)
 
@@ -255,19 +235,12 @@ class Polygon(Vertexes):
             return
 
         ### draw annotation ###
-        # pen
-        pen = QPen(self.green)
-        pen.setWidth(6)
-
-        # brush
         if self.isSelectedPolygon:
-            brush = QBrush(self.light_green, Qt.SolidPattern)
+            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
+                                      brush_color=light_green, brush_pattern=Qt.SolidPattern)
         else:
-            # transparent
-            brush = QBrush(self.transparency)
-        # set
-        painter.setPen(pen)
-        painter.setBrush(brush)
+            PaintMaster.set_pen_brush(painter, pen_color=green, pen_width=6,
+                                      brush_color=transparency, brush_pattern=Qt.SolidPattern)
 
         painter.drawPolygon(self.qpolygon)
 

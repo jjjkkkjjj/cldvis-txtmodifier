@@ -8,12 +8,6 @@ class GeoBase(object):
     def __init__(self):
         self._isShow = False
 
-        # color
-        self.green = QColor(0, 255, 0, int(255 * 0.8))
-        self.red = QColor(255, 0, 0, int(255 * 0.8))
-        self.light_green = QColor(0, 255, 0, int(255 * 0.4))
-        self.transparency = QColor(0, 255, 0, int(255 * 0))
-
     @property
     def isShow(self):
         return self._isShow
