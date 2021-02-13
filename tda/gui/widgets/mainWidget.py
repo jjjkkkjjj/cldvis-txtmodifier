@@ -12,18 +12,34 @@ class MainWidget(QWidget):
 
 
     def initUI(self):
-        hbox = QHBoxLayout(self)
-
         # leftdock
         self.leftdock = LeftDockWidget(self.mainWC)
-        hbox.addWidget(self.leftdock, 1)
 
         # canvas as central widget
         self.canvas = CanvasWidget(self.mainWC)
-        hbox.addWidget(self.canvas, 7)
 
         # rightdock
         self.rightdock = RightDockWidget(self.mainWC)
-        hbox.addWidget(self.rightdock, 2)
-        self.setLayout(hbox)
 
+        self.changeUIRatio(1, 7, 2)
+
+
+    def changeUIRatio(self, l, c, r):
+        layout = self.layout()
+        if layout:
+            layout.setStretch(0, l)# leftdock
+            layout.setStretch(1, c)# canvas
+            layout.setStretch(2, r)# rightdock
+            return
+        # create layout
+        hbox = QHBoxLayout(self)
+
+        # leftdock
+        hbox.addWidget(self.leftdock, l)
+
+        # canvas as central widget
+        hbox.addWidget(self.canvas, c)
+
+        # rightdock
+        hbox.addWidget(self.rightdock, r)
+        self.setLayout(hbox)

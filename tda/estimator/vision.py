@@ -1,5 +1,7 @@
 from google.cloud import vision
+from google.cloud import  documentai_v1beta2 as documentai
 import io, os, json, cv2
+
 
 class Vision(object):
     def __init__(self, credentialJsonpath):
@@ -68,6 +70,9 @@ class Vision(object):
 
         self.results = results
         return results
+
+    def detect_localTable(self):
+        pass
 
     #def select_prediction(self, index):
     #    pass

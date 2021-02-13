@@ -5,12 +5,14 @@ from PySide2.QtGui import *
 from .button import Button, _get_iconpath
 from ...functions.dialogs import *
 from ..baseWidget import BaseWidget
+from ..eveUtils import PredictionMode
 
 class LeftDockWidget(BaseWidget):
     imgChanged = Signal(bool, int) # emit imgpath and zoomvalue
     imgSet = Signal(object, int)
     ratioChanged = Signal(str, int) # emit imgpath and zoomvalue
     enableChecking = Signal()
+    predictionModeChanged = Signal(str)
     rectRemoved = Signal()
     datasetAdding = Signal()
     predicting = Signal(str)
@@ -81,7 +83,8 @@ class LeftDockWidget(BaseWidget):
 
         # predict
         self.comboBox_mode = QComboBox(self)
-        self.comboBox_mode.addItems(['image', 'file'])
+        self.comboBox_mode.addItems(PredictionMode.gen_list())
+        self.predictionModeChanged = self.comboBox_mode.currentTextChanged
         vbox_run.addWidget(self.comboBox_mode)
         self.button_predictTable = Button('cloud-vision.png')
         vbox_run.addWidget(self.button_predictTable)

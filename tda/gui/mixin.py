@@ -8,6 +8,7 @@ from .model import InfoManager, AnnotationManager, SelectionManager
 from ..estimator.vision import Vision, PredictError
 from .widgets import *
 from .widgets.eveUtils import AreaMode
+from .widgets.eveUtils import PredictionMode
 
 class MWAbstractMixin(object):
     # widget
@@ -33,6 +34,9 @@ class UtilMixin(MWAbstractMixin):
         self.leftdock.enableChecking.connect(self.check_enable)
         self.canvas.enableChecking.connect(self.check_enable)
 
+        # mode change
+        self.leftdock.predictionModeChanged.connect(lambda mode: self.mode_change(mode))
+
     def check_enable(self):
         # back forward
         self.leftdock.check_enable_backforward(self.info.isExistBackImg, self.info.isExistForwardImg)
@@ -48,6 +52,13 @@ class UtilMixin(MWAbstractMixin):
         self.menu.check_enable_run(self.info.isExistAreaPercentRect)
 
         # TODO: check enable function in editing
+
+    def mode_change(self, mode):
+        mode = PredictionMode(mode)
+        if mode == PredictionMode.IMAGE:
+            self.main.changeUIRatio(1, 7, 2)
+        elif mode == PredictionMode.TABLE:
+            self.main.changeUIRatio(1, 4, 3)
 
     """
     credential
@@ -169,7 +180,7 @@ class PredictionMixin(MWAbstractMixin):
             self.update_contents()
 
 
-        elif mode == 'file':
+        elif mode == 'table':
             pass
         else:
             raise ValueError('Invalid mode was passed')
