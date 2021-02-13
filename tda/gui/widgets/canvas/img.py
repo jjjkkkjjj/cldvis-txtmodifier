@@ -69,13 +69,13 @@ class ImgWidget(QLabel):
                 self.selection.set_selectPos(e.pos())
             elif self.mode == AreaMode.PREDICTION:
                 self.annotation.set_selectPos(e.pos())
-        self.repaint()
+        self.update()
 
     def mouseReleaseEvent(self, e: QMouseEvent):
         if self.mode == AreaMode.SELECTION:
             self.selection.mouseRelease()
             self.selectionAreaCreated.emit(self.selection.area.percent_points)
-        self.repaint()
+        self.update()
 
     def setPixmap(self, pixmap: QPixmap):
         super().setPixmap(pixmap)

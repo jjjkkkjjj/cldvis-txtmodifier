@@ -112,9 +112,10 @@ class AnnotationManager(object):
     def set_highlight(self, pos):
         pass
 
-    def set_detectionResult(self, results, parentQSize, offsetQPoint):
+    def set_detectionResult(self, results, baseWidget, parentQSize, offsetQPoint):
         """
         :param results: dict, detection result by vision
+        :param baseWidget: QWidget, the base widget for AnnotaionRubberBand
         :param parentQSize: Qsize, selected parentQSize
         :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
         :return:
@@ -133,7 +134,7 @@ class AnnotationManager(object):
         # create annotation instances, and then draw polygons
         self.offsetQPoint = offsetQPoint
         for result in results["prediction"]:
-            self.append(Annotation(result["bbox"], result['text'], parentQSize, offsetQPoint))
+            self.append(Annotation(baseWidget, result["bbox"], result['text'], parentQSize, offsetQPoint))
 
     @property
     def enableStatus_contextAction(self):
@@ -154,28 +155,58 @@ class AnnotationManager(object):
 
 
 class Annotation(Polygon):
-    def __init__(self, points, text, parentQSize, offsetQPoint):
+    def __init__(self, baseWidget, points, text, parentQSize, offsetQPoint):
         """
+        :param baseWidget: QWidget, the base widget for AnnotaionRubberBand
         :param points: list of list(2d=(x,y)), Note that these points are in percentage
         :param text: str
         :param parentQSize: QSize
         :param offsetQPoint: QPoint
         """
         super().__init__(points, parentQSize, offsetQPoint)
+        self.baseWidget = baseWidget
         self.text = text
+
+        self.band = AnnotaionRubberBand(self.text, QRubberBand.Rectangle, parent=baseWidget)
+        self.band.setGeometry(self.qpolygon.boundingRect())
 
         self.vertex_default_color = Color(fill=green)
         self.poly_default_color = Color(border=green, fill=light_green)
         self.vertex_selected_color = Color(fill=red)
-        self.poly_selected_color = Color(border=green, fill=light_orange)
+        self.poly_selected_color = Color(border=green, fill=transparency)
 
         self.text_color = Color(border=black)
+
+
+    def show(self):
+        super().show()
+        self.band.show()
+
+    def hide(self):
+        super().hide()
+        self.band.hide()
+
+    def set_percent_points(self, percent_pts=None):
+        super().set_percent_points(percent_pts)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
+    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
+        super().set_parentVals(parentQSize, offsetQPoint)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
+    def set_selectPos(self, pos):
+        if super().set_selectPos(pos):
+            # selected
+            self.band.isShowText = False
+        else:
+            self.band.isShowText = True
+        return self.isSelectedPolygon
 
     def duplicateMe(self):
         newpoints_percent = self.percent_points.copy()
         newpoints_percent[:, 0] += 10.0 / self.parentWidth
         newpoints_percent[:, 1] += 10.0 / self.parentHeight
-        return Annotation(newpoints_percent, self.text, self.parentQSize, self.offsetQPoint)
+        return Annotation(self.baseWidget, newpoints_percent, self.text, self.parentQSize, self.offsetQPoint)
 
     def paint(self, painter):
         if not self.isShow:
@@ -184,6 +215,8 @@ class Annotation(Polygon):
         # draw area first
         super().paint(painter)
 
+        """
+        # draw text is too slow. so do in rubberband instead
         if self.isSelectedPolygon:
             return
         else:
@@ -198,3 +231,41 @@ class Annotation(Polygon):
 
             painter.drawText(self.qpolygon.boundingRect(), Qt.AlignCenter, self.text)
             #painter.drawText(QFontMetrics(painter.font()).size(Qt.TextSingleLine, self.text).width(), self.text)
+        """
+
+class AnnotaionRubberBand(QRubberBand):
+    def __init__(self, text, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.text = text
+
+        vbox = QVBoxLayout(self)
+        self.label = QLabel(self)
+        self.label.setText(self.text)
+        font = self.font()
+        font.setPointSize(24)
+        self.label.setFont(font)
+        self.label.setStyleSheet("QLabel { color : red; }")
+        vbox.addWidget(self.label)
+        self.setLayout(vbox)
+
+        self.text_color = Color(border=black)
+        self._isShowText = True
+
+    @property
+    def isShowText(self):
+        return self._isShowText
+
+    @isShowText.setter
+    def isShowText(self, val):
+        self._isShowText = val
+
+        if val:
+            self.label.setText(self.text)
+        else:
+            self.label.setText("")
+
+
+    def paintEvent(self, event):
+        # not drawing at all!!
+        return

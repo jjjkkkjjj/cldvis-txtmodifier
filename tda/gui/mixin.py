@@ -163,8 +163,8 @@ class PredictionMixin(MWAbstractMixin):
                         self.info.remove_tmpimg()
 
             self.canvas.switch_areaMode(mode=AreaMode.PREDICTION)
-            self.annotation.set_detectionResult(results, parentQSize=self.selection.area.qsize,
-                                                offsetQPoint=self.selection.area.topLeft)
+            self.annotation.set_detectionResult(results, baseWidget=self.canvas.img,
+                                                parentQSize=self.selection.area.qsize, offsetQPoint=self.selection.area.topLeft)
             self.annotation.show()
             self.update_contents()
 
