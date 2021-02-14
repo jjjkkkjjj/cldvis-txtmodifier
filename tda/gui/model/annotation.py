@@ -239,17 +239,7 @@ class AnnotaionRubberBand(QRubberBand):
 
         self.text = text
 
-        vbox = QVBoxLayout(self)
-        self.label = QLabel(self)
-        self.label.setText(self.text)
-        font = self.font()
-        font.setPointSize(24)
-        self.label.setFont(font)
-        self.label.setStyleSheet("QLabel { color : red; }")
-        vbox.addWidget(self.label)
-        self.setLayout(vbox)
-
-        self.text_color = Color(border=black)
+        self.text_color = Color(border=red)
         self._isShowText = True
 
     @property
@@ -260,12 +250,24 @@ class AnnotaionRubberBand(QRubberBand):
     def isShowText(self, val):
         self._isShowText = val
 
-        if val:
-            self.label.setText(self.text)
-        else:
-            self.label.setText("")
+        self.update()
 
 
     def paintEvent(self, event):
-        # not drawing at all!!
+        if not self.isShowText:
+            return
+        # draw annotated text
+        painter = QPainter(self)
+        PaintMaster.set_pen_brush(painter, self.text_color)
+
+        rect = self.rect()
+        factor = rect.width() / painter.fontMetrics().width(self.text + '   ')
+        font = painter.font()
+        font.setPointSizeF(font.pointSizeF() * factor)
+        painter.setFont(font)
+
+        painter.drawText(self.rect(), Qt.AlignCenter, self.text)
+
+        # not drawing background at all!!
+        # a.k.a. not calling super
         return
