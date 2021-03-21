@@ -5,6 +5,17 @@ img/*
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,qt,pycharm+all,opencv,windows,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,qt,pycharm+all,opencv,windows,macos,linux
 
+### VisualStudioCode ###
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
