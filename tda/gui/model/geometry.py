@@ -91,6 +91,9 @@ class Vertexes(PercentVertexes):
             PaintMaster.set_pen_brush(painter, self.vertex_selected_color)
             painter.drawEllipse(self.selectedQPoint, self.vertex_r, self.vertex_r)
 
+    def move_qpoint(self, index, qpt):
+        percent_pt = np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight))
+        self.move_percent_point(index, percent_pt)
 
 class Rect(Vertexes):
     def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
@@ -231,10 +234,6 @@ class Polygon(Vertexes):
         self.poly_default_color = Color(border=green, fill=transparency)
         self.poly_selected_color = Color(border=green, fill=light_green)
 
-    @classmethod
-    def fromQPolygon(cls):
-        return cls()
-
     @property
     def qpolygon(self):
         """
@@ -246,6 +245,19 @@ class Polygon(Vertexes):
             qpolygon.append(qpt)
         return qpolygon
 
+    def set_qpolygon(self, qpolygon):
+        new_percent_pts = np.array(tuple((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight) for qpt in qpolygon))
+        self.set_percent_points(new_percent_pts)
+
+    def append(self, qpt):
+        self.append_percent_pt(np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight)))
+
+    @property
+    def boundingRectWidth(self):
+        return self.qpolygon.boundingRect().width()
+    @property
+    def boundingRectHeight(self):
+        return self.qpolygon.boundingRect().height()
 
     @property
     def selectedQPoint(self):

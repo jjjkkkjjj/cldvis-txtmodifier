@@ -27,8 +27,8 @@ class PercentVertexes(GeoBase):
         :param offsetQPoint: QPoint
         """
         super().__init__()
-
-        self._percent_points = sort_clockwise(np.array(percent_pts))
+        percent_pts = np.array(percent_pts)
+        self._percent_points = sort_clockwise(percent_pts) if percent_pts.size > 0 else percent_pts
         self._parentQSize = parentQSize
         self._offsetQPoint = offsetQPoint
 
@@ -48,8 +48,10 @@ class PercentVertexes(GeoBase):
         :param percent_pts: array-like, shape=(n, 2). Note that these points are in percentage
         """
         if percent_pts is not None:
-            self._percent_points = sort_clockwise(percent_pts)
+            self._percent_points = sort_clockwise(percent_pts) if percent_pts.size > 0 else percent_pts
 
+    def append_percent_pt(self, percent_pt):
+        self._percent_points = np.append(self._percent_points, percent_pt).reshape(-1, 2)
 
     @property
     def percent_points(self):
@@ -116,6 +118,8 @@ class PercentVertexes(GeoBase):
         new_dy_percent = float(movedAmount.y()) / self.parentHeight
         self._percent_points += np.array((new_dx_percent, new_dy_percent)).reshape((1, 2))
 
+    def move_percent_point(self, index, percent_pt):
+        self._percent_points[index] = percent_pt
 
 def sort_clockwise(a):
     """

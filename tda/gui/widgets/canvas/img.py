@@ -107,7 +107,7 @@ class ImgWidget(QLabel):
                 points = np.array((355/9928.0, 337/7016.0, 2640/9928.0, 1787/7016.0)).reshape(2, 2)
                 rect = Rect(points=points, parentQSize=self.pixmap().size())
 
-                self.selection._selectionArea = rect
+                self.selection._selectionImageArea = rect
 
             self.selection.area.set_color(vertex_default_color=Color(), vertex_selected_color=Color(),
                                           rect_default_color=Color(border=orange, borderSize=6),
