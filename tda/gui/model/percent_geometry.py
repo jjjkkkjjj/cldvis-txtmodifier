@@ -54,6 +54,10 @@ class PercentVertexes(GeoBase):
         self._percent_points = np.append(self._percent_points, percent_pt).reshape(-1, 2)
 
     @property
+    def points_number(self):
+        return self._percent_points.shape[0]
+
+    @property
     def percent_points(self):
         return self._percent_points
     @property

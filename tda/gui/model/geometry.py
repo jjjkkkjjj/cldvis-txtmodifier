@@ -221,18 +221,24 @@ class Rect(Vertexes):
         return Rect(newpoints_percent[::2], self.parentQSize, self.offsetQPoint)
 
 class Polygon(Vertexes):
-    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
+    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0), maximum_points_number=None):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
         :param parentQSize: QSize, the parent widget's parentQSize
         :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
+        :param maximum_points_number: int or None
         """
         super().__init__(points, parentQSize, offsetQPoint)
 
         self._isSelectedPolygon = False
+        self.maximum_points_number =maximum_points_number
 
         self.poly_default_color = Color(border=green, fill=transparency)
         self.poly_selected_color = Color(border=green, fill=light_green)
+
+    @property
+    def isAppendable(self):
+        return self.maximum_points_number is None or self.points_number < self.maximum_points_number
 
     @property
     def qpolygon(self):
@@ -250,7 +256,8 @@ class Polygon(Vertexes):
         self.set_percent_points(new_percent_pts)
 
     def append(self, qpt):
-        self.append_percent_pt(np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight)))
+        if self.isAppendable:
+            self.append_percent_pt(np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight)))
 
     @property
     def boundingRectWidth(self):

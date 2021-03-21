@@ -11,7 +11,7 @@ class SelectionManager(object):
     area: Vertexes
     def __init__(self):
         self._selectionImageArea = Rect(np.zeros(shape=(2, 2)))
-        self._selectionTableArea = Polygon(np.zeros(shape=(0, 2)))
+        self._selectionTableArea = Polygon(np.zeros(shape=(0, 2)), maximum_points_number=4)
 
         self.predictionMode = PredictionMode.IMAGE
         self.moveActionState = MoveActionState.CREATE
@@ -66,7 +66,7 @@ class SelectionManager(object):
         self._startPosition = pos
 
         if self.predictionMode == PredictionMode.IMAGE:
-            if area.isSelectedPoint:
+            if self._selectionImageArea.isSelectedPoint:
                 # if pressed position is edge
                 # expand or shrink parentQSize
                 self.moveActionState = MoveActionState.RESIZE
@@ -88,6 +88,11 @@ class SelectionManager(object):
                 self._selectionImageArea.set_qrect(qrect)
 
         elif self.predictionMode == PredictionMode.TABLE:
+            if self._selectionTableArea.isSelectedPoint:
+                self.moveActionState = MoveActionState.RESIZE
+                self._startPosition = self._selectionTableArea.selectedQPoint
+                return
+
             if self._selectionTableArea.isSelectedPolygon:
                 # if pressed position is contained in parentQSize
                 # move the parentQSize
@@ -112,9 +117,9 @@ class SelectionManager(object):
             return
 
         if self.moveActionState == MoveActionState.CREATE or self.moveActionState == MoveActionState.RESIZE:
-            if self.moveActionState.RESIZE:
+            if self.moveActionState == MoveActionState.RESIZE:
                 # for changing selected Point
-                area.set_selectPos(pos)
+                self._selectionImageArea.set_selectPos(pos)
             # clipping
             pos.setX(min(max(pos.x(), 0), self.parentWidth))
             pos.setY(min(max(pos.y(), 0), self.parentHeight))
@@ -124,6 +129,11 @@ class SelectionManager(object):
             self._selectionImageArea.set_qrect(qrect)
 
         elif self.predictionMode == PredictionMode.TABLE:
+            if self.moveActionState == MoveActionState.RESIZE:
+                self._selectionTableArea.move_qpoint(self._selectionTableArea.selectedPointIndex, pos)
+                # for changing selected Point
+                self._selectionTableArea.set_selectPos(pos)
+                return
             self._selectionTableArea.move_qpoint(-1, pos)
 
     def mouseRelease(self):
