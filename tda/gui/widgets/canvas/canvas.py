@@ -41,7 +41,7 @@ class CanvasWidget(BaseWidget):
 
     def establish_connection(self):
         self.selectionAreaCreated = self.img.selectionAreaCreated
-        #self.img.selectionAreaCreated.connect(lambda areaPercentRect: self.set_selectionArea(areaPercentRect))
+        #self.img.selectionAreaCreated.connect(lambda areaPercentPolygon: self.set_selectionArea(areaPercentPolygon))
 
 
     def set_img(self, imgpath, zoomvalue):

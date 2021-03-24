@@ -12,7 +12,7 @@ class InfoManager(object):
         self._imgPaths = []
         self._imgpixmap = None
 
-        self._areaPercentRect = None
+        self._areaPercentPolygon = None
         self.config = Config()
 
     """
@@ -66,15 +66,15 @@ class InfoManager(object):
     parentQSize
     """
     @property
-    def areaPercentRect(self):
-        return self._areaPercentRect
+    def areaPercentPolygon(self):
+        return self._areaPercentPolygon
 
     @property
     def isExistAreaPercentRect(self):
-        return self._areaPercentRect is not None
+        return self._areaPercentPolygon is not None
 
     def set_selectionArea(self, areaPercentRect):
-        self._areaPercentRect = areaPercentRect
+        self._areaPercentPolygon = areaPercentRect
 
     """
     gcp

@@ -94,7 +94,7 @@ class SelectionMixin(MWAbstractMixin):
         self.leftdock.rectRemoved.connect(lambda: self.canvas.set_selectionArea(None))
 
         # rubber
-        self.canvas.selectionAreaCreated.connect(lambda areaPercentRect: self.set_selectionArea(areaPercentRect))
+        self.canvas.selectionAreaCreated.connect(lambda areaPercentPolygon: self.set_selectionArea(areaPercentPolygon))
         self.canvas.img.painting.connect(lambda painter: self.paint_area(painter))
 
         # mode change
@@ -102,9 +102,9 @@ class SelectionMixin(MWAbstractMixin):
     """
     rubber
     """
-    def set_selectionArea(self, areaPercentRect):
-        self.info.set_selectionArea(areaPercentRect)
-        self.canvas.set_selectionArea(areaPercentRect)
+    def set_selectionArea(self, areaPercentPolygon):
+        self.info.set_selectionArea(areaPercentPolygon)
+        self.canvas.set_selectionArea(areaPercentPolygon)
 
     def paint_area(self, painter):
         self.selection.area.paint(painter)
@@ -139,21 +139,26 @@ class PredictionMixin(MWAbstractMixin):
     def establish_connection(self):
         # button action
         # self.leftdock.datasetAdding.connect()
-        self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.areaPercentRect, mode))
+        self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.areaPercentPolygon, mode))
 
         # img
         self.canvas.img.painting.connect(lambda painter: self.paint_annotations(painter))
         self.canvas.img.contextActionSelected.connect(lambda actionType: self.set_contextAction(actionType))
 
 
-    def predict(self, imgpath, tableRect, mode):
+    def predict(self, imgpath, areaPercentPolygon, mode):
         """
         :param imgpath: str
-        :param tableRect: tuple = (left, top, right, bottom) with percent mode
+        :param areaPercentPolygon:
+            image mode;
+                tuple = (left, top, right, bottom) with percent mode
+            table mode;
+                tuple = (left, top, right, bottom) with percent mode
         :param mode: str, 'image' or 'file'
         :return:
         """
-        if mode == 'image':
+        mode = PredictionMode(mode)
+        if mode == PredictionMode.IMAGE:
             from ..debug._utils import DEBUG
             if DEBUG:
                 # for debug
@@ -164,7 +169,7 @@ class PredictionMixin(MWAbstractMixin):
             else:
                 # TODO: show loading dialog
                 # save tmp image
-                tmpimgpath = self.info.save_tmpimg(imgpath, tableRect)
+                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon)
                 try:
                     # detect
                     results = self.vision.detect_localImg(tmpimgpath)
@@ -182,8 +187,17 @@ class PredictionMixin(MWAbstractMixin):
             self.update_contents()
 
 
-        elif mode == 'table':
-            pass
+        elif mode == PredictionMode.TABLE:
+            from ..debug._utils import DEBUG
+            if DEBUG:
+                import numpy as np
+                # for debug
+                areaPercentPolygon = np.loadtxt('tda/debug/table_polygon.csv', delimiter=',')
+
+            else:
+                pass
+            #ここらへん，4
+            #点取得→Affine変換→Jupyterで取り出し→予測→表作成
         else:
             raise ValueError('Invalid mode was passed')
 
