@@ -51,7 +51,8 @@ class PercentVertexes(GeoBase):
             self._percent_points = sort_clockwise(percent_pts) if percent_pts.size > 0 else percent_pts
 
     def append_percent_pt(self, percent_pt):
-        self._percent_points = np.append(self._percent_points, percent_pt).reshape(-1, 2)
+        new_percent_pts = np.append(self._percent_points, percent_pt).reshape(-1, 2)
+        self._percent_points = sort_clockwise(new_percent_pts)
 
     @property
     def points_number(self):

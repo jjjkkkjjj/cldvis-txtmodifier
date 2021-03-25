@@ -151,9 +151,9 @@ class PredictionMixin(MWAbstractMixin):
         :param imgpath: str
         :param areaPercentPolygon:
             image mode;
-                tuple = (left, top, right, bottom) with percent mode
+                tuple = (tl, tr, br, bl) with percent mode
             table mode;
-                tuple = (left, top, right, bottom) with percent mode
+                tuple = (tl, tr, br, bl) with percent mode
         :param mode: str, 'image' or 'file'
         :return:
         """

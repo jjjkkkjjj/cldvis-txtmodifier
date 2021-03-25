@@ -137,6 +137,6 @@ class SelectionManager(object):
             self._selectionTableArea.move_qpoint(-1, pos)
 
     def mouseRelease(self):
-        if self.moveActionState.RESIZE:
+        if self.moveActionState == MoveActionState.RESIZE:
             self._selectionImageArea.deselect()
         self._startPosition = QPoint(0, 0)
