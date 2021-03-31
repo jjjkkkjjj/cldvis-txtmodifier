@@ -19,8 +19,8 @@ class Vision(object):
         h, w, _ = cv2.imread(imgpath).shape
         h, w = float(h), float(w)
         image = vision.Image(content=content)
-
-        response = self.client.text_detection(image=image) # type is AnnotateImageResponse
+        # https://googleapis.dev/python/vision/1.0.0/gapic/v1/api.html#google.cloud.vision_v1.ImageAnnotatorClient.document_text_detection
+        response = self.client.document_text_detection(image=image) # type is AnnotateImageResponse
         texts = response.text_annotations # EntityAnnotation sequence
         vision.InputConfig()
 

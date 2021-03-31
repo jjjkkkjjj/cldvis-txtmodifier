@@ -151,7 +151,7 @@ class PredictionMixin(MWAbstractMixin):
         :param imgpath: str
         :param areaPercentPolygon:
             image mode;
-                tuple = (tl, tr, br, bl) with percent mode
+                tuple = (xmin, ymin, xmax, ymax) with percent mode
             table mode;
                 tuple = (tl, tr, br, bl) with percent mode
         :param mode: str, 'image' or 'file'
@@ -161,15 +161,17 @@ class PredictionMixin(MWAbstractMixin):
         if mode == PredictionMode.IMAGE:
             from ..debug._utils import DEBUG
             if DEBUG:
+                import numpy as np
+                areaPercentPolygon = np.loadtxt('tda/debug/image_rect.csv', delimiter=',')
                 # for debug
-                with open('tda/debug/result.json', 'r') as f:
+                with open('tda/debug/result-image.json', 'r') as f:
                     import json
                     results = json.load(f)
 
             else:
                 # TODO: show loading dialog
                 # save tmp image
-                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon)
+                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, mode)
                 try:
                     # detect
                     results = self.vision.detect_localImg(tmpimgpath)
@@ -193,11 +195,29 @@ class PredictionMixin(MWAbstractMixin):
                 import numpy as np
                 # for debug
                 areaPercentPolygon = np.loadtxt('tda/debug/table_polygon.csv', delimiter=',')
-
+                # for debug
+                with open('tda/debug/result-table.json', 'r') as f:
+                    import json
+                    results = json.load(f)
             else:
-                pass
-            #ここらへん，4
-            #点取得→Affine変換→Jupyterで取り出し→予測→表作成
+                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, mode)
+                try:
+                    # detect
+                    results = self.vision.detect_localImg(tmpimgpath)
+
+                except PredictError as e:
+                    ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+                    if ret == QMessageBox.Yes:
+                        # remove tmp files
+                        self.info.remove_tmpimg()
+
+            #とりあえず，imageの表示方法と共通化．共通化の際にエリアの拡大表示．
+            self.canvas.switch_areaMode(mode=AreaMode.PREDICTION)
+            self.annotation.set_detectionResult(results, baseWidget=self.canvas.img,
+                                                parentQSize=self.selection.area.qsize,
+                                                offsetQPoint=self.selection.area.topLeft)
+            self.annotation.show()
+            self.update_contents()
         else:
             raise ValueError('Invalid mode was passed')
 

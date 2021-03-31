@@ -1,10 +1,11 @@
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 import os, cv2, glob
+import numpy as np
 
 from ..functions.config import Config
-from ..functions.utils import reconstruct_coordinates
-
+from ..functions.utils import reconstruct_minmaxcoordinates, reconstruct_polycoordinates
+from ..widgets.eveUtils import PredictionMode
 
 class InfoManager(object):
     def __init__(self):
@@ -90,17 +91,36 @@ class InfoManager(object):
     def set_credentialJsonpath(self, path):
         self.config.credentialJsonpath = path
 
-    def save_tmpimg(self, imgpath, tableRect, directory=os.path.join('..', '.tda', 'tmp')):
+    def save_tmpimg(self, imgpath, areaPercentPolygon, mode, directory=os.path.join('.tda', 'tmp')):
         img = cv2.imread(imgpath)
         h, w, _ = img.shape
 
-        xmin, ymin, xmax, ymax = reconstruct_coordinates(tableRect, w, h)
+        if mode == PredictionMode.IMAGE:
+            xmin, ymin, xmax, ymax = reconstruct_minmaxcoordinates(areaPercentPolygon, w, h)
 
-        filename, ext = os.path.splitext(os.path.basename(imgpath))
-        apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
-        savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
+            filename, ext = os.path.splitext(os.path.basename(imgpath))
+            apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
+            savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
 
-        cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+            cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+        elif mode == PredictionMode.TABLE:
+            tl, tr, br, bl = reconstruct_polycoordinates(areaPercentPolygon, w, h).astype(np.float32)
+            hmax = int(max((bl - tl)[1], (br - tr)[1]))
+            wmax = int(max((tr - tl)[0], (br - bl)[0]))
+
+            # affine transform
+            src = np.vstack((tl, tr, bl))
+            dst = np.array(((0, 0), (wmax, 0), (0, hmax)), dtype=np.float32)
+            warp_mat = cv2.getAffineTransform(src, dst)
+            img_cropped = cv2.warpAffine(img, warp_mat, (wmax, hmax))
+
+            # savepath
+            areaPoly = np.vstack((tl, tr, br, bl)).flatten().astype(int)
+            filename, ext = os.path.splitext(os.path.basename(imgpath))
+            apex = '_tlx{}tly{}trx{}try{}brx{}bry{}blx{}bly{}'.format(*areaPoly)
+            savepath = os.path.abspath(os.path.join(directory, filename + apex + '.jpg'))
+
+            cv2.imwrite(savepath, img_cropped)
         return savepath
 
     def remove_tmpimg(self, directory=os.path.join('..', '.tda', 'tmp')):

@@ -1,5 +1,6 @@
 from PySide2.QtGui import *
 import os
+import numpy as np
 
 def path_desktop():
     return os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -23,7 +24,7 @@ def cvimg2qpixmap(cvimg):
     qImg = QImage(cvimg.data, width, height, bytesPerLine, QImage.Format_RGB888)
     return QPixmap(qImg)
 
-def reconstruct_coordinates(percentRect, w, h):
+def reconstruct_minmaxcoordinates(percentRect, w, h):
     """
     :param percentRect: tuple-like, (xmin, ymin, xmax, ymax)
     :param w: int, width
@@ -34,3 +35,15 @@ def reconstruct_coordinates(percentRect, w, h):
     xmin, xmax = int(xmin * w), int(xmax * w)
     ymin, ymax = int(ymin * h), int(ymax * h)
     return xmin, ymin, xmax, ymax
+
+def reconstruct_polycoordinates(percentPoly, w, h):
+    """
+    :param percentPoly: array-like (tl, tr, br, bl), shape = (4, 2)
+    :param w: int, width
+    :param h: int, height
+    :return: np.array, shape = (4, 2)
+    """
+    areaPolygon = percentPoly.copy()
+    areaPolygon[:, 0] *= w
+    areaPolygon[:, 1] *= h
+    return areaPolygon
