@@ -6,6 +6,7 @@ import cv2, os
 from .img import ImgWidget
 from ..baseWidget import BaseWidget
 from ...functions.utils import cvimg2qpixmap
+from ..eveUtils import ShowingMode
 
 class CanvasWidget(BaseWidget):
     selectionAreaCreated = Signal(tuple)
@@ -77,8 +78,8 @@ class CanvasWidget(BaseWidget):
             self.img.hide_selectionArea()
         self.enableChecking.emit()
 
-    def switch_areaMode(self, mode):
-        self.img.switch_areaMode(mode)
+    def switch_areaMode(self, areamode, showingmode):
+        self.img.switch_areaMode(areamode, showingmode)
 
     def check_enable(self, isExistImg):
         self.setEnabled(isExistImg)

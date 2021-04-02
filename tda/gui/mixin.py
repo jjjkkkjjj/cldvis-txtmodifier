@@ -8,7 +8,7 @@ from .model import InfoManager, AnnotationManager, SelectionManager
 from ..estimator.vision import Vision, PredictError
 from .widgets import *
 from .widgets.eveUtils import AreaMode
-from .widgets.eveUtils import PredictionMode
+from .widgets.eveUtils import PredictionMode, ShowingMode
 
 class MWAbstractMixin(object):
     # widget
@@ -34,6 +34,8 @@ class UtilMixin(MWAbstractMixin):
         self.leftdock.enableChecking.connect(self.check_enable)
         self.canvas.enableChecking.connect(self.check_enable)
 
+        # change showing mode
+        self.leftdock.showingChanged.connect(self.showingModeChanged)
 
     def check_enable(self):
         # back forward
@@ -43,6 +45,9 @@ class UtilMixin(MWAbstractMixin):
         # zoom
         self.leftdock.check_enable_zoom(self.info.isExistImg)
         self.menu.check_enable_zoom(self.info.isExistImg)
+
+        # showing
+        self.leftdock.check_enable_radioButtionShowing(self.info.isExistAreaPercentRect)
 
         # run
         self.canvas.check_enable(self.info.isExistImg)
@@ -78,6 +83,20 @@ class UtilMixin(MWAbstractMixin):
             ret = QMessageBox.critical(self, 'Invalid', '{} is invalid!'.format(path), QMessageBox.Yes)
             if ret == QMessageBox.Yes:
                 self.show_credentialDialog()
+
+    def showingModeChanged(self):
+        zoomvalue = self.leftdock.spinBox_zoom.value()
+        if self.leftdock.showingmode == ShowingMode.ALL:
+            self.canvas.set_img(self.info.imgpath, zoomvalue)
+
+        elif self.leftdock.showingmode == ShowingMode.SELECTED:
+            from ..debug._utils import DEBUG
+            if DEBUG:
+                tmpimgpath = '.tda/tmp/20200619173238005_x355X2640y337Y1787.jpg'
+            else:
+                tmpimgpath = self.info.save_tmpimg(self.info.imgpath, self.info.areaPercentPolygon, self.selection.predictionMode)
+            self.canvas.set_img(tmpimgpath, zoomvalue)
+
 
     def show_credentialDialog(self):
         dialog = CredentialDialog(self)
@@ -139,14 +158,14 @@ class PredictionMixin(MWAbstractMixin):
     def establish_connection(self):
         # button action
         # self.leftdock.datasetAdding.connect()
-        self.leftdock.predicting.connect(lambda mode: self.predict(self.info.imgpath, self.info.areaPercentPolygon, mode))
+        self.leftdock.predicting.connect(lambda: self.predict(self.info.imgpath, self.info.areaPercentPolygon))
 
         # img
         self.canvas.img.painting.connect(lambda painter: self.paint_annotations(painter))
         self.canvas.img.contextActionSelected.connect(lambda actionType: self.set_contextAction(actionType))
 
 
-    def predict(self, imgpath, areaPercentPolygon, mode):
+    def predict(self, imgpath, areaPercentPolygon):
         """
         :param imgpath: str
         :param areaPercentPolygon:
@@ -154,11 +173,9 @@ class PredictionMixin(MWAbstractMixin):
                 tuple = (xmin, ymin, xmax, ymax) with percent mode
             table mode;
                 tuple = (tl, tr, br, bl) with percent mode
-        :param mode: str, 'image' or 'file'
         :return:
         """
-        mode = PredictionMode(mode)
-        if mode == PredictionMode.IMAGE:
+        if self.leftdock.predictionmode == PredictionMode.IMAGE:
             from ..debug._utils import DEBUG
             if DEBUG:
                 import numpy as np
@@ -171,7 +188,7 @@ class PredictionMixin(MWAbstractMixin):
             else:
                 # TODO: show loading dialog
                 # save tmp image
-                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, mode)
+                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, self.leftdock.predictionmode)
                 try:
                     # detect
                     results = self.vision.detect_localImg(tmpimgpath)
@@ -182,14 +199,21 @@ class PredictionMixin(MWAbstractMixin):
                         # remove tmp files
                         self.info.remove_tmpimg()
 
-            self.canvas.switch_areaMode(mode=AreaMode.PREDICTION)
+            self.canvas.switch_areaMode(areamode=AreaMode.PREDICTION, showingmode=self.leftdock.showingmode)
+            # showing changeの際の変換
+            if self.leftdock.showingmode == ShowingMode.ALL:
+                parentQSize = self.selection.area.qsize
+                offsetQPoint = self.selection.area.topLeft
+            else:
+                parentQSize = self.canvas.img.size()
+                offsetQPoint = QPoint(0, 0)
             self.annotation.set_detectionResult(results, baseWidget=self.canvas.img,
-                                                parentQSize=self.selection.area.qsize, offsetQPoint=self.selection.area.topLeft)
+                                                parentQSize=parentQSize, offsetQPoint=offsetQPoint)
             self.annotation.show()
             self.update_contents()
 
 
-        elif mode == PredictionMode.TABLE:
+        elif self.leftdock.predictionmode == PredictionMode.TABLE:
             from ..debug._utils import DEBUG
             if DEBUG:
                 import numpy as np
@@ -200,7 +224,7 @@ class PredictionMixin(MWAbstractMixin):
                     import json
                     results = json.load(f)
             else:
-                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, mode)
+                tmpimgpath = self.info.save_tmpimg(imgpath, areaPercentPolygon, self.leftdock.predictionmode)
                 try:
                     # detect
                     results = self.vision.detect_localImg(tmpimgpath)
@@ -212,10 +236,15 @@ class PredictionMixin(MWAbstractMixin):
                         self.info.remove_tmpimg()
 
             #とりあえず，imageの表示方法と共通化．共通化の際にエリアの拡大表示．
-            self.canvas.switch_areaMode(mode=AreaMode.PREDICTION)
+            self.canvas.switch_areaMode(areamode=AreaMode.PREDICTION, showingmode=self.leftdock.showingmode)
+            if self.leftdock.showingmode == ShowingMode.ALL:
+                parentQSize = self.selection.area.qsize
+                offsetQPoint = self.selection.area.topLeft
+            else:
+                parentQSize = self.canvas.img.size()
+                offsetQPoint = QPoint(0, 0)
             self.annotation.set_detectionResult(results, baseWidget=self.canvas.img,
-                                                parentQSize=self.selection.area.qsize,
-                                                offsetQPoint=self.selection.area.topLeft)
+                                                parentQSize=parentQSize, offsetQPoint=offsetQPoint)
             self.annotation.show()
             self.update_contents()
         else:

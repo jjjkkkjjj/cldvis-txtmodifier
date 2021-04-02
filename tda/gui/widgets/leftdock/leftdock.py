@@ -5,7 +5,7 @@ from PySide2.QtGui import *
 from .button import Button, _get_iconpath
 from ...functions.dialogs import *
 from ..baseWidget import BaseWidget
-from ..eveUtils import PredictionMode
+from ..eveUtils import PredictionMode, ShowingMode
 
 class LeftDockWidget(BaseWidget):
     imgChanged = Signal(bool, int) # emit imgpath and zoomvalue
@@ -15,7 +15,8 @@ class LeftDockWidget(BaseWidget):
     predictionModeChanged = Signal(str)
     rectRemoved = Signal()
     datasetAdding = Signal()
-    predicting = Signal(str)
+    predicting = Signal()
+    showingChanged = Signal()
 
     def __init__(self, mainWidgetController):
         super().__init__(mainWidgetController)
@@ -70,6 +71,20 @@ class LeftDockWidget(BaseWidget):
         self.spinBox_zoom.setValue(100)
         vbox_viewer.addWidget(self.spinBox_zoom, 1)
 
+        # showing
+        vbox_showing = QVBoxLayout()
+        self.groupBox_showing = QGroupBox('Showing', self)
+
+        self.radioButton_all = QRadioButton('All')
+        self.radioButton_all.setChecked(True)
+        vbox_showing.addWidget(self.radioButton_all)
+
+        self.radioButton_selected = QRadioButton('Selected')
+        vbox_showing.addWidget(self.radioButton_selected)
+
+        self.groupBox_showing.setLayout(vbox_showing)
+        vbox_viewer.addWidget(self.groupBox_showing, 1)
+
         self.groupBox_viewer.setLayout(vbox_viewer)
         vbox.addWidget(self.groupBox_viewer, 1)
 
@@ -110,9 +125,10 @@ class LeftDockWidget(BaseWidget):
 
         self.button_removeRect.clicked.connect(self.buttonRemoveRectClicked)
         self.button_addDataset.clicked.connect(self.buttonAddDatasetClicked)
-        self.button_predictTable.clicked.connect(self.buttonPredictTableClicked)
+        self.predicting = self.button_predictTable.clicked
 
-        self.ratioChanged = self.spinBox_zoom.valueChanged
+        self.radioButton_all.clicked.connect(lambda: self.radioButtonShowingALLChanged(ShowingMode.ALL))
+        self.radioButton_selected.clicked.connect(lambda: self.radioButtonShowingALLChanged(ShowingMode.SELECTED))
 
     ##### connection func #####
     def openDialog(self, isFolder):
@@ -147,8 +163,15 @@ class LeftDockWidget(BaseWidget):
     def buttonAddDatasetClicked(self):
         self.datasetAdding.emit()
 
-    def buttonPredictTableClicked(self):
-        self.predicting.emit(self.comboBox_mode.currentText())
+    def radioButtonShowingALLChanged(self, mode):
+        self.showingChanged.emit()
+
+    @property
+    def predictionmode(self):
+        return PredictionMode(self.comboBox_mode.currentText())
+    @property
+    def showingmode(self):
+        return ShowingMode.ALL if self.radioButton_all.isChecked() else ShowingMode.SELECTED
 
     ##### check enable #####
     def check_enable_backforward(self, isExistBackImg, isExistForwardImg):
@@ -159,6 +182,11 @@ class LeftDockWidget(BaseWidget):
         self.spinBox_zoom.setEnabled(isExistImg)
         self.button_zoomin.setEnabled(isExistImg)
         self.button_zoomout.setEnabled(isExistImg)
+
+    def check_enable_radioButtionShowing(self, isExistAreaPercentRect):
+        self.radioButton_selected.setEnabled(isExistAreaPercentRect)
+        if not isExistAreaPercentRect:
+            self.radioButton_all.setChecked(True)
 
     def check_enable_run(self, isExistRubberPercentRect):
         self.button_removeRect.setEnabled(isExistRubberPercentRect)

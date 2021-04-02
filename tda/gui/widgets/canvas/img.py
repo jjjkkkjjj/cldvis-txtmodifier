@@ -16,7 +16,8 @@ class ImgWidget(QLabel):
         super().__init__(parent)
 
         self.moveActionState = MoveActionState.CREATE
-        self.mode = AreaMode.SELECTION
+        self.areamode = AreaMode.SELECTION
+        self.showingmode = ShowingMode.ALL
 
         # mouseMoveEvent will be fired without any button pressed
         self.setMouseTracking(True)
@@ -31,7 +32,7 @@ class ImgWidget(QLabel):
         return MainWindowController.selection
 
     def contextMenuEvent(self, e):
-        if self.mode == AreaMode.PREDICTION:
+        if self.areamode == AreaMode.PREDICTION:
             contextMenu = ImgContextMenu(self)
             contextMenu.setEnabled_action(**self.annotation.enableStatus_contextAction)
 
@@ -48,9 +49,9 @@ class ImgWidget(QLabel):
 
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
-        if self.mode == AreaMode.SELECTION:
+        if self.areamode == AreaMode.SELECTION:
             self.selection.mousePress(self.size(), e.pos())
-        elif self.mode == AreaMode.PREDICTION:
+        elif self.areamode == AreaMode.PREDICTION:
             if e.button() == Qt.RightButton:
                 pass
         self.repaint()
@@ -61,18 +62,18 @@ class ImgWidget(QLabel):
             return
 
         if e.buttons() == Qt.LeftButton:
-            if self.mode == AreaMode.SELECTION:
+            if self.areamode == AreaMode.SELECTION:
                 self.selection.mouseMove(e.pos())
 
         elif e.buttons() == Qt.NoButton:
-            if self.mode == AreaMode.SELECTION:
+            if self.areamode == AreaMode.SELECTION:
                 self.selection.set_selectPos(e.pos())
-            elif self.mode == AreaMode.PREDICTION:
+            elif self.areamode == AreaMode.PREDICTION:
                 self.annotation.set_selectPos(e.pos())
         self.update()
 
     def mouseReleaseEvent(self, e: QMouseEvent):
-        if self.mode == AreaMode.SELECTION:
+        if self.areamode == AreaMode.SELECTION:
             self.selection.mouseRelease()
             self.selectionAreaCreated.emit(self.selection.area.percent_points)
         self.update()
@@ -82,7 +83,7 @@ class ImgWidget(QLabel):
         # mode is not related
         self.selection.area.set_parentVals(parentQSize=pixmap.size())
 
-        if self.mode == AreaMode.PREDICTION:
+        if self.areamode == AreaMode.PREDICTION:
             self.annotation.set_parentVals(parentQSize=self.selection.area.qsize, offsetQPoint=self.selection.area.topLeft)
 
 
@@ -90,14 +91,15 @@ class ImgWidget(QLabel):
         self.selection.area.hide()
         self.repaint()
 
-    def switch_areaMode(self, mode):
-        self.mode = mode
+    def switch_areaMode(self, areamode, showingmode):
+        self.areamode = areamode
+        self.showingmode = showingmode
 
-        if mode == AreaMode.SELECTION:
+        if areamode == AreaMode.SELECTION:
             # revert default color
             self.selection.area.set_color()
 
-        elif mode == AreaMode.PREDICTION:
+        elif areamode == AreaMode.PREDICTION:
             from ....debug._utils import DEBUG
             if DEBUG:
                 # for debug
@@ -115,6 +117,10 @@ class ImgWidget(QLabel):
 
             self.selection.area.show()
 
+        if showingmode == ShowingMode.ALL:
+            self.selection.area.show()
+        elif showingmode == ShowingMode.SELECTED:
+            self.selection.area.hide()
 
     def paintEvent(self, event):
         if not self.pixmap():

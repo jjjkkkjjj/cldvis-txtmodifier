@@ -24,3 +24,7 @@ class PredictionMode(Enum):
     @staticmethod
     def gen_list():
         return [m.value for m in PredictionMode]
+
+class ShowingMode(Enum):
+    ALL = 'all'
+    SELECTED = 'selected'

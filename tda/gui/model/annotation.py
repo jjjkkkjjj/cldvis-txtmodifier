@@ -10,6 +10,7 @@ from .paint_utils import *
 
 class AnnotationManager(object):
     def __init__(self):
+        self.results = {}
         self._annotations = []
         self._selected_index = -1  # -1 if annotation is not selected
         # attr: offsetQPoint is QPoint!
@@ -131,8 +132,12 @@ class AnnotationManager(object):
                 "text": str
                 "bbox": list(4 points) of list(2d=(x, y))
         """
+        # clear
+        self.results = {}
+        self._annotations = []
         # create annotation instances, and then draw polygons
         self.offsetQPoint = offsetQPoint
+        self.results = results
         for result in results["prediction"]:
             self.append(Annotation(baseWidget, result["bbox"], result['text'], parentQSize, offsetQPoint))
 
