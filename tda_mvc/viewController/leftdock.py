@@ -2,6 +2,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 import os, glob
 
+from ..view import AboutDialog
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -32,6 +33,9 @@ class LeftDockVCMixin(VCAbstractMixin):
         # viewer
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
+
+        # about
+        self.menu.action_about.triggered.connect(self.openAbout)
 
     def openfile(self):
         filters = '{} ({})'.format('Images', ' '.join(['*' + ext for ext in SUPPORTED_EXTENSIONS]))
@@ -93,3 +97,8 @@ class LeftDockVCMixin(VCAbstractMixin):
     def zoomValueChanged(self, value):
         self.model.zoomvalue = value
         self.central.updateUI()
+
+
+    def openAbout(self):
+        aboutBox = AboutDialog(self)
+        aboutBox.show()

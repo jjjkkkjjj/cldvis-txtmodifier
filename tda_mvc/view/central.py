@@ -56,9 +56,14 @@ class CentralView(QWidget):
         self.setLayout(vbox)
 
     def updateUI(self):
+        # check enable
+        self.label_filename.setEnabled(self.model.isExistImg)
+        self.imageView.setEnabled(self.model.isExistImg)
+
         if not self.model.isExistImg:
             return
 
+        # set image
         self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
 
         """

@@ -4,6 +4,7 @@ from ..utils.funcs import check_instance
 from ..model import Model
 from .leftdock import LeftDockView
 from .central import CentralView
+from .rightdock import RightDockView
 
 class MainView(QWidget):
     def __init__(self, model, parent=None):
@@ -15,6 +16,7 @@ class MainView(QWidget):
     def initUI(self):
         self.leftdock = LeftDockView(self.model, self)
         self.central = CentralView(self.model, self)
+        self.rightdock = RightDockView(self.model, self)
 
         # create layout
         hbox = QHBoxLayout()
@@ -24,7 +26,7 @@ class MainView(QWidget):
         # canvas as central widget
         hbox.addWidget(self.central, 7)
         # rightdock
-        # hbox.addWidget(self.rightdock, r)
+        hbox.addWidget(self.rightdock, 2)
 
         self.setLayout(hbox)
 
@@ -54,11 +56,14 @@ class MenuBar(QMenuBar):
     # help menu
     action_about: QAction
 
+    model: Model
+
     def __init__(self, model: Model, parent=None):
         super().__init__(parent=parent)
 
         self.model = check_instance('model', model, Model)
         self.initUI()
+        self.updateUI()
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
@@ -110,6 +115,24 @@ class MenuBar(QMenuBar):
                                            tip='about Table Data Analyzer')
 
         _add_actions(self.menu_help, (self.action_about,))
+
+    def updateUI(self):
+        """
+        Check if each part is enabled or not
+        Returns
+        -------
+
+        """
+        self.updateOpen()
+        self.updateViewer()
+
+    def updateOpen(self):
+        self.action_backfile.setEnabled(self.model.isExistBackImg)
+        self.action_forwardfile.setEnabled(self.model.isExistForwardImg)
+
+    def updateViewer(self):
+        self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
+        self.action_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
 
 
 def _add_actions(target, actions):

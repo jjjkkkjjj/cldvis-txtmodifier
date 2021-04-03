@@ -151,9 +151,14 @@ class LeftDockView(QWidget):
         -------
 
         """
-        self.updateFileView()
+        self.updateOpen()
+        self.updateViewer()
 
-    def updateFileView(self):
+    def updateOpen(self):
         self.button_back.setEnabled(self.model.isExistBackImg)
         self.button_forward.setEnabled(self.model.isExistForwardImg)
 
+    def updateViewer(self):
+        self.spinBox_zoom.setEnabled(self.model.isExistImg)
+        self.button_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
+        self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
