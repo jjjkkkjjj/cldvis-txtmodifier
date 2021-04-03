@@ -1,16 +1,25 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+import pathlib
 
-from .parts.button import Button
 from ..utils.modes import PredictionMode
 from ..utils.funcs import check_instance
 from ..model import Model
 
+class Button(QPushButton):
+    def __init__(self, icon_filename, parent=None):
+        super().__init__(parent=parent)
+
+        icon = QIcon(QPixmap(_get_iconpath(icon_filename)))
+        self.setIcon(icon)
+
+
+def _get_iconpath(icon_filename):
+    icondir = pathlib.Path.joinpath(pathlib.Path(__file__).parent.parent, 'icon')
+    return str(pathlib.Path.joinpath(icondir, icon_filename))
+
 class LeftDockView(QWidget):
-    ### Signal ###
-
-
     ### Attributes ###
     # group
     groupBox_file: QGroupBox
@@ -147,3 +156,4 @@ class LeftDockView(QWidget):
     def updateFileView(self):
         self.button_back.setEnabled(self.model.isExistBackImg)
         self.button_forward.setEnabled(self.model.isExistForwardImg)
+

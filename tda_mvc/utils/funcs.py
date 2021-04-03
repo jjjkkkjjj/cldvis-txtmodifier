@@ -1,4 +1,6 @@
+from PySide2.QtGui import *
 import os
+import numpy as np
 
 def check_instance(name, val, cls, allow_none=True):
     if allow_none and val is None:
@@ -15,3 +17,22 @@ def check_instance(name, val, cls, allow_none=True):
 
 def path_desktop():
     return os.path.join(os.path.expanduser('~'), 'Desktop')
+
+def cvimg2qpixmap(cvimg: np.ndarray):
+    """
+    Convert opencv's image ndarray into QPixmap
+    Parameters
+    ----------
+    cvimg: ndarray
+        The image ndarray (BGR order) loaded by opencv
+
+    Returns
+    -------
+    QPixmap
+        The image QPixmap
+
+    """
+    height, width, channel = cvimg.shape
+    bytesPerLine = 3 * width
+    qImg = QImage(cvimg.data, width, height, bytesPerLine, QImage.Format_RGB888)
+    return QPixmap(qImg)

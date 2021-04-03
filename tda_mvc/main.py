@@ -19,9 +19,23 @@ class MainViewController(LeftDockVCMixin, QMainWindow):
         # check credential
         self.check_credential()
 
+    @property
+    def leftdock(self):
+        return self.main.leftdock
+    @property
+    def central(self):
+        return self.main.central
+
     def initUI(self):
         self.main = MainView(self.model, self)
         self.setCentralWidget(self.main)
+
+        self.menu = MenuBar(self.model, self)
+        self.setMenuBar(self.menu)
+
+    def updateAllUI(self):
+        self.leftdock.updateUI()
+        self.central.updateUI()
 
     def establish_connection(self):
         LeftDockVCMixin.establish_connection(self)
