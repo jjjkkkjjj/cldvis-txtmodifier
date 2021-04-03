@@ -7,3 +7,5 @@ class CentralVCMixin(VCAbstractMixin):
     def imageView(self):
         return self.central.imageView
 
+    def establish_connection(self):
+        self.imageView.areaChanged.connect()

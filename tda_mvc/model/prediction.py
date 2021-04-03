@@ -4,9 +4,10 @@ import io, os, json, cv2
 
 from .base import ModelAbstractMixin
 
-class VisionModelMixin(ModelAbstractMixin):
+class PredictionModelMixin(ModelAbstractMixin):
     client: vision.ImageAnnotatorClient
     results: dict
+    # TODO: Annotation
 
     def __init__(self):
         self.client = None

@@ -68,7 +68,7 @@ class MenuBar(QMenuBar):
     def initUI(self):
         self.menu_file = self.addMenu('&File')
         self.menu_viewer = self.addMenu('&View')
-        self.menu_prediction = self.addMenu('&Run')
+        self.menu_prediction = self.addMenu('&Prediction')
         self.menu_help = self.addMenu('&Help')
 
         ##### File #####

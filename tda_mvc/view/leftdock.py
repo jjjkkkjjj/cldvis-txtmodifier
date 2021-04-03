@@ -122,7 +122,7 @@ class LeftDockView(QWidget):
 
         ##### Run #####
         vbox_run = QVBoxLayout()
-        self.groupBox_prediction = QGroupBox('Run', self)
+        self.groupBox_prediction = QGroupBox('Prediction', self)
 
         # remove
         self.button_removeRect = Button('remove.png')
@@ -153,6 +153,7 @@ class LeftDockView(QWidget):
         """
         self.updateOpen()
         self.updateViewer()
+        self.updatePrediction()
 
     def updateOpen(self):
         self.button_back.setEnabled(self.model.isExistBackImg)
@@ -162,3 +163,6 @@ class LeftDockView(QWidget):
         self.spinBox_zoom.setEnabled(self.model.isExistImg)
         self.button_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
+
+    def updatePrediction(self):
+        pass

@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 import os, glob
 
 from ..view import AboutDialog
+from ..utils.modes import PredictionMode
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -22,6 +23,9 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.button_zoomin.clicked.connect(lambda: self.zoomInOut(True))
         self.leftdock.button_zoomout.clicked.connect(lambda: self.zoomInOut(False))
         self.leftdock.spinBox_zoom.valueChanged.connect(lambda value: self.zoomValueChanged(value))
+
+        # prediction
+        self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
 
         ### menu ###
         # open
@@ -98,7 +102,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.model.zoomvalue = value
         self.central.updateUI()
 
-
     def openAbout(self):
         aboutBox = AboutDialog(self)
         aboutBox.show()
+
+    def predmodeChanged(self, mode):
+        self.model.predmode = mode
+        self.central.updateUI()

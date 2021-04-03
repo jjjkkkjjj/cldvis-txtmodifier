@@ -4,14 +4,94 @@ from PySide2.QtGui import *
 import os, cv2
 
 from ..utils.funcs import check_instance, cvimg2qpixmap
+from ..utils.modes import PredictionMode, MoveActionState
+from ..utils.geometry import *
 from ..model import Model
 
 class ImageView(QLabel):
-    def __init__(self, parent=None):
+    ### Signal ###
+    areaChanged = Signal()
+
+    # model
+    model: Model
+    def __init__(self, model: Model, parent=None):
         super().__init__(parent)
+
+        self.model = check_instance('model', model, Model)
+
+        self.moveActionState = MoveActionState.CREATE
 
         # mouseMoveEvent will be fired on pressing any button
         self.setMouseTracking(True)
+
+
+    def updateUI(self):
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.rect_imagemode.show()
+            self.model.poly_tablemode.hide()
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.rect_imagemode.hide()
+            self.model.poly_tablemode.show()
+        self.repaint()
+
+    def mousePressEvent(self, e: QMouseEvent):
+        # Note that this method is called earlier than contextMenuEvent
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.mousePress_imagemode(e.pos(), self.size())
+
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.mousePress_tablemode(e.pos(), self.size())
+
+        self.updateUI()
+
+    def mouseMoveEvent(self, e: QMouseEvent):
+        # Note that this method is called earlier than contextMenuEvent
+        if isinstance(e, QContextMenuEvent):
+            return
+
+        pos = e.pos()
+        if e.buttons() == Qt.LeftButton:
+            # in clicking
+            if self.model.predmode == PredictionMode.IMAGE:
+                self.model.mouseMoveClicked_imagemode(pos, self.size())
+            elif self.model.predmode == PredictionMode.TABLE:
+                self.model.mouseMoveClicked_tablemode(pos, self.size())
+
+        elif e.buttons() == Qt.NoButton:
+            if self.model.predmode == PredictionMode.IMAGE:
+                self.model.mouseMoveNoButton_imagemode(pos)
+            elif self.model.predmode == PredictionMode.TABLE:
+                self.model.mouseMoveNoButton_tablemode(pos)
+
+        self.updateUI()
+
+    def mouseReleaseEvent(self, e: QMouseEvent):
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.mouseRelease_imagemode()
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.mouseRelease_tablemode()
+
+        self.updateUI()
+
+    def paintEvent(self, event):
+        if not self.pixmap():
+            return super().paintEvent(event)
+
+        # painter
+        painter = QPainter(self)
+        painter.drawPixmap(self.rect(), self.pixmap())
+
+        # pen
+        pen = QPen(QColor(255, 0, 0))
+        pen.setWidth(3)
+
+        # set
+        painter.setPen(pen)
+
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.rect_imagemode.paint(painter)
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.poly_tablemode.paint(painter)
 
 class CentralView(QWidget):
     ### Attributes ###
@@ -42,7 +122,7 @@ class CentralView(QWidget):
 
         # image
         self.scrollArea = QScrollArea(self)
-        self.imageView = ImageView(self)
+        self.imageView = ImageView(self.model, self)
 
         self.imageView.setBackgroundRole(QPalette.Base)
         # self.img.setScaledContents(True) # allow to stretch
@@ -56,6 +136,8 @@ class CentralView(QWidget):
         self.setLayout(vbox)
 
     def updateUI(self):
+        self.imageView.updateUI()
+
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
         self.imageView.setEnabled(self.model.isExistImg)
@@ -79,6 +161,8 @@ class CentralView(QWidget):
 
         self.imageView.setPixmap(pixmap)
 
-
-
-
+        # set parentSize
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.rect_imagemode.set_parentVals(parentQSize=pixmap.size())
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.poly_tablemode.set_parentVals(parentQSize=pixmap.size())
