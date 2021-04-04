@@ -12,6 +12,10 @@ class ShowingMode(Enum):
     ENTIRE = 'entire'
     SELECTED = 'selected'
 
+class AreaMode(Enum):
+    RECTANGLE = 'rectangle'
+    QUADRANGLE = 'quadrangle'
+
 class MoveActionState(Enum):
     CREATE = 0
     RESIZE = 1

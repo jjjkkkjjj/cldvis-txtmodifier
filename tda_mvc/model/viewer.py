@@ -1,6 +1,6 @@
 import cv2, os, shutil
 
-from ..utils.modes import PredictionMode, MoveActionState, ShowingMode
+from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode
 from ..utils.geometry import *
 from .base import ModelAbstractMixin
 
@@ -14,17 +14,21 @@ class ViewerModelMixin(ModelAbstractMixin):
         # showing mode
         self.showingmode = ShowingMode.ENTIRE
 
+        # area mode
+        self.areamode = AreaMode.RECTANGLE
+
         # image mode
-        self.rect_imagemode = Rect()
+        self.rectangle = Rect()
         # table mode
-        self.poly_docmentmode = Polygon(maximum_points_number=4)
-        self.rect_imagemode.hide()
-        self.poly_docmentmode.hide()
+        self.quadrangle = Polygon(maximum_points_number=4)
+        self.rectangle.hide()
+        self.quadrangle.hide()
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
 
-        self.selectedImgPath = None
+        self.selectedRectImgPath = None
+        self.selectedQuadImgPath = None
 
     ### Zoom ###
     @property
@@ -36,38 +40,52 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     @property
     def isExistArea(self):
-        if self.predmode == PredictionMode.IMAGE:
-            return self.rect_imagemode.isDrawableRect
-        elif self.predmode == PredictionMode.DOCUMENT:
-            return self.poly_docmentmode.isDrawablePolygon
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.isDrawableRect
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.isDrawablePolygon
         return False
     @property
     def isPredictable(self):
         # Slightly different from isExistArea!
-        if self.predmode == PredictionMode.IMAGE:
-            return self.rect_imagemode.isDrawableRect
-        elif self.predmode == PredictionMode.DOCUMENT:
-            return self.poly_docmentmode.points_number == 4
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.isDrawableRect
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.points_number == 4
         return False
+    @property
+    def isRectPredictable(self):
+        return self.rectangle.isDrawableRect
+    @property
+    def isQuadPredictable(self):
+        return self.quadrangle.points_number == 4
 
-    ### Image ###
-    def mousePress_imagemode(self, pos, parentQSize):
+    @property
+    def selectedImgPath(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.selectedRectImgPath
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.selectedQuadImgPath
+        return None
+
+    ### rect ###
+    def mousePress_rectmode(self, pos, parentQSize):
         self._startPosition = pos
 
-        self.rect_imagemode.set_parentVals(parentQSize=parentQSize)
-        self.rect_imagemode.set_selectPos(pos)
+        self.rectangle.set_parentVals(parentQSize=parentQSize)
+        self.rectangle.set_selectPos(pos)
 
-        if self.rect_imagemode.isSelectedPoint:
+        if self.rectangle.isSelectedPoint:
             # if pressed position is edge
             # expand or shrink parentQSize
             self.moveActionState = MoveActionState.RESIZE
             # [tl, tr, br, bl] -> [br, bl, tl, tr]
             diagIndex = [2, 3, 0, 1]
-            diagPos = self.rect_imagemode.qpoints[diagIndex[self.rect_imagemode.selectedPointIndex]]
+            diagPos = self.rectangle.qpoints[diagIndex[self.rectangle.selectedPointIndex]]
             self._startPosition = diagPos
             return
 
-        if self.rect_imagemode.isSelectedRect:
+        if self.rectangle.isSelectedRect:
             # if pressed position is contained in parentQSize
             # move the parentQSize
             self.moveActionState = MoveActionState.MOVE
@@ -75,42 +93,42 @@ class ViewerModelMixin(ModelAbstractMixin):
         else:
             # create new parentQSize
             self.moveActionState = MoveActionState.CREATE
-            self.rect_imagemode.append(pos)
+            self.rectangle.append(pos)
 
-    def mouseMoveClicked_imagemode(self, pos, parentQSize: QSize):
+    def mouseMoveClicked_rectmode(self, pos, parentQSize: QSize):
         if self.moveActionState == MoveActionState.MOVE:
             movedAmount = pos - self._startPosition
-            self.rect_imagemode.move(movedAmount)
+            self.rectangle.move(movedAmount)
             self._startPosition = pos
             return
 
         # Note that moveActionState must be CREATE or RESIZE
         if self.moveActionState == MoveActionState.RESIZE:
             # for changing selected Point
-            self.rect_imagemode.set_selectPos(pos)
+            self.rectangle.set_selectPos(pos)
 
         # clipping
         pos.setX(min(max(pos.x(), 0), parentQSize.width()))
         pos.setY(min(max(pos.y(), 0), parentQSize.height()))
 
         qrect = QRect(self._startPosition, pos).normalized()
-        self.rect_imagemode.set_qrect(qrect)
+        self.rectangle.set_qrect(qrect)
 
-    def mouseMoveNoButton_imagemode(self, pos):
-        self.rect_imagemode.set_selectPos(pos)
+    def mouseMoveNoButton_rectmode(self, pos):
+        self.rectangle.set_selectPos(pos)
 
-    def mouseRelease_imagemode(self):
+    def mouseRelease_rectmode(self):
         if self.moveActionState == MoveActionState.RESIZE:
-            self.rect_imagemode.deselect()
+            self.rectangle.deselect()
         self._startPosition = QPoint(0, 0)
 
-    def saveSelectedImg_imagemode(self, imgpath):
-        if not self.rect_imagemode.isDrawableRect:
-            self.selectedImgPath = None
+    def saveSelectedImg_rectmode(self, imgpath):
+        if not self.rectangle.isDrawableRect:
+            self.selectedRectImgPath = None
             return
 
         img = cv2.imread(imgpath)
-        tl, br = self.rect_imagemode.topLeft, self.rect_imagemode.bottomRight
+        tl, br = self.rectangle.topLeft, self.rectangle.bottomRight
 
         xmin, xmax, ymin, ymax = tl.x(), br.x(), tl.y(), br.y()
 
@@ -119,21 +137,21 @@ class ViewerModelMixin(ModelAbstractMixin):
         savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
 
         cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
-        self.selectedImgPath = savepath
+        self.selectedRectImgPath = savepath
 
-    ### Table ###
-    def mousePress_tablemode(self, pos, parentQSize):
+    ### quad ###
+    def mousePress_quadmode(self, pos, parentQSize):
         self._startPosition = pos
 
-        self.poly_docmentmode.set_parentVals(parentQSize=parentQSize)
-        self.poly_docmentmode.set_selectPos(pos)
+        self.quadrangle.set_parentVals(parentQSize=parentQSize)
+        self.quadrangle.set_selectPos(pos)
 
-        if self.poly_docmentmode.isSelectedPoint:
+        if self.quadrangle.isSelectedPoint:
             self.moveActionState = MoveActionState.RESIZE
-            self._startPosition = self.poly_docmentmode.selectedQPoint
+            self._startPosition = self.quadrangle.selectedQPoint
             return
 
-        if self.poly_docmentmode.isSelectedPolygon:
+        if self.quadrangle.isSelectedPolygon:
             # if pressed position is contained in parentQSize
             # move the parentQSize
             self.moveActionState = MoveActionState.MOVE
@@ -141,12 +159,12 @@ class ViewerModelMixin(ModelAbstractMixin):
         else:
             # create new parentQSize
             self.moveActionState = MoveActionState.CREATE
-            self.poly_docmentmode.append(pos)
+            self.quadrangle.append(pos)
 
-    def mouseMoveClicked_tablemode(self, pos, parentQSize: QSize):
+    def mouseMoveClicked_quadmode(self, pos, parentQSize: QSize):
         if self.moveActionState == MoveActionState.MOVE:
             movedAmount = pos - self._startPosition
-            self.poly_docmentmode.move(movedAmount)
+            self.quadrangle.move(movedAmount)
             self._startPosition = pos
             return
 
@@ -156,14 +174,14 @@ class ViewerModelMixin(ModelAbstractMixin):
         pos.setY(min(max(pos.y(), 0), parentQSize.height()))
 
         if self.moveActionState == MoveActionState.RESIZE:
-            self.poly_docmentmode.move_qpoint(self.poly_docmentmode.selectedPointIndex, pos)
+            self.quadrangle.move_qpoint(self.quadrangle.selectedPointIndex, pos)
             # for changing selected Point
-            self.poly_docmentmode.set_selectPos(pos)
+            self.quadrangle.set_selectPos(pos)
             return
-        self.poly_docmentmode.move_qpoint(-1, pos)
+        self.quadrangle.move_qpoint(-1, pos)
 
-    def mouseMoveNoButton_tablemode(self, pos):
-        self.poly_docmentmode.set_selectPos(pos)
+    def mouseMoveNoButton_quadmode(self, pos):
+        self.quadrangle.set_selectPos(pos)
         """
         if self.areamode == AreaMode.SELECTION:
             self.selection.set_selectPos(e.pos())
@@ -171,16 +189,16 @@ class ViewerModelMixin(ModelAbstractMixin):
             self.annotation.set_selectPos(e.pos())
         """
 
-    def mouseRelease_tablemode(self):
+    def mouseRelease_quadmode(self):
         self._startPosition = QPoint(0, 0)
 
-    def saveSelectedImg_tablemode(self, imgpath):
-        if self.poly_docmentmode.points_number < 4:
-            self.selectedImgPath = None
+    def saveSelectedImg_quadmode(self, imgpath):
+        if self.quadrangle.points_number < 4:
+            self.selectedQuadImgPath = None
             return
 
         img = cv2.imread(imgpath)
-        tl, tr, br, bl = self.poly_docmentmode.qpoints
+        tl, tr, br, bl = self.quadrangle.qpoints
 
         hmax = int(max((bl - tl).y(), (br - tr).y()))
         wmax = int(max((tr - tl).x(), (br - bl).x()))
@@ -198,13 +216,13 @@ class ViewerModelMixin(ModelAbstractMixin):
         savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
 
         cv2.imwrite(savepath, img_cropped)
-        self.selectedImgPath = savepath
+        self.selectedQuadImgPath = savepath
 
     def removeArea(self):
-        if self.predmode == PredictionMode.IMAGE:
-            self.rect_imagemode.clear()
-        elif self.predmode == PredictionMode.DOCUMENT:
-            self.poly_docmentmode.clear()
+        if self.areamode == AreaMode.RECTANGLE:
+            self.rectangle.clear()
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self.quadrangle.clear()
 
     def clearTmpImg(self):
         # remove all tmp images

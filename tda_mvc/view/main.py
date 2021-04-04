@@ -1,6 +1,9 @@
 from PySide2.QtWidgets import *
+from PySide2.QtGui import *
+from PySide2.QtCore import *
 
 from ..utils.funcs import check_instance
+from ..utils.modes import ShowingMode
 from ..model import Model
 from .leftdock import LeftDockView
 from .central import CentralView
@@ -109,6 +112,13 @@ class MenuBar(QMenuBar):
                                         self.action_showentire, self.action_showselected))
 
         ##### Run #####
+        # area mode
+        self.action_areaRectMode = _create_action(self, '&Rectangle Mode', slot=None,
+                                                  shortcut="r", tip='Use rectangle for prediction')
+
+        self.action_areaQuadMode = _create_action(self, '&Quadrangle Mode', slot=None,
+                                                  shortcut="q", tip='Use quadrangle for prediction')
+
         # remove
         self.action_removeArea = _create_action(self, '&Remove Rectangle', slot=None,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
@@ -125,7 +135,8 @@ class MenuBar(QMenuBar):
         self.action_predict = _create_action(self, '&Predict Table', slot=None,
                                              shortcut="Ctrl+R", tip='Predict table')
 
-        _add_actions(self.menu_prediction, (self.action_removeArea, None,
+        _add_actions(self.menu_prediction, (self.action_areaRectMode, self.action_areaQuadMode, None,
+                                            self.action_removeArea, None,
                                             self.action_predictImageMode, self.action_predictDocumentMode, None,
                                             self.action_predict, None))
 
@@ -157,6 +168,12 @@ class MenuBar(QMenuBar):
         self.action_showselected.setEnabled(self.model.isPredictable)
 
     def updatePrediction(self):
+        # below is replaced into
+        # `not (self.model.showingmode == ShowingMode.SELECTED and not self.model.isRectPredictable)`
+        # due to De Morgan's laws
+        self.action_areaRectMode.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isRectPredictable)
+        self.action_areaQuadMode.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isQuadPredictable)
+
         self.action_removeArea.setEnabled(self.model.isExistArea)
         self.action_predict.setEnabled(self.model.isPredictable)
 

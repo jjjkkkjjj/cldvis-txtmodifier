@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import pathlib
 
-from ..utils.modes import PredictionMode
+from ..utils.modes import PredictionMode, ShowingMode
 from ..utils.funcs import check_instance
 from ..model import Model
 
@@ -124,6 +124,21 @@ class LeftDockView(QWidget):
         vbox_run = QVBoxLayout()
         self.groupBox_prediction = QGroupBox('Prediction', self)
 
+        # area mode
+        vbox_areamode = QVBoxLayout()
+        self.groupBox_areamode = QGroupBox('Area Mode', self)
+
+        self.radioButton_rect = QRadioButton('Rectangle')
+        self.radioButton_rect.setChecked(True)
+        vbox_areamode.addWidget(self.radioButton_rect)
+
+        self.radioButton_quad = QRadioButton('Quadrangle')
+        vbox_areamode.addWidget(self.radioButton_quad)
+
+        self.groupBox_areamode.setLayout(vbox_areamode)
+        vbox_run.addWidget(self.groupBox_areamode, 1)
+
+
         # remove
         self.button_removeArea = Button('remove.png')
         vbox_run.addWidget(self.button_removeArea)
@@ -166,5 +181,11 @@ class LeftDockView(QWidget):
         self.radioButton_selected.setEnabled(self.model.isPredictable)
 
     def updatePrediction(self):
+        # below is replaced into
+        # `not (self.model.showingmode == ShowingMode.SELECTED and not self.model.isRectPredictable)`
+        # due to De Morgan's laws
+        self.radioButton_rect.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isRectPredictable)
+        self.radioButton_quad.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isQuadPredictable)
+
         self.button_removeArea.setEnabled(self.model.isExistArea)
         self.button_predict.setEnabled(self.model.isPredictable)

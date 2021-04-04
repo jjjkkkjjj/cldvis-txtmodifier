@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 import os, glob
 
 from ..view import AboutDialog
-from ..utils.modes import PredictionMode, ShowingMode
+from ..utils.modes import PredictionMode, ShowingMode, AreaMode
 from ..utils.exception import PredictionError
 from .base import VCAbstractMixin
 
@@ -28,6 +28,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.radioButton_selected.clicked.connect(lambda: self.showingmodeChanged(ShowingMode.SELECTED))
 
         # prediction
+        self.leftdock.radioButton_rect.clicked.connect(lambda: self.areamodeChanged(AreaMode.RECTANGLE))
+        self.leftdock.radioButton_quad.clicked.connect(lambda: self.areamodeChanged(AreaMode.QUADRANGLE))
         self.leftdock.button_removeArea.clicked.connect(self.removeArea)
         self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
         self.leftdock.button_predict.clicked.connect(self.predict)
@@ -46,6 +48,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.menu.action_showselected.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
 
         # prediction
+        self.menu.action_areaRectMode.triggered.connect(lambda: self.leftdock.radioButton_rect.click())
+        self.menu.action_areaQuadMode.triggered.connect(lambda: self.leftdock.radioButton_quad.click())
         self.menu.action_removeArea.triggered.connect(self.removeArea)
         self.menu.action_predictImageMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(0))
         self.menu.action_predictDocumentMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
@@ -129,10 +133,18 @@ class LeftDockVCMixin(VCAbstractMixin):
     def showingmodeChanged(self, mode):
         self.model.showingmode = mode
 
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.saveSelectedImg_imagemode(self.model.imgpath)
-        elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.model.saveSelectedImg_tablemode(self.model.imgpath)
+        if self.model.showingmode == ShowingMode.SELECTED:
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.saveSelectedImg_rectmode(self.model.imgpath)
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.saveSelectedImg_quadmode(self.model.imgpath)
+
+        self.leftdock.updateUI()
+        self.central.updateUI()
+        self.menu.updateUI()
+
+    def areamodeChanged(self, mode):
+        self.model.areamode = mode
 
         self.leftdock.updateUI()
         self.central.updateUI()
@@ -140,10 +152,11 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def removeArea(self):
         self.model.removeArea()
-
-        self.leftdock.updateUI()
-        self.central.updateUI()
-        self.menu.updateUI()
+        self.leftdock.radioButton_entire.click()
+        # call areamodeChanged, so below codes are redundant
+        #self.leftdock.updateUI()
+        #self.central.updateUI()
+        #self.menu.updateUI()
 
     def predict(self):
         from ..main import MainViewController
@@ -151,16 +164,16 @@ class LeftDockVCMixin(VCAbstractMixin):
         import numpy as np
         if MainViewController.debug:
             # read area from csv
-            self.model.rect_imagemode.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
-            self.model.poly_docmentmode.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
+            self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
+            self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
 
             # read results from json
-            if self.model.predmode == PredictionMode.IMAGE:
-                self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
                 with open(os.path.join('debug', 'result-rect.json'), 'r') as f:
                     results = json.load(f)
-            elif self.model.predmode == PredictionMode.DOCUMENT:
-                self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.selectedQuadImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
                 with open(os.path.join('debug', 'result-poly.json'), 'r') as f:
                     results = json.load(f)
             # show image
@@ -172,13 +185,13 @@ class LeftDockVCMixin(VCAbstractMixin):
             if self.model.predmode == PredictionMode.IMAGE:
                 results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
 
-                np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rect_imagemode.percent_points, delimiter=',')
+                np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
                 self.model.saveAsJson(os.path.join('debug', 'result-rect.json'))
 
             elif self.model.predmode == PredictionMode.DOCUMENT:
                 results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
-                np.savetxt(os.path.join('debug', 'poly.csv'), self.model.poly_docmentmode.percent_points, delimiter=',')
+                np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
                 self.model.saveAsJson(os.path.join('debug', 'result-poly.json'))
 
         except PredictionError as e:
@@ -191,12 +204,12 @@ class LeftDockVCMixin(VCAbstractMixin):
         # add annotation
         if self.model.showingmode == ShowingMode.ENTIRE:
             # get offset
-            if self.model.predmode == PredictionMode.IMAGE:
-                parentQSize = self.model.rect_imagemode.qsize
-                offsetQPoint = self.model.rect_imagemode.topLeft
-            elif self.model.predmode == PredictionMode.DOCUMENT:
-                parentQSize = self.model.poly_docmentmode.qsize
-                offsetQPoint = self.model.poly_docmentmode.qpoints[0]
+            if self.model.areamode == AreaMode.RECTANGLE:
+                parentQSize = self.model.rectangle.qsize
+                offsetQPoint = self.model.rectangle.topLeft
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                parentQSize = self.model.quadrangle.qsize
+                offsetQPoint = self.model.quadrangle.qpoints[0]
 
             self.model.set_annotations(results, baseWidget=self.central.imageView,
                                        parentQSize=parentQSize, offsetQPoint=offsetQPoint)

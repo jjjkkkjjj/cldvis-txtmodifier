@@ -4,7 +4,7 @@ from PySide2.QtGui import *
 import os, cv2
 
 from ..utils.funcs import check_instance, cvimg2qpixmap
-from ..utils.modes import PredictionMode, MoveActionState, ShowingMode
+from ..utils.modes import AreaMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
 from ..model import Model
 
@@ -55,10 +55,10 @@ class ImageView(QLabel):
         # set
         painter.setPen(pen)
 
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.rect_imagemode.paint(painter)
-        elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.model.poly_docmentmode.paint(painter)
+        if self.model.areamode == AreaMode.RECTANGLE:
+            self.model.rectangle.paint(painter)
+        elif self.model.areamode == AreaMode.QUADRANGLE:
+            self.model.quadrangle.paint(painter)
         for anno in self.model.annotations:
             anno.paint(painter)
 
@@ -127,13 +127,14 @@ class CentralView(QWidget):
             cvimg = cv2.imread(self.model.imgpath)
         elif self.model.showingmode == ShowingMode.SELECTED:
             cvimg = cv2.imread(self.model.selectedImgPath)
+
         h, w, c = cvimg.shape
         ratio = self.model.zoomvalue / 100.
         pixmap = cvimg2qpixmap(cv2.resize(cvimg, (int(w * ratio), int(h * ratio))))
         self.imageView.setPixmap(pixmap)
 
         # set parentSize
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.rect_imagemode.set_parentVals(parentQSize=pixmap.size())
-        elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.model.poly_docmentmode.set_parentVals(parentQSize=pixmap.size())
+        if self.model.areamode == AreaMode.RECTANGLE:
+            self.model.rectangle.set_parentVals(parentQSize=pixmap.size())
+        elif self.model.areamode == AreaMode.QUADRANGLE:
+            self.model.quadrangle.set_parentVals(parentQSize=pixmap.size())
