@@ -189,3 +189,9 @@ class LeftDockView(QWidget):
 
         self.button_removeArea.setEnabled(self.model.isExistArea)
         self.button_predict.setEnabled(self.model.isPredictable)
+
+        # if the image has already predicted, disable
+        self.groupBox_areamode.setEnabled(not self.model.isPredicted)
+        self.button_removeArea.setEnabled(not self.model.isPredicted)
+        self.comboBox_predmode.setEnabled(not self.model.isPredicted)
+        self.button_predict.setEnabled(not self.model.isPredicted)

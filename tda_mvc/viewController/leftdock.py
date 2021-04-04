@@ -170,36 +170,53 @@ class LeftDockVCMixin(VCAbstractMixin):
             # read results from json
             if self.model.areamode == AreaMode.RECTANGLE:
                 self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
-                with open(os.path.join('debug', 'result-rect.json'), 'r') as f:
+                if self.model.predmode == PredictionMode.IMAGE:
+                    jsonpath = os.path.join('debug', 'result-rect-image.json')
+                elif self.model.predmode == PredictionMode.DOCUMENT:
+                    jsonpath = os.path.join('debug', 'result-rect-document.json')
+
+                with open(jsonpath, 'r') as f:
                     results = json.load(f)
             elif self.model.areamode == AreaMode.QUADRANGLE:
                 self.model.selectedQuadImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
-                with open(os.path.join('debug', 'result-poly.json'), 'r') as f:
+                if self.model.predmode == PredictionMode.IMAGE:
+                    jsonpath = os.path.join('debug', 'result-quad-image.json')
+                elif self.model.predmode == PredictionMode.DOCUMENT:
+                    jsonpath = os.path.join('debug', 'result-quad-document.json')
+
+                with open(jsonpath, 'r') as f:
                     results = json.load(f)
-            # show image
-            self.central.updateUI()
+            self.model.results = results
 
-        try:
-            # prediction
-            import json
-            if self.model.predmode == PredictionMode.IMAGE:
-                results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
+        else:
+            try:
+                # prediction
+                import json
+                if self.model.predmode == PredictionMode.IMAGE:
+                    results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
 
-                np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
-                self.model.saveAsJson(os.path.join('debug', 'result-rect.json'))
+                    np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
+                    if self.model.areamode == AreaMode.RECTANGLE:
+                        self.model.saveAsJson(os.path.join('debug', 'result-rect-image.json'))
+                    elif self.model.areamode == AreaMode.QUADRANGLE:
+                        self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
 
-            elif self.model.predmode == PredictionMode.DOCUMENT:
-                results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
+                elif self.model.predmode == PredictionMode.DOCUMENT:
+                    results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
-                np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
-                self.model.saveAsJson(os.path.join('debug', 'result-poly.json'))
+                    np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
+                    if self.model.areamode == AreaMode.RECTANGLE:
+                        self.model.saveAsJson(os.path.join('debug', 'result-rect-document.json'))
+                    elif self.model.areamode == AreaMode.QUADRANGLE:
+                        self.model.saveAsJson(os.path.join('debug', 'result-quad-document.json'))
 
-        except PredictionError as e:
-            # show messagebox
-            ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
-            if ret == QMessageBox.Yes:
-                # remove tmp files
-                self.model.clearTmpImg()
+
+            except PredictionError as e:
+                # show messagebox
+                ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+                if ret == QMessageBox.Yes:
+                    # remove tmp files
+                    self.model.clearTmpImg()
 
         # add annotation
         if self.model.showingmode == ShowingMode.ENTIRE:
@@ -218,3 +235,4 @@ class LeftDockVCMixin(VCAbstractMixin):
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.central.updateUI()
+        self.leftdock.updateUI()
