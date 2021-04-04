@@ -58,7 +58,9 @@ class ImageView(QLabel):
         if self.model.predmode == PredictionMode.IMAGE:
             self.model.rect_imagemode.paint(painter)
         elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.model.poly_tablemode.paint(painter)
+            self.model.poly_docmentmode.paint(painter)
+        for anno in self.model.annotations:
+            anno.paint(painter)
 
 class CentralView(QWidget):
     ### Attributes ###
@@ -134,4 +136,4 @@ class CentralView(QWidget):
         if self.model.predmode == PredictionMode.IMAGE:
             self.model.rect_imagemode.set_parentVals(parentQSize=pixmap.size())
         elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.model.poly_tablemode.set_parentVals(parentQSize=pixmap.size())
+            self.model.poly_docmentmode.set_parentVals(parentQSize=pixmap.size())

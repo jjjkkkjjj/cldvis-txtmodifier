@@ -17,9 +17,9 @@ class ViewerModelMixin(ModelAbstractMixin):
         # image mode
         self.rect_imagemode = Rect()
         # table mode
-        self.poly_tablemode = Polygon(maximum_points_number=4)
+        self.poly_docmentmode = Polygon(maximum_points_number=4)
         self.rect_imagemode.hide()
-        self.poly_tablemode.hide()
+        self.poly_docmentmode.hide()
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
@@ -39,7 +39,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         if self.predmode == PredictionMode.IMAGE:
             return self.rect_imagemode.isDrawableRect
         elif self.predmode == PredictionMode.DOCUMENT:
-            return self.poly_tablemode.isDrawablePolygon
+            return self.poly_docmentmode.isDrawablePolygon
         return False
     @property
     def isPredictable(self):
@@ -47,7 +47,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         if self.predmode == PredictionMode.IMAGE:
             return self.rect_imagemode.isDrawableRect
         elif self.predmode == PredictionMode.DOCUMENT:
-            return self.poly_tablemode.points_number == 4
+            return self.poly_docmentmode.points_number == 4
         return False
 
     ### Image ###
@@ -125,15 +125,15 @@ class ViewerModelMixin(ModelAbstractMixin):
     def mousePress_tablemode(self, pos, parentQSize):
         self._startPosition = pos
 
-        self.poly_tablemode.set_parentVals(parentQSize=parentQSize)
-        self.poly_tablemode.set_selectPos(pos)
+        self.poly_docmentmode.set_parentVals(parentQSize=parentQSize)
+        self.poly_docmentmode.set_selectPos(pos)
 
-        if self.poly_tablemode.isSelectedPoint:
+        if self.poly_docmentmode.isSelectedPoint:
             self.moveActionState = MoveActionState.RESIZE
-            self._startPosition = self.poly_tablemode.selectedQPoint
+            self._startPosition = self.poly_docmentmode.selectedQPoint
             return
 
-        if self.poly_tablemode.isSelectedPolygon:
+        if self.poly_docmentmode.isSelectedPolygon:
             # if pressed position is contained in parentQSize
             # move the parentQSize
             self.moveActionState = MoveActionState.MOVE
@@ -141,12 +141,12 @@ class ViewerModelMixin(ModelAbstractMixin):
         else:
             # create new parentQSize
             self.moveActionState = MoveActionState.CREATE
-            self.poly_tablemode.append(pos)
+            self.poly_docmentmode.append(pos)
 
     def mouseMoveClicked_tablemode(self, pos, parentQSize: QSize):
         if self.moveActionState == MoveActionState.MOVE:
             movedAmount = pos - self._startPosition
-            self.poly_tablemode.move(movedAmount)
+            self.poly_docmentmode.move(movedAmount)
             self._startPosition = pos
             return
 
@@ -156,14 +156,14 @@ class ViewerModelMixin(ModelAbstractMixin):
         pos.setY(min(max(pos.y(), 0), parentQSize.height()))
 
         if self.moveActionState == MoveActionState.RESIZE:
-            self.poly_tablemode.move_qpoint(self.poly_tablemode.selectedPointIndex, pos)
+            self.poly_docmentmode.move_qpoint(self.poly_docmentmode.selectedPointIndex, pos)
             # for changing selected Point
-            self.poly_tablemode.set_selectPos(pos)
+            self.poly_docmentmode.set_selectPos(pos)
             return
-        self.poly_tablemode.move_qpoint(-1, pos)
+        self.poly_docmentmode.move_qpoint(-1, pos)
 
     def mouseMoveNoButton_tablemode(self, pos):
-        self.poly_tablemode.set_selectPos(pos)
+        self.poly_docmentmode.set_selectPos(pos)
         """
         if self.areamode == AreaMode.SELECTION:
             self.selection.set_selectPos(e.pos())
@@ -175,12 +175,12 @@ class ViewerModelMixin(ModelAbstractMixin):
         self._startPosition = QPoint(0, 0)
 
     def saveSelectedImg_tablemode(self, imgpath):
-        if self.poly_tablemode.points_number < 4:
+        if self.poly_docmentmode.points_number < 4:
             self.selectedImgPath = None
             return
 
         img = cv2.imread(imgpath)
-        tl, tr, br, bl = self.poly_tablemode.qpoints
+        tl, tr, br, bl = self.poly_docmentmode.qpoints
 
         hmax = int(max((bl - tl).y(), (br - tr).y()))
         wmax = int(max((tr - tl).x(), (br - bl).x()))
@@ -204,7 +204,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         if self.predmode == PredictionMode.IMAGE:
             self.rect_imagemode.clear()
         elif self.predmode == PredictionMode.DOCUMENT:
-            self.poly_tablemode.clear()
+            self.poly_docmentmode.clear()
 
     def clearTmpImg(self):
         # remove all tmp images

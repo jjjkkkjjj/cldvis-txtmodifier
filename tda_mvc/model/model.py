@@ -1,6 +1,7 @@
 from .file import FileModelMixin
 from .prediction import PredictionModelMixin
 from .viewer import ViewerModelMixin
+from .annotation import AnnotationModelMixin
 from .config import Config
 
 
@@ -8,7 +9,7 @@ class _BaseModel(object):
     def __init__(self):
         pass
 
-class Model(FileModelMixin, ViewerModelMixin, PredictionModelMixin, _BaseModel):
+class Model(FileModelMixin, ViewerModelMixin, PredictionModelMixin, AnnotationModelMixin, _BaseModel):
     """
     Singleton class
     """
@@ -18,3 +19,4 @@ class Model(FileModelMixin, ViewerModelMixin, PredictionModelMixin, _BaseModel):
         FileModelMixin.__init__(self)
         ViewerModelMixin.__init__(self)
         PredictionModelMixin.__init__(self)
+        AnnotationModelMixin.__init__(self)

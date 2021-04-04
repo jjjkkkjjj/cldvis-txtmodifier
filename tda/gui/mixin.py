@@ -181,7 +181,7 @@ class PredictionMixin(MWAbstractMixin):
                 import numpy as np
                 areaPercentPolygon = np.loadtxt('tda/debug/image_rect.csv', delimiter=',')
                 # for debug
-                with open('tda/debug/result-image.json', 'r') as f:
+                with open('tda/debug/result-rect.json', 'r') as f:
                     import json
                     results = json.load(f)
 

@@ -147,19 +147,39 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def predict(self):
         from ..main import MainViewController
+        import json
+        import numpy as np
         if MainViewController.debug:
+            # read area from csv
+            self.model.rect_imagemode.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
+            self.model.poly_docmentmode.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
+
+            # read results from json
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
+                with open(os.path.join('debug', 'result-rect.json'), 'r') as f:
+                    results = json.load(f)
             elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
-            return
+                with open(os.path.join('debug', 'result-poly.json'), 'r') as f:
+                    results = json.load(f)
+            # show image
+            self.central.updateUI()
 
         try:
             # prediction
+            import json
             if self.model.predmode == PredictionMode.IMAGE:
                 results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
+
+                np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rect_imagemode.percent_points, delimiter=',')
+                self.model.saveAsJson(os.path.join('debug', 'result-rect.json'))
+
             elif self.model.predmode == PredictionMode.DOCUMENT:
                 results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
+
+                np.savetxt(os.path.join('debug', 'poly.csv'), self.model.poly_docmentmode.percent_points, delimiter=',')
+                self.model.saveAsJson(os.path.join('debug', 'result-poly.json'))
 
         except PredictionError as e:
             # show messagebox
@@ -167,3 +187,21 @@ class LeftDockVCMixin(VCAbstractMixin):
             if ret == QMessageBox.Yes:
                 # remove tmp files
                 self.model.clearTmpImg()
+
+        # add annotation
+        if self.model.showingmode == ShowingMode.ENTIRE:
+            # get offset
+            if self.model.predmode == PredictionMode.IMAGE:
+                parentQSize = self.model.rect_imagemode.qsize
+                offsetQPoint = self.model.rect_imagemode.topLeft
+            elif self.model.predmode == PredictionMode.DOCUMENT:
+                parentQSize = self.model.poly_docmentmode.qsize
+                offsetQPoint = self.model.poly_docmentmode.qpoints[0]
+
+            self.model.set_annotations(results, baseWidget=self.central.imageView,
+                                       parentQSize=parentQSize, offsetQPoint=offsetQPoint)
+        elif self.model.showingmode == ShowingMode.SELECTED:
+            self.model.set_annotations(results, baseWidget=self.central.imageView,
+                                       parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
+        # update all
+        self.central.updateUI()

@@ -60,6 +60,10 @@ class PredictionModelMixin(ModelAbstractMixin):
         self.results = parse_response(response, w, h, imgpath)
         return self.results
 
+    def saveAsJson(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.results, f)
+
 def parse_response(response, w, h, imgpath):
     # type is AnnotateImageResponse
     texts = response.text_annotations  # EntityAnnotation sequence

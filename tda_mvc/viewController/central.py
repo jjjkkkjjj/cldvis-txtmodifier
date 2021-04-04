@@ -55,16 +55,16 @@ class CentralVCMixin(VCAbstractMixin):
     def modelUpdateAftermouseEvent(self):
         if self.model.showingmode == ShowingMode.SELECTED:
             self.model.rect_imagemode.hide()
-            self.model.poly_tablemode.hide()
+            self.model.poly_docmentmode.hide()
             self.imageView.setEnabled(False)
 
         elif self.model.showingmode == ShowingMode.ENTIRE:
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.rect_imagemode.show()
-                self.model.poly_tablemode.hide()
+                self.model.poly_docmentmode.hide()
             elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.rect_imagemode.hide()
-                self.model.poly_tablemode.show()
+                self.model.poly_docmentmode.show()
             self.imageView.setEnabled(True)
 
         self.imageView.repaint()
