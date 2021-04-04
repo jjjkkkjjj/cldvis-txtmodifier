@@ -4,7 +4,7 @@ from PySide2.QtGui import *
 import os, cv2
 
 from ..utils.funcs import check_instance, cvimg2qpixmap
-from ..utils.modes import PredictionMode, MoveActionState
+from ..utils.modes import PredictionMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
 from ..model import Model
 
@@ -155,11 +155,13 @@ class CentralView(QWidget):
         self.img.setPixmap(None)
         self.img.setPixmap(pixmap.scaled(pixmap.parentQSize() * zoomvalue / 100., Qt.KeepAspectRatio, Qt.SmoothTransformation))
         """
-        cvimg = cv2.imread(self.model.imgpath)
+        if self.model.showingmode == ShowingMode.ENTIRE:
+            cvimg = cv2.imread(self.model.imgpath)
+        elif self.model.showingmode == ShowingMode.SELECTED:
+            cvimg = cv2.imread(self.model.selectedImgPath)
         h, w, c = cvimg.shape
         ratio = self.model.zoomvalue / 100.
         pixmap = cvimg2qpixmap(cv2.resize(cvimg, (int(w * ratio), int(h * ratio))))
-
         self.imageView.setPixmap(pixmap)
 
         # set parentSize

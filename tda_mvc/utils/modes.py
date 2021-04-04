@@ -8,6 +8,9 @@ class PredictionMode(Enum):
     def gen_list():
         return [m.value for m in PredictionMode]
 
+class ShowingMode(Enum):
+    ENTIRE = 'entire'
+    SELECTED = 'selected'
 
 class MoveActionState(Enum):
     CREATE = 0

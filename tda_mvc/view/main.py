@@ -97,7 +97,16 @@ class MenuBar(QMenuBar):
         self.action_zoomout = _create_action(self, '&Zoom Out', slot=None,
                                              shortcut="Ctrl+-", tip='Zoom out')
 
-        _add_actions(self.menu_viewer, (self.action_zoomin, self.action_zoomout, None))
+        # show entire image
+        self.action_showentire = _create_action(self, '&Show Entire Image', slot=None,
+                                                shortcut='Ctrl+E', tip='Show the entire image')
+
+        # show selected image
+        self.action_showselected = _create_action(self, '&Show Selected Image', slot=None,
+                                                  shortcut='Ctrl+R', tip='Show the selected image')
+
+        _add_actions(self.menu_viewer, (self.action_zoomin, self.action_zoomout, None,
+                                        self.action_showentire, self.action_showselected))
 
         ##### Run #####
         # remove
@@ -134,6 +143,7 @@ class MenuBar(QMenuBar):
     def updateViewer(self):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.action_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
+        self.action_showselected.setEnabled(self.model.isExistArea)
 
     def updatePrediction(self):
         self.action_removeArea.setEnabled(self.model.isExistArea)

@@ -37,7 +37,7 @@ class LeftDockView(QWidget):
     button_zoomin: Button
     spinBox_zoom: QSpinBox
     groupBox_showing: QGroupBox
-    radioButton_all: QRadioButton
+    radioButton_entire: QRadioButton
     radioButton_selected: QRadioButton
 
     # run
@@ -107,9 +107,9 @@ class LeftDockView(QWidget):
         vbox_showing = QVBoxLayout()
         self.groupBox_showing = QGroupBox('Showing', self)
 
-        self.radioButton_all = QRadioButton('All')
-        self.radioButton_all.setChecked(True)
-        vbox_showing.addWidget(self.radioButton_all)
+        self.radioButton_entire = QRadioButton('Entire')
+        self.radioButton_entire.setChecked(True)
+        vbox_showing.addWidget(self.radioButton_entire)
 
         self.radioButton_selected = QRadioButton('Selected')
         vbox_showing.addWidget(self.radioButton_selected)
@@ -163,6 +163,7 @@ class LeftDockView(QWidget):
         self.spinBox_zoom.setEnabled(self.model.isExistImg)
         self.button_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
+        self.radioButton_selected.setEnabled(self.model.isExistArea)
 
     def updatePrediction(self):
         self.button_removeArea.setEnabled(self.model.isExistArea)

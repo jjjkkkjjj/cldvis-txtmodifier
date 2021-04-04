@@ -1,4 +1,6 @@
-from ..utils.modes import PredictionMode, MoveActionState
+import cv2, os
+
+from ..utils.modes import PredictionMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
 from .base import ModelAbstractMixin
 
@@ -8,6 +10,10 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         # prediction mode
         self.predmode = PredictionMode.IMAGE
+
+        # showing mode
+        self.showingmode = ShowingMode.ENTIRE
+
         # image mode
         self.rect_imagemode = Rect()
         # table mode
@@ -17,6 +23,8 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
+
+        self.selectedImgPath = None
 
     ### Zoom ###
     @property
@@ -28,11 +36,7 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     @property
     def isExistArea(self):
-        if self.predmode == PredictionMode.IMAGE:
-            return self.rect_imagemode.isDrawableRect
-        elif self.predmode == PredictionMode.TABLE:
-            return self.poly_tablemode.isDrawablePolygon
-        return False
+        return self.selectedImgPath is not None
 
     ### Image ###
     def mousePress_imagemode(self, pos, parentQSize):
@@ -88,6 +92,23 @@ class ViewerModelMixin(ModelAbstractMixin):
             self.rect_imagemode.deselect()
         self._startPosition = QPoint(0, 0)
 
+    def saveSelectedImg_imagemode(self, imgpath):
+        if not self.rect_imagemode.isDrawableRect:
+            self.selectedImgPath = None
+            return
+
+        img = cv2.imread(imgpath)
+        tl, br = self.rect_imagemode.topLeft, self.rect_imagemode.bottomRight
+
+        xmin, xmax, ymin, ymax = tl.x(), br.x(), tl.y(), br.y()
+
+        filename, ext = os.path.splitext(os.path.basename(imgpath))
+        apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
+        savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
+
+        cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+        self.selectedImgPath = savepath
+
     ### Table ###
     def mousePress_tablemode(self, pos, parentQSize):
         self._startPosition = pos
@@ -140,6 +161,33 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     def mouseRelease_tablemode(self):
         self._startPosition = QPoint(0, 0)
+
+    def saveSelectedImg_tablemode(self, imgpath):
+        if self.poly_tablemode.points_number < 4:
+            self.selectedImgPath = None
+            return
+
+        img = cv2.imread(imgpath)
+        tl, tr, br, bl = self.poly_tablemode.qpoints
+
+        hmax = int(max((bl - tl).y(), (br - tr).y()))
+        wmax = int(max((tr - tl).x(), (br - bl).x()))
+
+        # affine transform
+        src = np.array(((tl.x(), tl.y()), (tr.x(), tr.y()), (bl.x(), bl.y())), dtype=np.float32)
+        dst = np.array(((0, 0), (wmax, 0), (0, hmax)), dtype=np.float32)
+        warp_mat = cv2.getAffineTransform(src, dst)
+        img_cropped = cv2.warpAffine(img, warp_mat, (wmax, hmax))
+
+        # savepath
+        filename, ext = os.path.splitext(os.path.basename(imgpath))
+        apex = '_tlx{}tly{}trx{}try{}brx{}bry{}blx{}bly{}'.format(tl.x(), tl.y(), tr.x(), tr.y(),
+                                                                  br.x(), br.y(), bl.x(), bl.y())
+        savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
+
+        cv2.imwrite(savepath, img_cropped)
+        self.selectedImgPath = savepath
+
 
     def removeArea(self):
         if self.predmode == PredictionMode.IMAGE:

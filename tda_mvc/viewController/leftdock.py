@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 import os, glob
 
 from ..view import AboutDialog
-from ..utils.modes import PredictionMode
+from ..utils.modes import PredictionMode, ShowingMode
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -23,6 +23,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.button_zoomin.clicked.connect(lambda: self.zoomInOut(True))
         self.leftdock.button_zoomout.clicked.connect(lambda: self.zoomInOut(False))
         self.leftdock.spinBox_zoom.valueChanged.connect(lambda value: self.zoomValueChanged(value))
+        self.leftdock.radioButton_entire.clicked.connect(lambda: self.showingmodeChanged(ShowingMode.ENTIRE))
+        self.leftdock.radioButton_selected.clicked.connect(lambda: self.showingmodeChanged(ShowingMode.SELECTED))
 
         # prediction
         self.leftdock.button_removeArea.clicked.connect(self.removeArea)
@@ -38,6 +40,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         # viewer
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
+        self.menu.action_showentire.triggered.connect(lambda: self.showingmodeChanged(ShowingMode.ENTIRE))
+        self.menu.action_showselected.triggered.connect(lambda: self.showingmodeChanged(ShowingMode.SELECTED))
 
         # about
         self.menu.action_about.triggered.connect(self.openAbout)
@@ -109,6 +113,13 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def predmodeChanged(self, mode):
         self.model.predmode = mode
+
+        self.leftdock.updateUI()
+        self.central.updateUI()
+        self.menu.updateUI()
+
+    def showingmodeChanged(self, mode):
+        self.model.showingmode = mode
 
         self.leftdock.updateUI()
         self.central.updateUI()

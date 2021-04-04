@@ -3,6 +3,9 @@ import configparser, os, shutil
 from ..utils.funcs import path_desktop
 
 class Config(object):
+    selectedImgDir = os.path.join('.tda', 'selectedImg')
+    iniPath = os.path.join('.tda', 'tda.ini')
+
     def __init__(self):
         self.config = configparser.ConfigParser()
 
@@ -10,7 +13,7 @@ class Config(object):
 
     @property
     def configpath(self):
-        return os.path.join('.tda', 'tda.ini')
+        return self.iniPath
 
     @property
     def last_opendir(self):
@@ -36,7 +39,7 @@ class Config(object):
             if os.path.exists('.tda'):
                 shutil.rmtree('.tda') # remove all
             os.makedirs('.tda')
-            os.makedirs(os.path.join('.tda', 'tmp'))
+            os.makedirs(self.selectedImgDir)
 
             # default value
             default = {
