@@ -112,11 +112,22 @@ class MenuBar(QMenuBar):
         # remove
         self.action_removeArea = _create_action(self, '&Remove Rectangle', slot=None,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
+
+        # predict as image mode
+        self.action_predictImageMode = _create_action(self, '&Image mode', slot=None,
+                                                      shortcut='Ctrl+shift+I', tip='Predict the texts as Image mode')
+
+        # predict as table mode
+        self.action_predictTableMode = _create_action(self, '&Table mode', slot=None,
+                                                      shortcut='Ctrl+shift+T', tip='Predict the texts as Table mode')
+
         # predict
         self.action_predict = _create_action(self, '&Predict Table', slot=None,
                                              shortcut="Ctrl+R", tip='Predict table')
 
-        _add_actions(self.menu_prediction, (self.action_removeArea, self.action_predict, None))
+        _add_actions(self.menu_prediction, (self.action_removeArea, None,
+                                            self.action_predictImageMode, self.action_predictTableMode, None,
+                                            self.action_predict, None))
 
         ##### Help #####
         # about

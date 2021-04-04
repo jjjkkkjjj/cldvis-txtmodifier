@@ -29,6 +29,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.leftdock.button_removeArea.clicked.connect(self.removeArea)
         self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
+        self.leftdock.button_predict.clicked.connect(self.predict)
 
         ### menu ###
         # open
@@ -40,8 +41,14 @@ class LeftDockVCMixin(VCAbstractMixin):
         # viewer
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
-        self.menu.action_showentire.triggered.connect(lambda: self.showingmodeChanged(ShowingMode.ENTIRE))
-        self.menu.action_showselected.triggered.connect(lambda: self.showingmodeChanged(ShowingMode.SELECTED))
+        self.menu.action_showentire.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
+        self.menu.action_showselected.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
+
+        # prediction
+        self.menu.action_removeArea.triggered.connect(self.removeArea)
+        self.menu.action_predictImageMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(0))
+        self.menu.action_predictTableMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
+        self.menu.action_predict.triggered.connect(self.predict)
 
         # about
         self.menu.action_about.triggered.connect(self.openAbout)
@@ -136,3 +143,4 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.updateUI()
         self.central.updateUI()
         self.menu.updateUI()
+
