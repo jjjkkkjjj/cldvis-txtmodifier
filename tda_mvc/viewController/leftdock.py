@@ -4,6 +4,7 @@ import os, glob
 
 from ..view import AboutDialog
 from ..utils.modes import PredictionMode, ShowingMode
+from ..utils.exception import PredictionError
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -144,3 +145,25 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.central.updateUI()
         self.menu.updateUI()
 
+    def predict(self):
+        from ..main import MainViewController
+        if MainViewController.debug:
+            if self.model.predmode == PredictionMode.IMAGE:
+                self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
+            elif self.model.predmode == PredictionMode.TABLE:
+                self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
+            return
+
+        try:
+            # prediction
+            if self.model.predmode == PredictionMode.IMAGE:
+                results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
+            elif self.model.predmode == PredictionMode.TABLE:
+                results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
+
+        except PredictionError as e:
+            # show messagebox
+            ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+            if ret == QMessageBox.Yes:
+                # remove tmp files
+                self.model.clearTmpImg()

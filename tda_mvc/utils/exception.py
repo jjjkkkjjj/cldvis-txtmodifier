@@ -1,0 +1,3 @@
+
+class PredictionError(Exception):
+    pass
