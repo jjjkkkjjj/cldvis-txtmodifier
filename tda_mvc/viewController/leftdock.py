@@ -25,6 +25,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.spinBox_zoom.valueChanged.connect(lambda value: self.zoomValueChanged(value))
 
         # prediction
+        self.leftdock.button_removeArea.clicked.connect(self.removeArea)
         self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
 
         ### menu ###
@@ -108,4 +109,14 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def predmodeChanged(self, mode):
         self.model.predmode = mode
+
+        self.leftdock.updateUI()
         self.central.updateUI()
+        self.menu.updateUI()
+
+    def removeArea(self):
+        self.model.removeArea()
+
+        self.leftdock.updateUI()
+        self.central.updateUI()
+        self.menu.updateUI()

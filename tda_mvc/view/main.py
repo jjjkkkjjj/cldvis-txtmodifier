@@ -50,8 +50,8 @@ class MenuBar(QMenuBar):
     action_zoomout: QAction
 
     # prediction menu
-    action_removeRect: QAction
-    action_predictTable: QAction
+    action_removeArea: QAction
+    action_predict: QAction
 
     # help menu
     action_about: QAction
@@ -101,13 +101,13 @@ class MenuBar(QMenuBar):
 
         ##### Run #####
         # remove
-        self.action_removeRect = _create_action(self, '&Remove Rectangle', slot=None,
+        self.action_removeArea = _create_action(self, '&Remove Rectangle', slot=None,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
         # predict
-        self.action_predictTable = _create_action(self, '&Predict Table', slot=None,
-                                                  shortcut="Ctrl+R", tip='Predict table')
+        self.action_predict = _create_action(self, '&Predict Table', slot=None,
+                                             shortcut="Ctrl+R", tip='Predict table')
 
-        _add_actions(self.menu_prediction, (self.action_removeRect, self.action_predictTable, None))
+        _add_actions(self.menu_prediction, (self.action_removeArea, self.action_predict, None))
 
         ##### Help #####
         # about
@@ -125,6 +125,7 @@ class MenuBar(QMenuBar):
         """
         self.updateOpen()
         self.updateViewer()
+        self.updatePrediction()
 
     def updateOpen(self):
         self.action_backfile.setEnabled(self.model.isExistBackImg)
@@ -134,6 +135,9 @@ class MenuBar(QMenuBar):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.action_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
 
+    def updatePrediction(self):
+        self.action_removeArea.setEnabled(self.model.isExistArea)
+        self.action_predict.setEnabled(self.model.isExistArea)
 
 def _add_actions(target, actions):
     for action in actions:

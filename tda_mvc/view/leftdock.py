@@ -41,7 +41,7 @@ class LeftDockView(QWidget):
     radioButton_selected: QRadioButton
 
     # run
-    button_removeRect: Button
+    button_removeArea: Button
     comboBox_predmode: QComboBox
     button_predict: Button
 
@@ -125,8 +125,8 @@ class LeftDockView(QWidget):
         self.groupBox_prediction = QGroupBox('Prediction', self)
 
         # remove
-        self.button_removeRect = Button('remove.png')
-        vbox_run.addWidget(self.button_removeRect)
+        self.button_removeArea = Button('remove.png')
+        vbox_run.addWidget(self.button_removeArea)
 
         # predict
         self.comboBox_predmode = QComboBox(self)
@@ -165,4 +165,5 @@ class LeftDockView(QWidget):
         self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
 
     def updatePrediction(self):
-        pass
+        self.button_removeArea.setEnabled(self.model.isExistArea)
+        self.button_predict.setEnabled(self.model.isExistArea)

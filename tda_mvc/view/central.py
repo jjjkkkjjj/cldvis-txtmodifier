@@ -72,6 +72,7 @@ class ImageView(QLabel):
             self.model.mouseRelease_tablemode()
 
         self.updateUI()
+        self.areaChanged.emit()
 
     def paintEvent(self, event):
         if not self.pixmap():

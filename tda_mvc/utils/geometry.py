@@ -131,15 +131,21 @@ class PercentVertexes(GeoBase):
 
 class Vertexes(PercentVertexes):
 
-    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
+    def __init__(self, points=np.zeros(shape=(0, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0), maximum_points_number=None):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
         :param parentQSize: QSize, the parent widget's parentQSize
         :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
+        :param maximum_points_number: int or None
         """
         super().__init__(points, parentQSize, offsetQPoint)
 
         self._selected_vertex_index = -1  # -1 if vertices are no selected
+
+        self.maximum_points_number = maximum_points_number
+        _points = np.array(points)
+        if self.maximum_points_number and _points.shape[0] > self.maximum_points_number:
+            raise ValueError('points number: {} is over maximum_points_numner: {}'.format(_points.shape[0], self.maximum_points_number))
 
         # point radius
         self.vertex_r = 8
@@ -182,6 +188,17 @@ class Vertexes(PercentVertexes):
 
         return self.isSelectedPoint
 
+    @property
+    def isAppendable(self):
+        return self.maximum_points_number is None or self.points_number < self.maximum_points_number
+
+    def append(self, qpt):
+        if self.isAppendable:
+            self.append_percent_pt(np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight)))
+
+    def clear(self):
+        self.set_percent_points(np.zeros(shape=(0, 2)))
+
     def set_color(self, vertex_default_color=None, vertex_selected_color=None):
         """
         :param vertex_default_color: Color, default color
@@ -198,39 +215,45 @@ class Vertexes(PercentVertexes):
         else:
             self.vertex_selected_color = Color(border=transparency, fill=red, borderSize=0)
 
+    @property
+    def isDrawablePoints(self):
+        return self.points_number > 0
 
     def paint(self, painter):
         if not self.isShow:
             return
-        ### draw edge point ###
-        PaintMaster.set_pen_brush(painter, self.vertex_default_color)
-        for qpoint in self.gen_qpoints():
-            # drawEllipse(center, rx, ry)
-            painter.drawEllipse(qpoint, self.vertex_r, self.vertex_r)
 
-        # if selected
-        if self.isSelectedPoint:
-            PaintMaster.set_pen_brush(painter, self.vertex_selected_color)
-            painter.drawEllipse(self.selectedQPoint, self.vertex_r, self.vertex_r)
+        if self.isDrawablePoints:
+            ### draw edge point ###
+            PaintMaster.set_pen_brush(painter, self.vertex_default_color)
+            for qpoint in self.gen_qpoints():
+                # drawEllipse(center, rx, ry)
+                painter.drawEllipse(qpoint, self.vertex_r, self.vertex_r)
+
+            # if selected
+            if self.isSelectedPoint:
+                PaintMaster.set_pen_brush(painter, self.vertex_selected_color)
+                painter.drawEllipse(self.selectedQPoint, self.vertex_r, self.vertex_r)
 
     def move_qpoint(self, index, qpt):
         percent_pt = np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight))
         self.move_percent_point(index, percent_pt)
 
 class Rect(Vertexes):
-    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
+    def __init__(self, points=np.zeros(shape=(2, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
-        :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
+        :param points: list(2) of list(2d=(x,y)), (topleft, bottomright) Note that these points are percent representation
         :param parentQSize: QSize, the parent widget's parentQSize
         :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
+        :param maximum_points_number: int or None
         """
         _points = np.array(points)
         assert _points.shape == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
         # append top-right and bottom-left
-        _points = np.insert(_points, 1, [points[0, 0], points[1, 1]], axis=0) # top-right
-        _points = np.insert(_points, 3, [points[1, 0], points[0, 1]], axis=0)  # bottom-left
+        _points = np.insert(_points, 1, [_points[0, 0], _points[1, 1]], axis=0)  # top-right
+        _points = np.insert(_points, 3, [_points[1, 0], _points[0, 1]], axis=0)  # bottom-left
 
-        super().__init__(_points, parentQSize, offsetQPoint)
+        super().__init__(_points, parentQSize, offsetQPoint, maximum_points_number=4)
 
         self._isSelectedRect = False
 
@@ -242,6 +265,9 @@ class Rect(Vertexes):
         """
         :return: QRect
         """
+        if self.points_number < 2:
+            return None
+
         # note that order is (tl, tr, br, bl)
         qpoints = self.qpoints
         return QRect(qpoints[0], qpoints[2])
@@ -284,7 +310,7 @@ class Rect(Vertexes):
         :return:
         """
         super().set_selectPos(pos)
-        if pos:
+        if pos and self.isDrawableRect:
             self._isSelectedRect = self.qrect.contains(pos) or self.isSelectedPoint
         else:
             self._isSelectedRect = False
@@ -309,17 +335,22 @@ class Rect(Vertexes):
         else:
             self.rect_selected_color = Color(border=green, fill=light_green)
 
+    @property
+    def isDrawableRect(self):
+        return self.points_number == 4
 
     def paint(self, painter):
         if not self.isShow:
             return
-        ### draw annotation ###
-        if self.isSelectedRect:
-            PaintMaster.set_pen_brush(painter, self.rect_selected_color)
-        else:
-            PaintMaster.set_pen_brush(painter, self.rect_default_color)
 
-        painter.drawRect(self.qrect)
+        if self.isDrawableRect:
+            ### draw annotation ###
+            if self.isSelectedRect:
+                PaintMaster.set_pen_brush(painter, self.rect_selected_color)
+            else:
+                PaintMaster.set_pen_brush(painter, self.rect_default_color)
+
+            painter.drawRect(self.qrect)
 
         super().paint(painter)
 
@@ -343,24 +374,19 @@ class Rect(Vertexes):
         return Rect(newpoints_percent[::2], self.parentQSize, self.offsetQPoint)
 
 class Polygon(Vertexes):
-    def __init__(self, points, parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0), maximum_points_number=None):
+    def __init__(self, points=np.zeros(shape=(0, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0), maximum_points_number=None):
         """
         :param points: list(n) of list(2d=(x,y)), Note that these points are percent representation
         :param parentQSize: QSize, the parent widget's parentQSize
         :param offsetQPoint: QPoint, the _offsetQPoint coordinates to parent widget
         :param maximum_points_number: int or None
         """
-        super().__init__(points, parentQSize, offsetQPoint)
+        super().__init__(points, parentQSize, offsetQPoint, maximum_points_number)
 
         self._isSelectedPolygon = False
-        self.maximum_points_number =maximum_points_number
 
         self.poly_default_color = Color(border=green, fill=transparency)
         self.poly_selected_color = Color(border=green, fill=light_green)
-
-    @property
-    def isAppendable(self):
-        return self.maximum_points_number is None or self.points_number < self.maximum_points_number
 
     @property
     def qpolygon(self):
@@ -376,10 +402,6 @@ class Polygon(Vertexes):
     def set_qpolygon(self, qpolygon):
         new_percent_pts = np.array(tuple((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight) for qpt in qpolygon))
         self.set_percent_points(new_percent_pts)
-
-    def append(self, qpt):
-        if self.isAppendable:
-            self.append_percent_pt(np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight)))
 
     @property
     def boundingRectWidth(self):
@@ -405,7 +427,7 @@ class Polygon(Vertexes):
         :return:
         """
         super().set_selectPos(pos)
-        if pos:
+        if pos and self.isDrawablePolygon:
             self._isSelectedPolygon = self.qpolygon.containsPoint(pos, Qt.OddEvenFill) or self.isSelectedPoint
         else:
             self._isSelectedPolygon = False
@@ -430,18 +452,22 @@ class Polygon(Vertexes):
         else:
             self.poly_selected_color = Color(border=green, fill=light_green)
 
+    @property
+    def isDrawablePolygon(self):
+        return self.points_number >= 2
 
     def paint(self, painter):
         if not self.isShow:
             return
 
-        ### draw annotation ###
-        if self.isSelectedPolygon:
-            PaintMaster.set_pen_brush(painter, self.poly_selected_color)
-        else:
-            PaintMaster.set_pen_brush(painter, self.poly_default_color)
+        if self.isDrawablePolygon:
+            ### draw annotation ###
+            if self.isSelectedPolygon:
+                PaintMaster.set_pen_brush(painter, self.poly_selected_color)
+            else:
+                PaintMaster.set_pen_brush(painter, self.poly_default_color)
 
-        painter.drawPolygon(self.qpolygon)
+            painter.drawPolygon(self.qpolygon)
 
         super().paint(painter)
 

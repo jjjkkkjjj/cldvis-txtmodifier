@@ -6,7 +6,7 @@ from .view import *
 from .viewController import *
 
 
-class MainViewController(LeftDockVCMixin, QMainWindow):
+class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -36,9 +36,11 @@ class MainViewController(LeftDockVCMixin, QMainWindow):
     def updateAllUI(self):
         self.leftdock.updateUI()
         self.central.updateUI()
+        self.menu.updateUI()
 
     def establish_connection(self):
         LeftDockVCMixin.establish_connection(self)
+        CentralVCMixin.establish_connection(self)
 
     def check_credential(self):
         def show_credentialDialog():

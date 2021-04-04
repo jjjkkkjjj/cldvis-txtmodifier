@@ -9,9 +9,9 @@ class ViewerModelMixin(ModelAbstractMixin):
         # prediction mode
         self.predmode = PredictionMode.IMAGE
         # image mode
-        self.rect_imagemode = Rect(points=np.zeros(shape=(2, 2)))
+        self.rect_imagemode = Rect()
         # table mode
-        self.poly_tablemode = Polygon(points=np.zeros(shape=(0, 2)), maximum_points_number=4)
+        self.poly_tablemode = Polygon(maximum_points_number=4)
         self.rect_imagemode.hide()
         self.poly_tablemode.hide()
 
@@ -25,6 +25,14 @@ class ViewerModelMixin(ModelAbstractMixin):
     @property
     def isZoomInable(self):
         return self.zoomvalue <= 190 - 10
+
+    @property
+    def isExistArea(self):
+        if self.predmode == PredictionMode.IMAGE:
+            return self.rect_imagemode.isDrawableRect
+        elif self.predmode == PredictionMode.TABLE:
+            return self.poly_tablemode.isDrawablePolygon
+        return False
 
     ### Image ###
     def mousePress_imagemode(self, pos, parentQSize):
@@ -133,3 +141,9 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     def mouseRelease_tablemode(self):
         self._startPosition = QPoint(0, 0)
+
+    def removeArea(self):
+        if self.predmode == PredictionMode.IMAGE:
+            pass
+        elif self.predmode == PredictionMode.TABLE:
+            self.poly_tablemode.clear()

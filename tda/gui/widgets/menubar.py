@@ -50,7 +50,7 @@ class MenuBar(BaseMenuBar):
 
         ##### Run #####
         # remove
-        self.action_removeRect = _create_action(self, '&Remove Rectangle', slot=self.mainWC.leftdock.button_removeRect.click,
+        self.action_removeRect = _create_action(self, '&Remove Rectangle', slot=self.mainWC.leftdock.button_removeArea.click,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
         # predict
         self.action_predictTable = _create_action(self, '&Predict Table', slot=self.mainWC.leftdock.button_predictTable.click,
