@@ -10,7 +10,9 @@ from ..model import Model
 
 class ImageView(QLabel):
     ### Signal ###
-    areaChanged = Signal()
+    mousePressed = Signal(QMouseEvent)
+    mouseMoved = Signal(QMouseEvent)
+    mouseReleased = Signal(QMouseEvent)
 
     # model
     model: Model
@@ -25,54 +27,18 @@ class ImageView(QLabel):
         self.setMouseTracking(True)
 
 
-    def updateUI(self):
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.rect_imagemode.show()
-            self.model.poly_tablemode.hide()
-        elif self.model.predmode == PredictionMode.TABLE:
-            self.model.rect_imagemode.hide()
-            self.model.poly_tablemode.show()
-        self.repaint()
-
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.mousePress_imagemode(e.pos(), self.size())
-
-        elif self.model.predmode == PredictionMode.TABLE:
-            self.model.mousePress_tablemode(e.pos(), self.size())
-
-        self.updateUI()
+        self.mousePressed.emit(e)
 
     def mouseMoveEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
         if isinstance(e, QContextMenuEvent):
             return
-
-        pos = e.pos()
-        if e.buttons() == Qt.LeftButton:
-            # in clicking
-            if self.model.predmode == PredictionMode.IMAGE:
-                self.model.mouseMoveClicked_imagemode(pos, self.size())
-            elif self.model.predmode == PredictionMode.TABLE:
-                self.model.mouseMoveClicked_tablemode(pos, self.size())
-
-        elif e.buttons() == Qt.NoButton:
-            if self.model.predmode == PredictionMode.IMAGE:
-                self.model.mouseMoveNoButton_imagemode(pos)
-            elif self.model.predmode == PredictionMode.TABLE:
-                self.model.mouseMoveNoButton_tablemode(pos)
-
-        self.updateUI()
+        self.mouseMoved.emit(e)
 
     def mouseReleaseEvent(self, e: QMouseEvent):
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.model.mouseRelease_imagemode()
-        elif self.model.predmode == PredictionMode.TABLE:
-            self.model.mouseRelease_tablemode()
-
-        self.updateUI()
-        self.areaChanged.emit()
+        self.mouseReleased.emit(e)
 
     def paintEvent(self, event):
         if not self.pixmap():
@@ -137,7 +103,7 @@ class CentralView(QWidget):
         self.setLayout(vbox)
 
     def updateUI(self):
-        self.imageView.updateUI()
+        self.imageView.repaint()
 
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
