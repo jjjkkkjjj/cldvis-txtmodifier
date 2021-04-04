@@ -240,7 +240,7 @@ class Vertexes(PercentVertexes):
         self.move_percent_point(index, percent_pt)
 
 class Rect(Vertexes):
-    def __init__(self, points=np.zeros(shape=(2, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
+    def __init__(self, points=np.zeros(shape=(0, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
         :param points: list(2) of list(2d=(x,y)), (topleft, bottomright) Note that these points are percent representation
         :param parentQSize: QSize, the parent widget's parentQSize
@@ -248,10 +248,16 @@ class Rect(Vertexes):
         :param maximum_points_number: int or None
         """
         _points = np.array(points)
-        assert _points.shape == (2, 2), "shape must be (2=(tl, br), 2=(x, y))"
-        # append top-right and bottom-left
-        _points = np.insert(_points, 1, [_points[0, 0], _points[1, 1]], axis=0)  # top-right
-        _points = np.insert(_points, 3, [_points[1, 0], _points[0, 1]], axis=0)  # bottom-left
+        if _points.shape[1] != 2 or _points.shape[0] >= 3:
+            raise ValueError("shape must be (0 or 1 or 2=(tl, br), 2=(x, y))")
+
+        if _points.shape[0] > 0:
+            # 1 or 2
+            if _points.shape[0] == 1:# shape = (1, 2)
+                _points = np.broadcast_to(_points, shape=(2, 2))
+            # append top-right and bottom-left
+            _points = np.insert(_points, 1, [_points[0, 0], _points[1, 1]], axis=0)  # top-right
+            _points = np.insert(_points, 3, [_points[1, 0], _points[0, 1]], axis=0)  # bottom-left
 
         super().__init__(_points, parentQSize, offsetQPoint, maximum_points_number=4)
 
@@ -315,6 +321,10 @@ class Rect(Vertexes):
         else:
             self._isSelectedRect = False
         return self.isSelectedRect
+
+    def append(self, qpt):
+        qrect = QRect(qpt, qpt)
+        self.set_qrect(qrect)
 
     def set_color(self, rect_default_color=None, rect_selected_color=None, **kwargs):
         """

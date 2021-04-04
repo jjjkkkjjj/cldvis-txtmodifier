@@ -59,8 +59,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         else:
             # create new parentQSize
             self.moveActionState = MoveActionState.CREATE
-            qrect = QRect(pos, pos)
-            self.rect_imagemode.set_qrect(qrect)
+            self.rect_imagemode.append(pos)
 
     def mouseMoveClicked_imagemode(self, pos, parentQSize: QSize):
         if self.moveActionState == MoveActionState.MOVE:
@@ -144,6 +143,6 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     def removeArea(self):
         if self.predmode == PredictionMode.IMAGE:
-            pass
+            self.rect_imagemode.clear()
         elif self.predmode == PredictionMode.TABLE:
             self.poly_tablemode.clear()
