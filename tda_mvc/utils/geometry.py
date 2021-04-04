@@ -255,9 +255,10 @@ class Rect(Vertexes):
             # 1 or 2
             if _points.shape[0] == 1:# shape = (1, 2)
                 _points = np.broadcast_to(_points, shape=(2, 2))
+            _pts = _points.copy()
             # append top-right and bottom-left
-            _points = np.insert(_points, 1, [_points[0, 0], _points[1, 1]], axis=0)  # top-right
-            _points = np.insert(_points, 3, [_points[1, 0], _points[0, 1]], axis=0)  # bottom-left
+            _points = np.insert(_points, 1, [_pts[0, 0], _pts[1, 1]], axis=0)  # top-right
+            _points = np.insert(_points, 3, [_pts[1, 0], _pts[0, 1]], axis=0)  # bottom-left
 
         super().__init__(_points, parentQSize, offsetQPoint, maximum_points_number=4)
 
@@ -321,6 +322,25 @@ class Rect(Vertexes):
         else:
             self._isSelectedRect = False
         return self.isSelectedRect
+
+    def set_percent_points(self, percent_pts=None):
+        if percent_pts is None:
+            return
+        if percent_pts.shape[0] == 2:
+            percent_pts = sort_clockwise(percent_pts)
+
+            new_percent_pts = percent_pts.copy()
+            # append top-right and bottom-left
+            new_percent_pts = np.insert(new_percent_pts, 1, [percent_pts[0, 0], percent_pts[1, 1]], axis=0)  # top-right
+            new_percent_pts = np.insert(new_percent_pts, 3, [percent_pts[1, 0], percent_pts[0, 1]], axis=0)  # bottom-left
+
+            super().set_percent_points(new_percent_pts)
+
+        elif percent_pts.shape[0] == 0 or percent_pts.shape[0] == 4:
+            super().set_percent_points(percent_pts)
+
+        else:
+            raise ValueError('percent_pts\' shape must be (2, 2) or (4, 2), but got {}'.format(percent_pts.shape))
 
     def append(self, qpt):
         qrect = QRect(qpt, qpt)
