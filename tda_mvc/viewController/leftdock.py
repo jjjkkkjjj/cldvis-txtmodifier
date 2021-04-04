@@ -121,6 +121,11 @@ class LeftDockVCMixin(VCAbstractMixin):
     def showingmodeChanged(self, mode):
         self.model.showingmode = mode
 
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.model.saveSelectedImg_imagemode(self.model.imgpath)
+        elif self.model.predmode == PredictionMode.TABLE:
+            self.model.saveSelectedImg_tablemode(self.model.imgpath)
+
         self.leftdock.updateUI()
         self.central.updateUI()
         self.menu.updateUI()

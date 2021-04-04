@@ -163,8 +163,8 @@ class LeftDockView(QWidget):
         self.spinBox_zoom.setEnabled(self.model.isExistImg)
         self.button_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
-        self.radioButton_selected.setEnabled(self.model.isExistArea)
+        self.radioButton_selected.setEnabled(self.model.isPredictable)
 
     def updatePrediction(self):
         self.button_removeArea.setEnabled(self.model.isExistArea)
-        self.button_predict.setEnabled(self.model.isExistArea)
+        self.button_predict.setEnabled(self.model.isPredictable)

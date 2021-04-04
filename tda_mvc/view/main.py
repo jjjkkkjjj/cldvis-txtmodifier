@@ -143,11 +143,11 @@ class MenuBar(QMenuBar):
     def updateViewer(self):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.action_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
-        self.action_showselected.setEnabled(self.model.isExistArea)
+        self.action_showselected.setEnabled(self.model.isPredictable)
 
     def updatePrediction(self):
         self.action_removeArea.setEnabled(self.model.isExistArea)
-        self.action_predict.setEnabled(self.model.isExistArea)
+        self.action_predict.setEnabled(self.model.isPredictable)
 
 def _add_actions(target, actions):
     for action in actions:

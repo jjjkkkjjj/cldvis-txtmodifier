@@ -1,4 +1,4 @@
-import cv2, os
+import cv2, os, shutil
 
 from ..utils.modes import PredictionMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
@@ -36,7 +36,19 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     @property
     def isExistArea(self):
-        return self.selectedImgPath is not None
+        if self.predmode == PredictionMode.IMAGE:
+            return self.rect_imagemode.isDrawableRect
+        elif self.predmode == PredictionMode.TABLE:
+            return self.poly_tablemode.isDrawablePolygon
+        return False
+    @property
+    def isPredictable(self):
+        # Slightly different from isExistArea!
+        if self.predmode == PredictionMode.IMAGE:
+            return self.rect_imagemode.isDrawableRect
+        elif self.predmode == PredictionMode.TABLE:
+            return self.poly_tablemode.points_number == 4
+        return False
 
     ### Image ###
     def mousePress_imagemode(self, pos, parentQSize):
@@ -188,9 +200,13 @@ class ViewerModelMixin(ModelAbstractMixin):
         cv2.imwrite(savepath, img_cropped)
         self.selectedImgPath = savepath
 
-
     def removeArea(self):
         if self.predmode == PredictionMode.IMAGE:
             self.rect_imagemode.clear()
         elif self.predmode == PredictionMode.TABLE:
             self.poly_tablemode.clear()
+
+    def clearTmpImg(self):
+        # remove all tmp images
+        shutil.rmtree(self.config.selectedImgDir)
+        os.makedirs(self.config.selectedImgDir)

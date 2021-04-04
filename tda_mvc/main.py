@@ -71,6 +71,5 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
         else:
             show_credentialDialog()
 
-
-
-
+    def closeEvent(self, event):
+        self.model.clearTmpImg()
