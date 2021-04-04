@@ -38,7 +38,7 @@ class ViewerModelMixin(ModelAbstractMixin):
     def isExistArea(self):
         if self.predmode == PredictionMode.IMAGE:
             return self.rect_imagemode.isDrawableRect
-        elif self.predmode == PredictionMode.TABLE:
+        elif self.predmode == PredictionMode.DOCUMENT:
             return self.poly_tablemode.isDrawablePolygon
         return False
     @property
@@ -46,7 +46,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         # Slightly different from isExistArea!
         if self.predmode == PredictionMode.IMAGE:
             return self.rect_imagemode.isDrawableRect
-        elif self.predmode == PredictionMode.TABLE:
+        elif self.predmode == PredictionMode.DOCUMENT:
             return self.poly_tablemode.points_number == 4
         return False
 
@@ -203,7 +203,7 @@ class ViewerModelMixin(ModelAbstractMixin):
     def removeArea(self):
         if self.predmode == PredictionMode.IMAGE:
             self.rect_imagemode.clear()
-        elif self.predmode == PredictionMode.TABLE:
+        elif self.predmode == PredictionMode.DOCUMENT:
             self.poly_tablemode.clear()
 
     def clearTmpImg(self):

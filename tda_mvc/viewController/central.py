@@ -19,7 +19,7 @@ class CentralVCMixin(VCAbstractMixin):
     def mouseReleased(self, e: QMouseEvent):
         if self.model.predmode == PredictionMode.IMAGE:
             self.model.mouseRelease_imagemode()
-        elif self.model.predmode == PredictionMode.TABLE:
+        elif self.model.predmode == PredictionMode.DOCUMENT:
             self.model.mouseRelease_tablemode()
 
         self.modelUpdateAftermouseEvent()
@@ -30,7 +30,7 @@ class CentralVCMixin(VCAbstractMixin):
         if self.model.predmode == PredictionMode.IMAGE:
             self.model.mousePress_imagemode(e.pos(), self.imageView.size())
 
-        elif self.model.predmode == PredictionMode.TABLE:
+        elif self.model.predmode == PredictionMode.DOCUMENT:
             self.model.mousePress_tablemode(e.pos(), self.imageView.size())
 
         self.modelUpdateAftermouseEvent()
@@ -41,13 +41,13 @@ class CentralVCMixin(VCAbstractMixin):
             # in clicking
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.mouseMoveClicked_imagemode(pos, self.imageView.size())
-            elif self.model.predmode == PredictionMode.TABLE:
+            elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.mouseMoveClicked_tablemode(pos, self.imageView.size())
 
         elif e.buttons() == Qt.NoButton:
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.mouseMoveNoButton_imagemode(pos)
-            elif self.model.predmode == PredictionMode.TABLE:
+            elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.mouseMoveNoButton_tablemode(pos)
 
         self.modelUpdateAftermouseEvent()
@@ -62,7 +62,7 @@ class CentralVCMixin(VCAbstractMixin):
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.rect_imagemode.show()
                 self.model.poly_tablemode.hide()
-            elif self.model.predmode == PredictionMode.TABLE:
+            elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.rect_imagemode.hide()
                 self.model.poly_tablemode.show()
             self.imageView.setEnabled(True)

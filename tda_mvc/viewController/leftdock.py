@@ -48,7 +48,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.menu.action_removeArea.triggered.connect(self.removeArea)
         self.menu.action_predictImageMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(0))
-        self.menu.action_predictTableMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
+        self.menu.action_predictDocumentMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
         self.menu.action_predict.triggered.connect(self.predict)
 
         # about
@@ -131,7 +131,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         if self.model.predmode == PredictionMode.IMAGE:
             self.model.saveSelectedImg_imagemode(self.model.imgpath)
-        elif self.model.predmode == PredictionMode.TABLE:
+        elif self.model.predmode == PredictionMode.DOCUMENT:
             self.model.saveSelectedImg_tablemode(self.model.imgpath)
 
         self.leftdock.updateUI()
@@ -150,7 +150,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         if MainViewController.debug:
             if self.model.predmode == PredictionMode.IMAGE:
                 self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
-            elif self.model.predmode == PredictionMode.TABLE:
+            elif self.model.predmode == PredictionMode.DOCUMENT:
                 self.model.selectedImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
             return
 
@@ -158,7 +158,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             # prediction
             if self.model.predmode == PredictionMode.IMAGE:
                 results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
-            elif self.model.predmode == PredictionMode.TABLE:
+            elif self.model.predmode == PredictionMode.DOCUMENT:
                 results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
         except PredictionError as e:

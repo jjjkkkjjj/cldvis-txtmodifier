@@ -118,15 +118,15 @@ class MenuBar(QMenuBar):
                                                       shortcut='Ctrl+shift+I', tip='Predict the texts as Image mode')
 
         # predict as table mode
-        self.action_predictTableMode = _create_action(self, '&Table mode', slot=None,
-                                                      shortcut='Ctrl+shift+T', tip='Predict the texts as Table mode')
+        self.action_predictDocumentMode = _create_action(self, '&Document mode', slot=None,
+                                                         shortcut='Ctrl+shift+D', tip='Predict the texts as Document mode')
 
         # predict
         self.action_predict = _create_action(self, '&Predict Table', slot=None,
                                              shortcut="Ctrl+R", tip='Predict table')
 
         _add_actions(self.menu_prediction, (self.action_removeArea, None,
-                                            self.action_predictImageMode, self.action_predictTableMode, None,
+                                            self.action_predictImageMode, self.action_predictDocumentMode, None,
                                             self.action_predict, None))
 
         ##### Help #####

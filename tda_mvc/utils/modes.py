@@ -2,7 +2,7 @@ from enum import Enum
 
 class PredictionMode(Enum):
     IMAGE = 'image'
-    TABLE = 'table'
+    DOCUMENT = 'document'
 
     @staticmethod
     def gen_list():
