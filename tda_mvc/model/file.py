@@ -43,7 +43,7 @@ class FileModelMixin(ModelAbstractMixin):
         :param paths: list of str(path) or None
         :return:
         """
-        if paths is None:
+        if paths is None or len(paths) == 0:
             # self._imgIndex = -1
             return
 
