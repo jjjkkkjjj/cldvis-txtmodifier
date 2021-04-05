@@ -1,4 +1,5 @@
 from PySide2.QtGui import *
+from PySide2.QtCore import *
 import os
 import numpy as np
 
@@ -36,6 +37,23 @@ def cvimg2qpixmap(cvimg: np.ndarray):
     bytesPerLine = 3 * width
     qImg = QImage(cvimg.data, width, height, bytesPerLine, QImage.Format_RGB888)
     return QPixmap(qImg)
+
+def qsize_from_quadrangle(qpoints):
+    """
+    Get qsize from quadrangle
+    Parameters
+    ----------
+    qpoints: list(4) of QPoints
+        The quadrangle QPoints
+    Returns
+    -------
+
+    """
+    assert len(qpoints) == 4, "must have 4 qpoints, but got {}".format(len(qpoints))
+    tl, tr, br, bl = qpoints
+    hmax = int(max((bl - tl).y(), (br - tr).y()))
+    wmax = int(max((tr - tl).x(), (br - bl).x()))
+    return QSize(wmax, hmax)
 
 def sort_clockwise(a):
     """

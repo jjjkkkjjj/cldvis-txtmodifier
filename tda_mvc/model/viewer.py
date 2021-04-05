@@ -2,6 +2,7 @@ import cv2, os, shutil
 
 from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode
 from ..utils.geometry import *
+from ..utils.funcs import qsize_from_quadrangle
 from .base import ModelAbstractMixin
 
 class ViewerModelMixin(ModelAbstractMixin):
@@ -200,14 +201,13 @@ class ViewerModelMixin(ModelAbstractMixin):
         img = cv2.imread(imgpath)
         tl, tr, br, bl = self.quadrangle.qpoints
 
-        hmax = int(max((bl - tl).y(), (br - tr).y()))
-        wmax = int(max((tr - tl).x(), (br - bl).x()))
+        retqsize = qsize_from_quadrangle((tl, tr, br, bl))
 
         # affine transform
         src = np.array(((tl.x(), tl.y()), (tr.x(), tr.y()), (bl.x(), bl.y())), dtype=np.float32)
-        dst = np.array(((0, 0), (wmax, 0), (0, hmax)), dtype=np.float32)
+        dst = np.array(((0, 0), (retqsize.width(), 0), (0, retqsize.height())), dtype=np.float32)
         warp_mat = cv2.getAffineTransform(src, dst)
-        img_cropped = cv2.warpAffine(img, warp_mat, (wmax, hmax))
+        img_cropped = cv2.warpAffine(img, warp_mat, (retqsize.width(), retqsize.height()))
 
         # savepath
         filename, ext = os.path.splitext(os.path.basename(imgpath))

@@ -3,7 +3,8 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 
 from .base import ModelAbstractMixin
-from ..utils.geometry import Annotation
+from ..utils.geometry import Annotation, Polygon
+from ..utils.paint import Color, NoColor, transparency, orange
 
 class AnnotationModelMixin(ModelAbstractMixin):
     def __init__(self):
@@ -11,6 +12,10 @@ class AnnotationModelMixin(ModelAbstractMixin):
         self._selectedIndex = -1
 
         self._annotations = []
+        # prediction area
+        self.area = Polygon(maximum_points_number=4)
+        self.area.set_color(poly_default_color=Color(border=orange, fill=transparency),
+                            vertex_default_color=NoColor())
 
     @property
     def selectedAnnotation(self):
@@ -45,7 +50,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
         for anno in self._annotations:
             yield anno
 
-    def set_annotations(self, results, baseWidget, parentQSize, offsetQPoint):
+    def set_annotations(self, results, baseWidget, areaQPolygon, parentQSize, offsetQPoint):
         """
         :param results: dict, detection result by vision
             "info":
@@ -56,13 +61,39 @@ class AnnotationModelMixin(ModelAbstractMixin):
                 "text": str
                 "bbox": list(4 points) of list(2d=(x, y))
         :param baseWidget: QWidget, the base widget for AnnotaionRubberBand
+        :param areaQPolygon: QPolygon, the selected area's qpolygon
         :param parentQSize: Qsize, selected parentQSize
         :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
         :return:
         """
+
+        # Note that the selected area is no offset
+        self.area.set_parentVals(parentQSize)
+        self.area.set_qpolygon(areaQPolygon)
+        self.area.show()
 
         self._annotations = []
         for result in results['prediction']:
             anno = Annotation(baseWidget, result["bbox"], result['text'], parentQSize, offsetQPoint)
             self._annotations += [anno]
             anno.show()
+
+    def paint_annotations(self, painter, isShow):
+        self.area.paint(painter)
+
+        if isShow:
+            for anno in self._annotations:
+                anno.paint(painter)
+                anno.show()
+        else:
+            for anno in self._annotations:
+                anno.paint(painter)
+                anno.hide()
+
+    def show_annotations(self):
+        for anno in self._annotations:
+            anno.show()
+
+    def hide_annotations(self):
+        for anno in self._annotations:
+            anno.hide()

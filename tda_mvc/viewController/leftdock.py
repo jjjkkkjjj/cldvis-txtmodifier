@@ -1,10 +1,12 @@
 from PySide2.QtWidgets import *
+from PySide2.QtGui import *
 from PySide2.QtCore import *
 import os, glob
 
 from ..view import AboutDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode
 from ..utils.exception import PredictionError
+from ..utils.funcs import qsize_from_quadrangle
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -222,17 +224,29 @@ class LeftDockVCMixin(VCAbstractMixin):
         if self.model.showingmode == ShowingMode.ENTIRE:
             # get offset
             if self.model.areamode == AreaMode.RECTANGLE:
+                areaQPolygon = self.model.rectangle.qpolygon
                 parentQSize = self.model.rectangle.qsize
                 offsetQPoint = self.model.rectangle.topLeft
             elif self.model.areamode == AreaMode.QUADRANGLE:
-                parentQSize = self.model.quadrangle.qsize
+                areaQPolygon = self.model.quadrangle.qpolygon
+                parentQSize = qsize_from_quadrangle(self.model.quadrangle.qpoints)
                 offsetQPoint = self.model.quadrangle.qpoints[0]
 
-            self.model.set_annotations(results, baseWidget=self.central.imageView,
+            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=areaQPolygon,
                                        parentQSize=parentQSize, offsetQPoint=offsetQPoint)
         elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.set_annotations(results, baseWidget=self.central.imageView,
+            if self.model.areamode == AreaMode.RECTANGLE:
+                areaQPolygon = self.model.rectangle.qpolygon
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                areaQPolygon = self.model.quadrangle.qpolygon
+            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=areaQPolygon,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.central.updateUI()
         self.leftdock.updateUI()
+        #アノテーション後のEntireでのArea表示
+        #RightDock表示
+        #編集機能
+        #CSV出力
+        #データセット出力
+        #次へ機能

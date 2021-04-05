@@ -6,6 +6,7 @@ import os, cv2
 from ..utils.funcs import check_instance, cvimg2qpixmap
 from ..utils.modes import AreaMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
+from ..utils.paint import Color, NoColor, transparency, orange
 from ..model import Model
 
 class ImageView(QLabel):
@@ -55,12 +56,32 @@ class ImageView(QLabel):
         # set
         painter.setPen(pen)
 
+        if not self.model.isPredicted:
+            self.model.area.hide()
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.rectangle.paint(painter)
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.quadrangle.paint(painter)
+            return
+
+        # predicted
+        if self.model.showingmode == ShowingMode.SELECTED:
+            self.model.area.hide()
+            return
+
+        # predicted and Entire mode
+        self.model.area.show()
         if self.model.areamode == AreaMode.RECTANGLE:
-            self.model.rectangle.paint(painter)
+            # change area's color
+            self.model.area.set_color(poly_default_color=Color(border=orange, fill=transparency),
+                                      vertex_default_color=NoColor())
+            isShow = True
         elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.model.quadrangle.paint(painter)
-        for anno in self.model.annotations:
-            anno.paint(painter)
+            # change area's color
+            self.model.area.set_color(poly_default_color=Color(border=orange, fill=light_orange),
+                                      vertex_default_color=NoColor())
+            isShow = False
+        self.model.paint_annotations(painter, isShow)
 
 class CentralView(QWidget):
     ### Attributes ###

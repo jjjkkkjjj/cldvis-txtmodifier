@@ -189,6 +189,17 @@ class Vertexes(PercentVertexes):
         return self.isSelectedPoint
 
     @property
+    def qpolygon(self):
+        """
+        return scaled qpolygon. In other words, return qpolygon to fit pixmap.
+        :return:
+        """
+        qpolygon = QPolygon()
+        for qpt in self.gen_qpoints():
+            qpolygon.append(qpt)
+        return qpolygon
+
+    @property
     def isAppendable(self):
         return self.maximum_points_number is None or self.points_number < self.maximum_points_number
 
@@ -417,17 +428,6 @@ class Polygon(Vertexes):
 
         self.poly_default_color = Color(border=green, fill=transparency)
         self.poly_selected_color = Color(border=green, fill=light_green)
-
-    @property
-    def qpolygon(self):
-        """
-        return scaled qpolygon. In other words, return qpolygon to fit pixmap.
-        :return:
-        """
-        qpolygon = QPolygon()
-        for qpt in self.gen_qpoints():
-            qpolygon.append(qpt)
-        return qpolygon
 
     def set_qpolygon(self, qpolygon):
         new_percent_pts = np.array(tuple((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight) for qpt in qpolygon))

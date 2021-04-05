@@ -37,3 +37,7 @@ class Color(object):
         self.fill = fill
         self.borderSize = borderSize
         self.fill_pattern = fill_pattern
+
+class NoColor(Color):
+    def __init__(self):
+        super().__init__(border=transparency, fill=transparency)
