@@ -67,12 +67,14 @@ class ImageView(QLabel):
         # predicted
         if self.model.showingmode == ShowingMode.SELECTED:
             self.model.area.hide()
+            self.model.paint_annotations(painter, True)
             return
 
         # predicted and Entire mode
         self.model.area.show()
         if self.model.areamode == AreaMode.RECTANGLE:
             # change area's color
+            # TODO: this code must be implemented in the ViewController
             self.model.area.set_color(poly_default_color=Color(border=orange, fill=transparency),
                                       vertex_default_color=NoColor())
             isShow = True
@@ -126,20 +128,19 @@ class CentralView(QWidget):
         self.setLayout(vbox)
 
     def updateUI(self):
-        self.imageView.repaint()
-
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
         self.imageView.setEnabled(self.model.isExistImg)
 
         if not self.model.isExistImg:
+            self.imageView.repaint()
             return
 
         # set image
         self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
 
         """
-        # below code is not good resizing
+        # below code is not good for resizing
         pixmap = QPixmap(imgpath)
         self.img.setPixmap(None)
         self.img.setPixmap(pixmap.scaled(pixmap.parentQSize() * zoomvalue / 100., Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -155,7 +156,40 @@ class CentralView(QWidget):
         self.imageView.setPixmap(pixmap)
 
         # set parentSize
+        # area
+        # TODO: set_parentVals must be called in the ViewController
         if self.model.areamode == AreaMode.RECTANGLE:
             self.model.rectangle.set_parentVals(parentQSize=pixmap.size())
+
         elif self.model.areamode == AreaMode.QUADRANGLE:
             self.model.quadrangle.set_parentVals(parentQSize=pixmap.size())
+
+
+        if not self.model.isPredicted:
+            self.imageView.repaint()
+            return
+
+        # predicted
+        # annotation
+        if self.model.showingmode == ShowingMode.ENTIRE:
+            self.model.set_parentVals_annotations(parentQSize=self.model.areaQSize,
+                                                  offsetQPoint=self.model.areaTopLeft)
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.area.show()
+                self.model.hide_annotations()
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.area.hide()
+                self.model.show_annotations()
+
+        elif self.model.showingmode == ShowingMode.SELECTED:
+            self.model.show_annotations()
+
+
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.set_parentVals_annotations(parentQSize=pixmap.size(),
+                                                      offsetQPoint=QPoint(0, 0))
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.set_parentVals_annotations(parentQSize=pixmap.size(),
+                                                      offsetQPoint=QPoint(0, 0))
+
+        self.imageView.repaint()

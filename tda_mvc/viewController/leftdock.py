@@ -165,13 +165,14 @@ class LeftDockVCMixin(VCAbstractMixin):
         import json
         import numpy as np
         if MainViewController.debug:
-            # read area from csv
-            self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
-            self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
 
             # read results from json
             if self.model.areamode == AreaMode.RECTANGLE:
-                self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg.jpg')
+                # read area from csv
+                self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
+                self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
+
+                self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg')
                 if self.model.predmode == PredictionMode.IMAGE:
                     jsonpath = os.path.join('debug', 'result-rect-image.json')
                 elif self.model.predmode == PredictionMode.DOCUMENT:
@@ -180,6 +181,10 @@ class LeftDockVCMixin(VCAbstractMixin):
                 with open(jsonpath, 'r') as f:
                     results = json.load(f)
             elif self.model.areamode == AreaMode.QUADRANGLE:
+                # read area from csv
+                self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
+                self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
+
                 self.model.selectedQuadImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
                 if self.model.predmode == PredictionMode.IMAGE:
                     jsonpath = os.path.join('debug', 'result-quad-image.json')
@@ -195,6 +200,8 @@ class LeftDockVCMixin(VCAbstractMixin):
                 # prediction
                 import json
                 if self.model.predmode == PredictionMode.IMAGE:
+                    if self.model.selectedImgPath is None:
+                        self.model.saveSelectedImg_rectmode(self.model.imgpath)
                     results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
 
                     np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
@@ -204,6 +211,8 @@ class LeftDockVCMixin(VCAbstractMixin):
                         self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
 
                 elif self.model.predmode == PredictionMode.DOCUMENT:
+                    if self.model.selectedImgPath is None:
+                        self.model.saveSelectedImg_quadmode(self.model.imgpath)
                     results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
                     np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
@@ -222,24 +231,11 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         # add annotation
         if self.model.showingmode == ShowingMode.ENTIRE:
-            # get offset
-            if self.model.areamode == AreaMode.RECTANGLE:
-                areaQPolygon = self.model.rectangle.qpolygon
-                parentQSize = self.model.rectangle.qsize
-                offsetQPoint = self.model.rectangle.topLeft
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                areaQPolygon = self.model.quadrangle.qpolygon
-                parentQSize = qsize_from_quadrangle(self.model.quadrangle.qpoints)
-                offsetQPoint = self.model.quadrangle.qpoints[0]
+            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
+                                       parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
-            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=areaQPolygon,
-                                       parentQSize=parentQSize, offsetQPoint=offsetQPoint)
         elif self.model.showingmode == ShowingMode.SELECTED:
-            if self.model.areamode == AreaMode.RECTANGLE:
-                areaQPolygon = self.model.rectangle.qpolygon
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                areaQPolygon = self.model.quadrangle.qpolygon
-            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=areaQPolygon,
+            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.central.updateUI()
