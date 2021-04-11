@@ -17,6 +17,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
 
     def mouseReleased(self, e: QMouseEvent):
+        if self.model.isPredicted:
+            return
+
         if self.model.areamode == AreaMode.RECTANGLE:
             self.model.mouseRelease_rectmode()
         elif self.model.areamode == AreaMode.QUADRANGLE:
@@ -27,6 +30,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.menu.updateUI()
 
     def mousePressed(self, e: QMouseEvent):
+        if self.model.isPredicted:
+            return
+
         if self.model.areamode == AreaMode.RECTANGLE:
             self.model.mousePress_rectmode(e.pos(), self.imageView.size())
 
@@ -36,6 +42,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseMoved(self, e: QMouseEvent):
+        if self.model.isPredicted:
+            return
+
         pos = e.pos()
         if e.buttons() == Qt.LeftButton:
             # in clicking
