@@ -119,7 +119,9 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def zoomValueChanged(self, value):
         self.model.zoomvalue = value
-        self.central.updateUI()
+
+        self.updateModel()
+        self.updateAllUI()
 
     def openAbout(self):
         aboutBox = AboutDialog(self)
@@ -128,9 +130,8 @@ class LeftDockVCMixin(VCAbstractMixin):
     def predmodeChanged(self, mode):
         self.model.predmode = mode
 
-        self.leftdock.updateUI()
-        self.central.updateUI()
-        self.menu.updateUI()
+        self.updateModel()
+        self.updateAllUI()
 
     def showingmodeChanged(self, mode):
         self.model.showingmode = mode
@@ -141,24 +142,20 @@ class LeftDockVCMixin(VCAbstractMixin):
             elif self.model.areamode == AreaMode.QUADRANGLE:
                 self.model.saveSelectedImg_quadmode(self.model.imgpath)
 
-        self.leftdock.updateUI()
-        self.central.updateUI()
-        self.menu.updateUI()
+        self.updateModel()
+        self.updateAllUI()
 
     def areamodeChanged(self, mode):
         self.model.areamode = mode
 
-        self.leftdock.updateUI()
-        self.central.updateUI()
-        self.menu.updateUI()
+        self.updateModel()
+        self.updateAllUI()
 
     def removeArea(self):
         self.model.removeArea()
         self.leftdock.radioButton_entire.click()
         # call areamodeChanged, so below codes are redundant
-        #self.leftdock.updateUI()
-        #self.central.updateUI()
-        #self.menu.updateUI()
+        #self.updateAllUI()
 
     def predict(self):
         from ..main import MainViewController
@@ -168,7 +165,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
             # read results from json
             if self.model.areamode == AreaMode.RECTANGLE:
-                # read area from csv
+                # read predictedArea from csv
                 self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
                 self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
 
@@ -181,7 +178,7 @@ class LeftDockVCMixin(VCAbstractMixin):
                 with open(jsonpath, 'r') as f:
                     results = json.load(f)
             elif self.model.areamode == AreaMode.QUADRANGLE:
-                # read area from csv
+                # read predictedArea from csv
                 self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
                 self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
 
@@ -229,7 +226,7 @@ class LeftDockVCMixin(VCAbstractMixin):
                     # remove tmp files
                     self.model.clearTmpImg()
 
-        # add annotation
+        # set the annotations from the predicted results
         if self.model.showingmode == ShowingMode.ENTIRE:
             self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
                                        parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
@@ -238,9 +235,8 @@ class LeftDockVCMixin(VCAbstractMixin):
             self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
-        self.central.updateUI()
-        self.leftdock.updateUI()
-        #アノテーション後のEntireでのArea表示
+        self.updateModel()
+        self.updateAllUI()
         #RightDock表示
         #編集機能
         #CSV出力

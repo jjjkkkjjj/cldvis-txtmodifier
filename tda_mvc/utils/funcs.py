@@ -1,7 +1,9 @@
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import os
+import os, cv2
 import numpy as np
+
+from .modes import ShowingMode
 
 def check_instance(name, val, cls, allow_none=True):
     if allow_none and val is None:
@@ -69,3 +71,29 @@ def sort_clockwise(a):
     sorted_inds = np.argsort(np.arctan2(a[:, 1]-center[:, 1], a[:, 0]-center[:, 0]))
 
     return np.take(a, sorted_inds, axis=0)
+
+def get_pixmap(model):
+    """
+    Get pixmap from the current status
+    Parameters
+    ----------
+    model: Model
+
+    Returns
+    -------
+    QPixmap
+        The current pixmap to set the imageView
+
+    """
+    from ..model import Model
+    model: Model
+
+    if model.showingmode == ShowingMode.ENTIRE:
+        cvimg = cv2.imread(model.imgpath)
+    elif model.showingmode == ShowingMode.SELECTED:
+        cvimg = cv2.imread(model.selectedImgPath)
+
+    h, w, c = cvimg.shape
+    ratio = model.zoomvalue / 100.
+    pixmap = cvimg2qpixmap(cv2.resize(cvimg, (int(w * ratio), int(h * ratio))))
+    return pixmap

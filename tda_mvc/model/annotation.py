@@ -13,9 +13,9 @@ class AnnotationModelMixin(ModelAbstractMixin):
 
         self._annotations = []
         # prediction area
-        self.area = Polygon(maximum_points_number=4)
-        self.area.set_color(poly_default_color=Color(border=orange, fill=transparency),
-                            vertex_default_color=NoColor())
+        self.predictedArea = Polygon(maximum_points_number=4)
+        self.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
+                                     vertex_default_color=NoColor())
 
     @property
     def selectedAnnotation(self):
@@ -68,9 +68,9 @@ class AnnotationModelMixin(ModelAbstractMixin):
         """
 
         # Note that the selected area is no offset
-        self.area.set_parentVals(parentQSize)
-        self.area.set_qpolygon(areaQPolygon)
-        self.area.show()
+        self.predictedArea.set_parentVals(parentQSize)
+        self.predictedArea.set_qpolygon(areaQPolygon)
+        self.predictedArea.show()
 
         self._annotations = []
         for result in results['prediction']:
@@ -79,7 +79,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
             anno.show()
 
     def paint_annotations(self, painter, isShow):
-        self.area.paint(painter)
+        self.predictedArea.paint(painter)
 
         if isShow:
             for anno in self._annotations:
