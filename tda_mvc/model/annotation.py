@@ -97,3 +97,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
     def hide_annotations(self):
         for anno in self._annotations:
             anno.hide()
+
+    def set_parentVals_annotations(self, parentQSize, offsetQPoint):
+        for anno in self._annotations:
+            anno.set_parentVals(parentQSize, offsetQPoint)
