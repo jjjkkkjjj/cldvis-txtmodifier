@@ -72,12 +72,16 @@ def sort_clockwise(a):
 
     return np.take(a, sorted_inds, axis=0)
 
-def get_pixmap(model):
+def get_pixmap(model, parentQSize=None):
     """
     Get pixmap from the current status
     Parameters
     ----------
     model: Model
+
+    parentQSize: QSize (Optional)
+        The parent widget size. if the returned pixmap's size is smaller than this size,
+        the one will be padded in gray
 
     Returns
     -------
@@ -95,5 +99,22 @@ def get_pixmap(model):
 
     h, w, c = cvimg.shape
     ratio = model.zoomvalue / 100.
-    pixmap = cvimg2qpixmap(cv2.resize(cvimg, (int(w * ratio), int(h * ratio))))
+    cvimg = cv2.resize(cvimg, (int(w * ratio), int(h * ratio)))
+
+    if parentQSize:
+        h, w, c = cvimg.shape
+        padded_w = parentQSize.width() - w
+        if padded_w > 0:
+            # light gray color = BGR=166
+            padded_img = np.ones(shape=(h, padded_w, c), dtype=np.uint8) * 166
+            cvimg = np.concatenate((cvimg, padded_img), axis=1)
+
+        h, w, c = cvimg.shape
+        padded_h = parentQSize.width() - h
+        if padded_h > 0:
+            # light gray color = BGR=166
+            padded_img = np.zeros(shape=(padded_h, w, c), dtype=np.uint8) * 166
+            cvimg = np.concatenate((cvimg, padded_img), axis=0)
+
+    pixmap = cvimg2qpixmap(cvimg)
     return pixmap

@@ -127,7 +127,8 @@ class CentralView(QWidget):
             self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
 
             # set the image
-            pixmap = get_pixmap(self.model)
+            pixmap = get_pixmap(self.model, self.imageView.size())
+
             self.imageView.setPixmap(pixmap)
 
         self.imageView.repaint()
