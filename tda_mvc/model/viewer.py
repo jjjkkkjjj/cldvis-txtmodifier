@@ -69,6 +69,28 @@ class ViewerModelMixin(ModelAbstractMixin):
             return self.selectedQuadImgPath
         return None
 
+    @property
+    def areaQPolygon(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.qpolygon
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.qpolygon
+        return None
+    @property
+    def areaQSize(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.qsize
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return qsize_from_quadrangle(self.quadrangle.qpoints)
+        return None
+    @property
+    def areaTopLeft(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.topLeft
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.qpoints[0]
+        return None
+
     ### rect ###
     def mousePress_rectmode(self, pos, parentQSize):
         self._startPosition = pos
@@ -129,9 +151,10 @@ class ViewerModelMixin(ModelAbstractMixin):
             return
 
         img = cv2.imread(imgpath)
-        tl, br = self.rectangle.topLeft, self.rectangle.bottomRight
+        h, w, _ = img.shape
+        x, y = (self.rectangle.percent_x * w).astype(int), (self.rectangle.percent_y * h).astype(int)
 
-        xmin, xmax, ymin, ymax = tl.x(), br.x(), tl.y(), br.y()
+        xmin, xmax, ymin, ymax = x.min(), x.max(), y.min(), y.max()
 
         filename, ext = os.path.splitext(os.path.basename(imgpath))
         apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
@@ -199,7 +222,9 @@ class ViewerModelMixin(ModelAbstractMixin):
             return
 
         img = cv2.imread(imgpath)
-        tl, tr, br, bl = self.quadrangle.qpoints
+        h, w, _ = img.shape
+        x, y = (self.quadrangle.percent_x * w).astype(int), (self.quadrangle.percent_y * h).astype(int)
+        tl, tr, br, bl = tuple(QPoint(x[i], y[i]) for i in range(x.size))
 
         retqsize = qsize_from_quadrangle((tl, tr, br, bl))
 
