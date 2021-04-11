@@ -40,9 +40,12 @@ class PercentVertexes(GeoBase):
         :param parentQSize: QSize
         :param offsetQPoint: QPoint
         """
-        if parentQSize:
+        if parentQSize is not None:
             self._parentQSize = parentQSize
-        if offsetQPoint:
+        # if I use the following statement, it will be ignored unexpectedly!!!
+        # if offsetQPoint: When offsetQPoint=QPoint(0,0)
+        #    print('aaaaa') <===== Not called!!!
+        if offsetQPoint is not None:
             self._offsetQPoint = offsetQPoint
 
 
@@ -56,10 +59,6 @@ class PercentVertexes(GeoBase):
     def append_percent_pt(self, percent_pt):
         new_percent_pts = np.append(self._percent_points, percent_pt).reshape(-1, 2)
         self._percent_points = sort_clockwise(new_percent_pts)
-
-    @property
-    def points_number(self):
-        return self._percent_points.shape[0]
 
     @property
     def percent_points(self):
