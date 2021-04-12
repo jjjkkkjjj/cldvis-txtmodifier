@@ -101,7 +101,7 @@ def get_pixmap(model, parentQSize=None):
     ratio = model.zoomvalue / 100.
     cvimg = cv2.resize(cvimg, (int(w * ratio), int(h * ratio)))
 
-    if parentQSize:
+    if parentQSize is not None:
         h, w, c = cvimg.shape
         padded_w = parentQSize.width() - w
         if padded_w > 0:

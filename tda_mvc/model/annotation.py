@@ -5,6 +5,7 @@ from PySide2.QtCore import *
 from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
+from ..utils.funcs import qsize_from_quadrangle
 
 class AnnotationModelMixin(ModelAbstractMixin):
     def __init__(self):
@@ -16,6 +17,13 @@ class AnnotationModelMixin(ModelAbstractMixin):
         self.predictedArea = Polygon(maximum_points_number=4)
         self.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
                                      vertex_default_color=NoColor())
+
+    @property
+    def predictedAreaQSize(self):
+        return qsize_from_quadrangle(self.predictedArea.qpoints)
+    @property
+    def predictedAreaTopLeft(self):
+        return self.predictedArea.qpoints[0]
 
     @property
     def selectedAnnotation(self):
@@ -50,7 +58,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
         for anno in self._annotations:
             yield anno
 
-    def set_annotations(self, results, baseWidget, areaQPolygon, parentQSize, offsetQPoint):
+    def set_annotations(self, results, baseWidget, parentQSize, offsetQPoint):
         """
         :param results: dict, detection result by vision
             "info":
@@ -66,11 +74,6 @@ class AnnotationModelMixin(ModelAbstractMixin):
         :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
         :return:
         """
-
-        # Note that the selected area is no offset
-        self.predictedArea.set_parentVals(parentQSize)
-        self.predictedArea.set_qpolygon(areaQPolygon)
-        self.predictedArea.show()
 
         self._annotations = []
         for result in results['prediction']:

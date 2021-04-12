@@ -110,8 +110,10 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
 
             if self.model.showingmode == ShowingMode.ENTIRE:
                 #### Entire mode ####
-
-                self.model.set_parentVals_annotations(parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
+                # set parant size and offset point
+                pixmap = get_pixmap(self.model)
+                self.model.predictedArea.set_parentVals(parentQSize=pixmap.size())
+                self.model.set_parentVals_annotations(parentQSize=self.model.predictedAreaQSize, offsetQPoint=self.model.predictedAreaTopLeft)
                 if self.model.areamode == AreaMode.RECTANGLE:
                     # change area's color
                     self.model.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),

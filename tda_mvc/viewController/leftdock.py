@@ -227,12 +227,14 @@ class LeftDockVCMixin(VCAbstractMixin):
                     self.model.clearTmpImg()
 
         # set the annotations from the predicted results
+        self.model.predictedArea.set_percent_points(self.model.areaPercentPts)
+        self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize, offsetQPoint=self.model.areaOffsetQPoint)
         if self.model.showingmode == ShowingMode.ENTIRE:
-            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
+            self.model.set_annotations(results, baseWidget=self.central.imageView,
                                        parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
         elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.set_annotations(results, baseWidget=self.central.imageView, areaQPolygon=self.model.areaQPolygon,
+            self.model.set_annotations(results, baseWidget=self.central.imageView,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.updateModel()

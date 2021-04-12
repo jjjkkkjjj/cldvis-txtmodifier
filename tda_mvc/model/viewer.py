@@ -90,6 +90,27 @@ class ViewerModelMixin(ModelAbstractMixin):
         elif self.areamode == AreaMode.QUADRANGLE:
             return self.quadrangle.qpoints[0]
         return None
+    @property
+    def areaPercentPts(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.percent_points
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.percent_points
+        return None
+    @property
+    def areaParentQSize(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.parentQSize
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.parentQSize
+        return None
+    @property
+    def areaOffsetQPoint(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self.rectangle.offsetQPoint
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self.quadrangle.offsetQPoint
+        return None
 
     ### rect ###
     def mousePress_rectmode(self, pos, parentQSize):
