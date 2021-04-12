@@ -110,10 +110,10 @@ def get_pixmap(model, parentQSize=None):
             cvimg = np.concatenate((cvimg, padded_img), axis=1)
 
         h, w, c = cvimg.shape
-        padded_h = parentQSize.width() - h
+        padded_h = parentQSize.height() - h
         if padded_h > 0:
             # light gray color = BGR=166
-            padded_img = np.zeros(shape=(padded_h, w, c), dtype=np.uint8) * 166
+            padded_img = np.ones(shape=(padded_h, w, c), dtype=np.uint8) * 166
             cvimg = np.concatenate((cvimg, padded_img), axis=0)
 
     pixmap = cvimg2qpixmap(cvimg)
