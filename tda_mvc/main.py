@@ -149,5 +149,8 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
                     self.model.show_annotations()
 
 
+    def resizeEvent(self, event):
+        self.updateAllUI()
+
     def closeEvent(self, event):
         self.model.clearTmpImg()
