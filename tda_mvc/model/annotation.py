@@ -9,10 +9,7 @@ from ..utils.funcs import qsize_from_quadrangle
 
 class AnnotationModelMixin(ModelAbstractMixin):
     def __init__(self):
-        # -1 if annotation is not selected
-        self._selectedIndex = -1
-
-        self._annotations = []
+        self.annotations = AnnotationsManager()
         # prediction area
         self.predictedArea = Polygon(maximum_points_number=4)
         self.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
@@ -25,13 +22,32 @@ class AnnotationModelMixin(ModelAbstractMixin):
     def predictedAreaTopLeft(self):
         return self.predictedArea.qpoints[0]
 
+
+
+
+
+
+#Annotationsは切り分け，  マウスイベント実装，ContextMenu追加，RightDock
+class AnnotationsManager(object):
+    def __init__(self):
+        # -1 if annotation is not selected
+        self._selectedIndex = -1
+
+        self._annotations = []
+
+    def __iter__(self):
+        """
+        Note that this property returns generator, not list
+        """
+        for anno in self._annotations:
+            yield anno
+
     @property
     def selectedAnnotation(self):
         if self.isExistSelectedAnnotation:
             return self._annotations[self._selectedIndex]
         else:
             return None
-
     @property
     def selectedAnnotationIndex(self):
         if self.isExistSelectedAnnotation:
@@ -42,7 +58,6 @@ class AnnotationModelMixin(ModelAbstractMixin):
     @property
     def isExistSelectedAnnotation(self):
         return self._selectedIndex != -1
-
     @property
     def isExistSelectedAnnotationPoint(self):
         if self.isExistSelectedAnnotation:
@@ -50,15 +65,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
         else:
             return False
 
-    @property
-    def annotations(self):
-        """
-        Note that this property returns generator, not list
-        """
-        for anno in self._annotations:
-            yield anno
-
-    def set_annotations(self, results, baseWidget, parentQSize, offsetQPoint):
+    def set_results(self, results, baseWidget, parentQSize, offsetQPoint):
         """
         :param results: dict, detection result by vision
             "info":
@@ -81,9 +88,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
             self._annotations += [anno]
             anno.show()
 
-    def paint_annotations(self, painter, isShow):
-        self.predictedArea.paint(painter)
-
+    def paint(self, painter, isShow):
         if isShow:
             for anno in self._annotations:
                 anno.paint(painter)
@@ -93,14 +98,14 @@ class AnnotationModelMixin(ModelAbstractMixin):
                 anno.paint(painter)
                 anno.hide()
 
-    def show_annotations(self):
+    def show(self):
         for anno in self._annotations:
             anno.show()
 
-    def hide_annotations(self):
+    def hide(self):
         for anno in self._annotations:
             anno.hide()
 
-    def set_parentVals_annotations(self, parentQSize, offsetQPoint):
+    def set_parentVals(self, parentQSize, offsetQPoint):
         for anno in self._annotations:
             anno.set_parentVals(parentQSize, offsetQPoint)

@@ -43,6 +43,8 @@ class CentralVCMixin(VCAbstractMixin):
 
     def mouseMoved(self, e: QMouseEvent):
         if self.model.isPredicted:
+            if e.buttons() == Qt.NoButton:
+                pass
             return
 
         pos = e.pos()

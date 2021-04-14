@@ -64,15 +64,16 @@ class ImageView(QLabel):
             return
 
         # predicted
+        self.model.predictedArea.paint(painter)
         if self.model.showingmode == ShowingMode.SELECTED:
-            self.model.paint_annotations(painter, True)
+            self.model.annotations.paint(painter, True)
             return
 
         # predicted and Entire mode
         if self.model.areamode == AreaMode.RECTANGLE:
-            self.model.paint_annotations(painter, True)
+            self.model.annotations.paint(painter, True)
         elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.model.paint_annotations(painter, False)
+            self.model.annotations.paint(painter, False)
 
 
 class CentralView(QWidget):

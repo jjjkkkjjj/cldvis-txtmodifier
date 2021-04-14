@@ -76,6 +76,9 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
             show_credentialDialog()
 
     def updateModel(self):
+        if not self.model.isExistImg:
+            return
+
         if not self.model.isPredicted:
             #### Not predicted ####
 
@@ -113,14 +116,14 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
                 # set parant size and offset point
                 pixmap = get_pixmap(self.model)
                 self.model.predictedArea.set_parentVals(parentQSize=pixmap.size())
-                self.model.set_parentVals_annotations(parentQSize=self.model.predictedAreaQSize, offsetQPoint=self.model.predictedAreaTopLeft)
+                self.model.annotations.set_parentVals(parentQSize=self.model.predictedAreaQSize, offsetQPoint=self.model.predictedAreaTopLeft)
                 if self.model.areamode == AreaMode.RECTANGLE:
                     # change area's color
                     self.model.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
                                                        vertex_default_color=NoColor())
                     # area is shown only
                     self.model.predictedArea.show()
-                    self.model.hide_annotations()
+                    self.model.annotations.hide()
 
                 elif self.model.areamode == AreaMode.QUADRANGLE:
                     # change area's color
@@ -128,7 +131,7 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
                                                        vertex_default_color=NoColor())
                     # area and annotations are shown
                     self.model.predictedArea.show()
-                    self.model.show_annotations()
+                    self.model.annotations.show()
 
 
             elif self.model.showingmode == ShowingMode.SELECTED:
@@ -137,16 +140,16 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
                 # set parant size and offset point
                 pixmap = get_pixmap(self.model)
                 if self.model.areamode == AreaMode.RECTANGLE:
-                    self.model.set_parentVals_annotations(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
+                    self.model.annotations.set_parentVals(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
 
                     self.model.predictedArea.hide()
-                    self.model.show_annotations()
+                    self.model.annotations.show()
 
                 elif self.model.areamode == AreaMode.QUADRANGLE:
-                    self.model.set_parentVals_annotations(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
+                    self.model.annotations.set_parentVals(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
 
                     self.model.predictedArea.hide()
-                    self.model.show_annotations()
+                    self.model.annotations.show()
 
 
     def resizeEvent(self, event):

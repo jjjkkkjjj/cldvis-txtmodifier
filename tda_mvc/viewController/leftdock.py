@@ -230,17 +230,13 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.model.predictedArea.set_percent_points(self.model.areaPercentPts)
         self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize, offsetQPoint=self.model.areaOffsetQPoint)
         if self.model.showingmode == ShowingMode.ENTIRE:
-            self.model.set_annotations(results, baseWidget=self.central.imageView,
+            self.model.annotations.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
         elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.set_annotations(results, baseWidget=self.central.imageView,
+            self.model.annotations.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.updateModel()
         self.updateAllUI()
-        #RightDock表示
-        #編集機能
-        #CSV出力
-        #データセット出力
-        #次へ機能
+
