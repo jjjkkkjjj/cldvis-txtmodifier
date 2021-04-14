@@ -23,7 +23,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
         return self.predictedArea.qpoints[0]
 
 
-#ContextMenu追加，RightDock
+#RightDock
 class AnnotationsManager(object):
     def __init__(self):
         # -1 if annotation is not selected
@@ -37,6 +37,9 @@ class AnnotationsManager(object):
         """
         for anno in self._annotations:
             yield anno
+
+    def append(self, anno):
+        self._annotations += [anno]
 
     @property
     def selectedAnnotation(self):
@@ -116,3 +119,14 @@ class AnnotationsManager(object):
                 return
         # All of polygons are not selected
         self._selectedIndex = -1
+
+    def remove_selectedAnnotation(self):
+        if self.isExistSelectedAnnotation:
+            del self._annotations[self.selectedAnnotationIndex]
+            self._selectedIndex = -1
+
+    def duplicate_selectedAnnotation(self):
+        if self.isExistSelectedAnnotation:
+            newanno = self.selectedAnnotation.duplicateMe()
+            newanno.show()
+            self.append(newanno)

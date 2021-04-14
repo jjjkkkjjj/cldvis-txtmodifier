@@ -2,7 +2,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 
-from ..utils.funcs import check_instance
+from ..utils.funcs import check_instance, create_action, add_actions
 from ..utils.modes import ShowingMode
 from ..model import Model
 from .leftdock import LeftDockView
@@ -76,76 +76,76 @@ class MenuBar(QMenuBar):
 
         ##### File #####
         # open folder
-        self.action_openfolder = _create_action(self, "&Open Folder", slot=None,
+        self.action_openfolder = create_action(self, "&Open Folder", slot=None,
                                                 shortcut="Ctrl+O", tip="open folder")
         # open files
-        self.action_openfiles = _create_action(self, "&Open Files", slot=None,
+        self.action_openfiles = create_action(self, "&Open Files", slot=None,
                                                shortcut="Ctrl+Shift+O", tip="open files")
 
         # back file
-        self.action_backfile = _create_action(self, "&Back File", slot=None,
+        self.action_backfile = create_action(self, "&Back File", slot=None,
                                               shortcut="Alt+Left", tip="Back file")
         # forward file
-        self.action_forwardfile = _create_action(self, "&Forward File", slot=None,
+        self.action_forwardfile = create_action(self, "&Forward File", slot=None,
                                                  shortcut="Alt+Right", tip="Forward file")
 
-        _add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
+        add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
                                       self.action_backfile, self.action_forwardfile))
 
         ##### View #####
         # zoom in
-        self.action_zoomin = _create_action(self, '&Zoom In', slot=None,
+        self.action_zoomin = create_action(self, '&Zoom In', slot=None,
                                             shortcut="Ctrl++", tip='Zoom in')
         # zoom out
-        self.action_zoomout = _create_action(self, '&Zoom Out', slot=None,
+        self.action_zoomout = create_action(self, '&Zoom Out', slot=None,
                                              shortcut="Ctrl+-", tip='Zoom out')
 
         # show entire image
-        self.action_showentire = _create_action(self, '&Show Entire Image', slot=None,
+        self.action_showentire = create_action(self, '&Show Entire Image', slot=None,
                                                 shortcut='Ctrl+E', tip='Show the entire image')
 
         # show selected image
-        self.action_showselected = _create_action(self, '&Show Selected Image', slot=None,
+        self.action_showselected = create_action(self, '&Show Selected Image', slot=None,
                                                   shortcut='Ctrl+R', tip='Show the selected image')
 
-        _add_actions(self.menu_viewer, (self.action_zoomin, self.action_zoomout, None,
+        add_actions(self.menu_viewer, (self.action_zoomin, self.action_zoomout, None,
                                         self.action_showentire, self.action_showselected))
 
         ##### Run #####
         # area mode
-        self.action_areaRectMode = _create_action(self, '&Rectangle Mode', slot=None,
+        self.action_areaRectMode = create_action(self, '&Rectangle Mode', slot=None,
                                                   shortcut="r", tip='Use rectangle for prediction')
 
-        self.action_areaQuadMode = _create_action(self, '&Quadrangle Mode', slot=None,
+        self.action_areaQuadMode = create_action(self, '&Quadrangle Mode', slot=None,
                                                   shortcut="q", tip='Use quadrangle for prediction')
 
         # remove
-        self.action_removeArea = _create_action(self, '&Remove Rectangle', slot=None,
+        self.action_removeArea = create_action(self, '&Remove Rectangle', slot=None,
                                                 shortcut="Ctrl+D", tip='Remove rectangle')
 
         # predict as image mode
-        self.action_predictImageMode = _create_action(self, '&Image mode', slot=None,
+        self.action_predictImageMode = create_action(self, '&Image mode', slot=None,
                                                       shortcut='Ctrl+shift+I', tip='Predict the texts as Image mode')
 
         # predict as table mode
-        self.action_predictDocumentMode = _create_action(self, '&Document mode', slot=None,
+        self.action_predictDocumentMode = create_action(self, '&Document mode', slot=None,
                                                          shortcut='Ctrl+shift+D', tip='Predict the texts as Document mode')
 
         # predict
-        self.action_predict = _create_action(self, '&Predict Table', slot=None,
+        self.action_predict = create_action(self, '&Predict Table', slot=None,
                                              shortcut="Ctrl+R", tip='Predict table')
 
-        _add_actions(self.menu_prediction, (self.action_areaRectMode, self.action_areaQuadMode, None,
+        add_actions(self.menu_prediction, (self.action_areaRectMode, self.action_areaQuadMode, None,
                                             self.action_removeArea, None,
                                             self.action_predictImageMode, self.action_predictDocumentMode, None,
                                             self.action_predict, None))
 
         ##### Help #####
         # about
-        self.action_about = _create_action(self, '&About', slot=None,
+        self.action_about = create_action(self, '&About', slot=None,
                                            tip='about Table Data Analyzer')
 
-        _add_actions(self.menu_help, (self.action_about,))
+        add_actions(self.menu_help, (self.action_about,))
 
     def updateUI(self):
         """
@@ -177,25 +177,3 @@ class MenuBar(QMenuBar):
         self.action_removeArea.setEnabled(self.model.isExistArea)
         self.action_predict.setEnabled(self.model.isPredictable)
 
-def _add_actions(target, actions):
-    for action in actions:
-        if action is None:
-            target.addSeparator()
-        else:
-            target.addAction(action)
-
-def _create_action(self, text, slot=None, shortcut=None,
-                  icon=None, tip=None, checkable=False, ):
-    action = QAction(text, self)
-    if icon is not None:
-        action.setIcon(QIcon(":/%s.png" % icon))
-    if shortcut is not None:
-        action.setShortcut(shortcut)
-    if tip is not None:
-        action.setToolTip(tip)
-        action.setStatusTip(tip)
-    if slot is not None:
-        action.triggered.connect(slot)
-    if checkable:
-        action.setCheckable(True)
-    return action

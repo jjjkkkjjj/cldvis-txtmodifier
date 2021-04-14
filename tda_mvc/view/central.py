@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import os, cv2
 
-from ..utils.funcs import check_instance, get_pixmap
+from ..utils.funcs import check_instance, get_pixmap, create_action, add_actions
 from ..utils.modes import AreaMode, MoveActionState, ShowingMode
 from ..utils.geometry import *
 from ..utils.paint import Color, NoColor, transparency, orange
@@ -11,6 +11,7 @@ from ..model import Model
 
 class ImageView(QLabel):
     ### Signal ###
+    rightClicked = Signal(QContextMenuEvent)
     mousePressed = Signal(QMouseEvent)
     mouseMoved = Signal(QMouseEvent)
     mouseReleased = Signal(QMouseEvent)
@@ -24,9 +25,14 @@ class ImageView(QLabel):
 
         self.moveActionState = MoveActionState.CREATE
 
+        # context menu
+        self.contextMenu = ImgContextMenu(self.model, self)
+
         # mouseMoveEvent will be fired on pressing any button
         self.setMouseTracking(True)
 
+    def contextMenuEvent(self, e):
+        self.rightClicked.emit(e)
 
     def mousePressEvent(self, e: QMouseEvent):
         # Note that this method is called earlier than contextMenuEvent
@@ -133,3 +139,39 @@ class CentralView(QWidget):
             self.imageView.setPixmap(pixmap)
 
         self.imageView.repaint()
+        
+class ImgContextMenu(QMenu):
+    # model
+    model: Model
+
+    def __init__(self, model, parent=None):
+        super().__init__(parent)
+
+        self.model = check_instance('model', model, Model)
+        self.initUI()
+        self.updateUI()
+
+    def initUI(self):
+        # annotation
+        self.action_remove_annotation = create_action(self, "&Remove Annotation", slot=None,
+                                                    tip="remove selected annotation")
+        self.action_duplicate_annotation = create_action(self, "&Duplicate Annotation", slot=None,
+                                                       tip="duplicate selected annotation")
+
+        # point
+        self.action_remove_point = create_action(self, "&Remove Point", slot=None,
+                                                    tip="remove selected point")
+        self.action_duplicate_point = create_action(self, "&Duplicate Point", slot=None,
+                                                       tip="duplicate selected point")
+
+        add_actions(self, (self.action_remove_annotation, self.action_duplicate_annotation, None,
+                            self.action_remove_point, self.action_duplicate_point))
+
+    def updateUI(self):
+        # annotation
+        self.action_remove_annotation.setEnabled(self.model.annotations.isExistSelectedAnnotation)
+        self.action_duplicate_annotation.setEnabled(self.model.annotations.isExistSelectedAnnotation)
+
+        # point
+        self.action_remove_point.setEnabled(self.model.annotations.isExistSelectedAnnotationPoint)
+        self.action_duplicate_point.setEnabled(self.model.annotations.isExistSelectedAnnotationPoint)

@@ -12,6 +12,7 @@ class CentralVCMixin(VCAbstractMixin):
         return self.central.imageView
 
     def establish_connection(self):
+        self.imageView.rightClicked.connect(lambda e: self.rightClicked(e))
         self.imageView.mouseReleased.connect(lambda e: self.mouseReleased(e))
         self.imageView.mousePressed.connect(lambda e: self.mousePressed(e))
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
@@ -28,6 +29,23 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
         self.leftdock.updateUI()
         self.menu.updateUI()
+
+    def rightClicked(self, e: QContextMenuEvent):
+        if not self.model.isPredicted:
+            return
+
+        contextMenu = self.imageView.contextMenu
+        contextMenu.updateUI()
+        action = contextMenu.exec_(self.imageView.mapToGlobal(e.pos()))
+        if action == contextMenu.action_remove_annotation:
+            self.model.annotations.remove_selectedAnnotation()
+        elif action == contextMenu.action_duplicate_annotation:
+            self.model.annotations.duplicate_selectedAnnotation()
+        elif action == contextMenu.action_remove_point:
+            pass
+        elif action == contextMenu.action_duplicate_point:
+            pass
+
 
     def mousePressed(self, e: QMouseEvent):
         if self.model.isPredicted:
