@@ -44,7 +44,7 @@ class CentralVCMixin(VCAbstractMixin):
     def mouseMoved(self, e: QMouseEvent):
         if self.model.isPredicted:
             if e.buttons() == Qt.NoButton:
-                pass
+                self.model.annotations.set_selectPos(e.pos())
             return
 
         pos = e.pos()

@@ -23,11 +23,7 @@ class AnnotationModelMixin(ModelAbstractMixin):
         return self.predictedArea.qpoints[0]
 
 
-
-
-
-
-#Annotationsは切り分け，  マウスイベント実装，ContextMenu追加，RightDock
+#ContextMenu追加，RightDock
 class AnnotationsManager(object):
     def __init__(self):
         # -1 if annotation is not selected
@@ -109,3 +105,14 @@ class AnnotationsManager(object):
     def set_parentVals(self, parentQSize, offsetQPoint):
         for anno in self._annotations:
             anno.set_parentVals(parentQSize, offsetQPoint)
+
+    def set_selectPos(self, pos):
+        for anno in self._annotations:
+            anno.set_selectPos(None)
+
+        for i, anno in reversed(list(enumerate(self._annotations))):
+            if anno.set_selectPos(pos):
+                self._selectedIndex = i
+                return
+        # All of polygons are not selected
+        self._selectedIndex = -1
