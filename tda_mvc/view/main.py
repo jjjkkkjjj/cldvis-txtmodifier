@@ -171,9 +171,13 @@ class MenuBar(QMenuBar):
         # below is replaced into
         # `not (self.model.showingmode == ShowingMode.SELECTED and not self.model.isRectPredictable)`
         # due to De Morgan's laws
-        self.action_areaRectMode.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isRectPredictable)
-        self.action_areaQuadMode.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isQuadPredictable)
+        self.action_areaRectMode.setEnabled((self.model.showingmode == ShowingMode.ENTIRE or self.model.isRectPredictable)
+                                            and (not self.model.isPredicted))
+        self.action_areaQuadMode.setEnabled((self.model.showingmode == ShowingMode.ENTIRE or self.model.isQuadPredictable)
+                                            and (not self.model.isPredicted))
 
-        self.action_removeArea.setEnabled(self.model.isExistArea)
-        self.action_predict.setEnabled(self.model.isPredictable)
+        self.action_predictImageMode.setEnabled(not self.model.isPredicted)
+        self.action_predictDocumentMode.setEnabled(not self.model.isPredicted)
+        self.action_removeArea.setEnabled(self.model.isExistArea and not self.model.isPredicted)
+        self.action_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
 

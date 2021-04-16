@@ -187,11 +187,8 @@ class LeftDockView(QWidget):
         self.radioButton_rect.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isRectPredictable)
         self.radioButton_quad.setEnabled(self.model.showingmode == ShowingMode.ENTIRE or self.model.isQuadPredictable)
 
-        self.button_removeArea.setEnabled(self.model.isExistArea)
-        self.button_predict.setEnabled(self.model.isPredictable)
-
         # if the image has already predicted, disable
         self.groupBox_areamode.setEnabled(not self.model.isPredicted)
-        self.button_removeArea.setEnabled(not self.model.isPredicted)
+        self.button_removeArea.setEnabled(self.model.isExistArea and not self.model.isPredicted)
         self.comboBox_predmode.setEnabled(not self.model.isPredicted)
-        self.button_predict.setEnabled(not self.model.isPredicted)
+        self.button_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
