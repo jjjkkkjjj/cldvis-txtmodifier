@@ -537,6 +537,10 @@ class Annotation(Polygon):
         super().hide()
         self.band.hide()
 
+    def set_text(self, text):
+        self.text = text
+        self.band.text = text
+
     def set_percent_points(self, percent_pts=None):
         super().set_percent_points(percent_pts)
         self.band.setGeometry(self.qpolygon.boundingRect())

@@ -15,6 +15,7 @@ class ImageView(QLabel):
     mousePressed = Signal(QMouseEvent)
     mouseMoved = Signal(QMouseEvent)
     mouseReleased = Signal(QMouseEvent)
+    mouseDoubleClicked = Signal(QMouseEvent)
 
     # model
     model: Model
@@ -46,6 +47,9 @@ class ImageView(QLabel):
 
     def mouseReleaseEvent(self, e: QMouseEvent):
         self.mouseReleased.emit(e)
+
+    def mouseDoubleClickEvent(self, e: QMouseEvent):
+        self.mouseDoubleClicked.emit(e)
 
     def paintEvent(self, event):
         if not self.pixmap():

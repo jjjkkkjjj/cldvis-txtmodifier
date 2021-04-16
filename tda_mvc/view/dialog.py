@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
+from PySide2.QtGui import *
 
 import glob, os, sys
 
@@ -115,3 +116,68 @@ class CredentialDialog(QDialog):
     def closeEvent(self, event):
         if not self.isSetPath:
             sys.exit()
+
+class EditDialog(QDialog):
+    edited = Signal(object, str)
+    removed = Signal()
+    def __init__(self, annotation, parent=None):
+        super().__init__(parent)
+
+        self.annoatation = annotation
+
+        self.initUI()
+        self.establish_connection()
+
+    def initUI(self):
+        title = 'Edit {}'.format(self.annoatation.text)
+        self.setWindowTitle(title)
+
+        vbox = QVBoxLayout()
+        self.shifhtEnterTextEdit = ShiftEnterTextEdit(self)
+        self.shifhtEnterTextEdit.installEventFilter(self)
+        self.shifhtEnterTextEdit.setText(self.annoatation.text)
+        self.shifhtEnterTextEdit.moveCursor(QTextCursor.End)
+        self.shifhtEnterTextEdit.selectAll()
+        vbox.addWidget(self.shifhtEnterTextEdit)
+
+        hbox = QHBoxLayout()
+        self.button_remove = QPushButton('Remove')
+        hbox.addWidget(self.button_remove, 1)
+        self.button_cancel = QPushButton('Cancel')
+        hbox.addWidget(self.button_cancel, 2)
+        self.button_ok = QPushButton('OK')
+        self.button_ok.setDefault(True)
+        hbox.addWidget(self.button_ok, 2)
+        vbox.addLayout(hbox)
+
+        self.setLayout(vbox)
+
+
+    def establish_connection(self):
+        self.shifhtEnterTextEdit.enterKeyPressed.connect(self.okClicked)
+        self.button_ok.clicked.connect(self.okClicked)
+        self.button_cancel.clicked.connect(self.close)
+        self.button_remove.clicked.connect(self.removeClicked)
+
+    def okClicked(self):
+        text = self.shifhtEnterTextEdit.toPlainText()
+        if self.annoatation.text != text:
+            self.edited.emit(self.annoatation, text)
+        self.close()
+
+    def removeClicked(self):
+        self.removed.emit()
+        self.close()
+
+class ShiftEnterTextEdit(QTextEdit):
+    enterKeyPressed = Signal(QKeyEvent)
+    def keyPressEvent(self, event):
+        # shift enter
+        if event.modifiers() == Qt.ShiftModifier and event.key() == Qt.Key_Return:
+            self.insertPlainText('\n')
+            return
+        # enter only
+        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            self.enterKeyPressed.emit(event)
+            return
+        super().keyPressEvent(event)

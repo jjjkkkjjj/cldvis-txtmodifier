@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from ..utils.modes import AreaMode, ShowingMode
+from ..view.dialog import EditDialog
 from .base import VCAbstractMixin
 
 class CentralVCMixin(VCAbstractMixin):
@@ -16,6 +17,7 @@ class CentralVCMixin(VCAbstractMixin):
         self.imageView.mouseReleased.connect(lambda e: self.mouseReleased(e))
         self.imageView.mousePressed.connect(lambda e: self.mousePressed(e))
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
+        self.imageView.mouseDoubleClicked.connect(lambda e: self.mouseDoubleClicked(e))
 
     def mouseReleased(self, e: QMouseEvent):
         if self.model.isPredicted:
@@ -86,6 +88,24 @@ class CentralVCMixin(VCAbstractMixin):
                 self.model.mouseMoveNoButton_quadmode(pos)
 
         self.modelUpdateAftermouseEvent()
+
+    def mouseDoubleClicked(self, e: QMouseEvent):
+        if not self.model.annotations.isExistSelectedAnnotation:
+            return
+
+        def edited(annotation, text):
+            annotation.set_text(text)
+            self.updateAllUI()
+
+        def remove():
+            self.model.annotations.remove_selectedAnnotation()
+            self.updateModel()
+            self.updateAllUI()
+
+        editDialog = EditDialog(self.model.annotations.selectedAnnotation, self)
+        editDialog.edited.connect(lambda anno, text: edited(anno, text))
+        editDialog.removed.connect(remove)
+        editDialog.exec_()
 
     def modelUpdateAftermouseEvent(self):
         if self.model.showingmode == ShowingMode.SELECTED:
