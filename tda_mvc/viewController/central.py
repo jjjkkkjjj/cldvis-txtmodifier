@@ -46,6 +46,9 @@ class CentralVCMixin(VCAbstractMixin):
         elif action == contextMenu.action_duplicate_point:
             pass
 
+        self.updateModel()
+        self.updateAllUI()
+
 
     def mousePressed(self, e: QMouseEvent):
         if self.model.isPredicted:
