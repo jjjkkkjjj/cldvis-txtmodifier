@@ -11,6 +11,7 @@ class VCAbstractMixin(object):
     ### property ###
     leftdock: LeftDockView
     central: CentralView
+    rightdock: RightDockView
 
     def establish_connection(self):
         """

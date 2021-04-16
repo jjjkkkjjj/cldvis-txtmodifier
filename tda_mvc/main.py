@@ -10,7 +10,7 @@ from .view import *
 from .viewController import *
 
 
-class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
+class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMainWindow):
     debug = False
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -29,6 +29,9 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
     @property
     def central(self):
         return self.main.central
+    @property
+    def rightdock(self):
+        return self.main.rightdock
 
     def initUI(self):
         self.main = MainView(self.model, self)
@@ -40,11 +43,13 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, QMainWindow):
     def updateAllUI(self):
         self.leftdock.updateUI()
         self.central.updateUI()
+        self.rightdock.updateUI()
         self.menu.updateUI()
 
     def establish_connection(self):
         LeftDockVCMixin.establish_connection(self)
         CentralVCMixin.establish_connection(self)
+        RightDockVCMixin.establish_connection(self)
 
     def check_credential(self):
         def show_credentialDialog():

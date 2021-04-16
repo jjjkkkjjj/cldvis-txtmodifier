@@ -32,9 +32,11 @@ class RightDockView(QWidget):
 
         self.tableview = QTableView(self)
         self.tableview.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableview.setModel(self.model)
         vbox.addWidget(self.tableview)
 
         self.setLayout(vbox)
 
     def updateUI(self):
-        pass
+        self.model.layoutChanged.emit()
+        self.tableview.repaint()

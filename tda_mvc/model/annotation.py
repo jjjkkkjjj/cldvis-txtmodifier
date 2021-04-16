@@ -7,8 +7,13 @@ from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
 from ..utils.funcs import qsize_from_quadrangle
 
-class AnnotationModelMixin(ModelAbstractMixin):
+class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
+
     def __init__(self):
+        QAbstractTableModel.__init__(self, parent=None)
+
+        self._header_labels = ['Text']
+
         self.annotations = AnnotationsManager()
         # prediction area
         self.predictedArea = Polygon(maximum_points_number=4)
@@ -22,8 +27,23 @@ class AnnotationModelMixin(ModelAbstractMixin):
     def predictedAreaTopLeft(self):
         return self.predictedArea.qpoints[0]
 
+    def data(self, index, role=None):
+        if role == Qt.DisplayRole:
+            anno: Annotation = self.annotations[index.row()]
+            return anno.text
 
-#RightDock
+    def headerData(self, section, orientation, role=None):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self._header_labels[section]
+        return super().headerData(section, orientation, role)
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return len(self.annotations)
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return 1
+
+
 class AnnotationsManager(object):
     def __init__(self):
         # -1 if annotation is not selected
@@ -37,6 +57,12 @@ class AnnotationsManager(object):
         """
         for anno in self._annotations:
             yield anno
+
+    def __getitem__(self, index):
+        return self._annotations[index]
+
+    def __len__(self):
+        return len(self._annotations)
 
     def append(self, anno):
         self._annotations += [anno]
