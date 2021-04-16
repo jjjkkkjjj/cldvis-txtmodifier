@@ -66,6 +66,9 @@ class CentralVCMixin(VCAbstractMixin):
         if self.model.isPredicted:
             if e.buttons() == Qt.NoButton:
                 self.model.annotations.set_selectPos(e.pos())
+                if not self.model.annotations.isExistSelectedAnnotation:
+                    return
+                self.rightdock.tableview.selectRow(self.model.annotations.selectedAnnotationIndex)
             return
 
         pos = e.pos()
