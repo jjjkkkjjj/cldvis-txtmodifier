@@ -5,4 +5,4 @@ from .rightdock import RightDockView
 from .dialog import *
 
 __all__ = ['MainView', 'MenuBar', 'LeftDockView', 'CentralView', 'ImageView',
-           'RightDockView', 'CredentialDialog', 'AboutDialog']
+           'RightDockView', 'PreferencesDialog', 'AboutDialog']

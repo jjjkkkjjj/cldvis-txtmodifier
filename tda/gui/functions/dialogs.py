@@ -156,7 +156,7 @@ class CredentialDialog(QDialog):
 
     def check_enable(self):
         # always enabled
-        # self.button_read.setEnabled(not self.isSetPath)
+        # self.button_readJsonpath.setEnabled(not self.isValidJsonPath)
         self.button_ok.setEnabled(self.isSetPath)
 
     def readJsonpath(self):

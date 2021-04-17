@@ -52,33 +52,9 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
         RightDockVCMixin.establish_connection(self)
 
     def check_credential(self):
-        def show_credentialDialog():
-            dialog = CredentialDialog()
-            dialog.pathSet.connect(lambda path: set_credential(path))
+        if not self.model.isExistCredPath:
+            dialog = PreferencesDialog(self.model, initial=True, parent=self)
             dialog.exec_()
-
-        def set_credential(path):
-            """
-            This method must be called in initialization
-            # https://cloud.google.com/vision/docs/ocr
-            # https://www.youtube.com/watch?v=HMaoUdJQEgY
-            # https://cloud.google.com/vision/docs/pdf
-            :param path: str, credential json path
-            :return:
-            """
-            try:
-                self.model.set_credentialJsonpath(path)
-
-            except DefaultCredentialsError:
-                ret = QMessageBox.critical(self, 'Invalid', '{} is invalid!'.format(path), QMessageBox.Yes)
-                if ret == QMessageBox.Yes:
-                    show_credentialDialog()
-
-        if self.model.isExistCredPath:
-            # set credential
-            set_credential(self.model.credentialJsonpath)
-        else:
-            show_credentialDialog()
 
     def updateModel(self):
         if not self.model.isExistImg:

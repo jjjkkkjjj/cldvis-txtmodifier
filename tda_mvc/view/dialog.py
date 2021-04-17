@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
-
+from google.auth.exceptions import DefaultCredentialsError
 import glob, os, sys
 
 class AboutDialog(QDialog):
@@ -43,80 +43,105 @@ class AboutDialog(QDialog):
         self.setLayout(hbox)
         self.setFixedSize(400, 300)
 
-class CredentialDialog(QDialog):
-    pathSet = Signal(str)
+class PreferencesDialog(QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, model, initial, parent=None):
         super().__init__(parent)
 
-        self._jsonpath = None
+        # jsonpath => '': Not selected, None: Can't be loaded, other: OK.
+        try:
+            self.jsonpath = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+        except KeyError:
+            self.jsonpath = ''
+        # None: Not selected
+        # False: Can't be loaded
+        # True: OK.
+        self.isValidJsonPath = None
+
+        from ..model import Model
+        self.model: Model = model
+        self.initial = initial
 
         self.initUI()
         self.establish_connection()
+        self.updateUI()
 
-        self.check_enable()
-
-    @property
-    def jsonpath(self):
-        return self._jsonpath
-    @jsonpath.setter
-    def jsonpath(self, path):
-        self._jsonpath = path
-        if path:
-            self.label_path.setText('Json Path: {}'.format(self._jsonpath))
-        else:
-            self.label_path.setText('Json Path: Not selected')
-
-        self.check_enable()
-
-    @property
-    def isSetPath(self):
-        return self._jsonpath is not None
 
     def initUI(self):
-        title = 'Set credential'
+        title = 'Preferences'
         self.setWindowTitle(title)
 
         vbox = QVBoxLayout()
 
-        self.label_path = QLabel('Json Path: Not selected')
-        vbox.addWidget(self.label_path)
-
-        hbox = QHBoxLayout()
-        self.button_read = QPushButton('Read Json')
-        hbox.addWidget(self.button_read)
+        hbox_jsonpath = QHBoxLayout()
+        self.label_jsonpath = QLabel('Json Path: Not selected')
+        hbox_jsonpath.addWidget(self.label_jsonpath, 5)
+        self.label_jsonpathStatus = QLabel()
+        hbox_jsonpath.addWidget(self.label_jsonpathStatus, 1)
+        self.button_readJsonpath = QPushButton('Read Json')
+        hbox_jsonpath.addWidget(self.button_readJsonpath, 1)
+        vbox.addLayout(hbox_jsonpath)
 
         self.button_ok = QPushButton('OK')
-        hbox.addWidget(self.button_ok)
-        vbox.addLayout(hbox)
+        self.button_ok.setDefault(True)
+        vbox.addWidget(self.button_ok)
 
         self.setLayout(vbox)
-        self.setFixedSize(400, 200)
+        self.setFixedSize(600, 200)
 
     def establish_connection(self):
-        self.button_read.clicked.connect(self.readJsonpath)
-        self.button_ok.clicked.connect(self._emit_jsonpath)
+        self.button_readJsonpath.clicked.connect(self.readJsonpath)
+        self.button_ok.clicked.connect(self.close)
 
-    def check_enable(self):
-        # always enabled
-        # self.button_read.setEnabled(not self.isSetPath)
-        self.button_ok.setEnabled(self.isSetPath)
+    def updateUI(self):
+        self.isValidJsonPath = self.checkJsonpath()
+
+        if self.isValidJsonPath is None:
+            self.label_jsonpath.setText('Json Path: Not selected')
+            icon = self.style().standardIcon(QStyle.SP_MessageBoxWarning)
+            self.button_ok.setEnabled(False)
+        elif self.isValidJsonPath:
+            self.label_jsonpath.setText('Json Path: {}'.format(os.path.basename(self.jsonpath)))
+            icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
+            self.button_ok.setEnabled(True)
+        else:
+            self.label_jsonpath.setText('Json Path: {} is invalid'.format(os.path.basename(self.jsonpath)))
+            icon = self.style().standardIcon(QStyle.SP_MessageBoxCritical)
+            self.button_ok.setEnabled(False)
+
+        self.label_jsonpathStatus.setPixmap(icon.pixmap(QSize(16, 16)))
+
+    def checkJsonpath(self):
+        """
+        This method must be called in initialization
+        # https://cloud.google.com/vision/docs/ocr
+        # https://www.youtube.com/watch?v=HMaoUdJQEgY
+        # https://cloud.google.com/vision/docs/pdf
+        :param path: str, credential json path
+        :return:
+            None: Not selected
+            False: Can't be loaded
+            True: OK.
+        """
+        if self.jsonpath is None or self.jsonpath == '':
+            return None
+        try:
+            self.model.set_credentialJsonpath(self.jsonpath)
+            return True
+        except DefaultCredentialsError:
+            return False
 
     def readJsonpath(self):
         filters = 'JSON (*.json)'
         filename = QFileDialog.getOpenFileName(self, 'OpenFile', '', filters, None, QFileDialog.DontUseNativeDialog)
 
         self.jsonpath = filename[0] if filename[0] != '' else None
-
-    def _emit_jsonpath(self):
-        # set path
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = self.jsonpath
-        self.pathSet.emit(self.jsonpath)
-        self.close()
+        self.updateUI()
 
     def closeEvent(self, event):
-        if not self.isSetPath:
+        if self.initial and not self.isValidJsonPath:
             sys.exit()
+        super().closeEvent(event)
 
 class EditDialog(QDialog):
     edited = Signal(object, str)

@@ -152,9 +152,13 @@ class MenuBar(QMenuBar):
         ##### Help #####
         # about
         self.action_about = create_action(self, '&About', slot=None,
-                                           tip='about Table Data Analyzer')
+                                           tip='About Table Data Analyzer')
 
-        add_actions(self.menu_help, (self.action_about,))
+        # preferences
+        self.action_preferences = create_action(self, '&Preferences', slot=None,
+                                                shortcut="Ctrl+,", tip='Preferences')
+
+        add_actions(self.menu_help, (self.action_about, None, self.action_preferences))
 
     def updateUI(self):
         """

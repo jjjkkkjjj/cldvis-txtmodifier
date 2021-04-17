@@ -3,7 +3,7 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 import os, glob, csv
 
-from ..view import AboutDialog
+from ..view import AboutDialog, PreferencesDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode
 from ..utils.exception import PredictionError
 from ..utils.funcs import parse_annotations
@@ -63,6 +63,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         # about
         self.menu.action_about.triggered.connect(self.openAbout)
+        self.menu.action_preferences.triggered.connect(self.openPreferences)
 
     def openfile(self):
         filters = '{} ({})'.format('Images', ' '.join(['*' + ext for ext in SUPPORTED_EXTENSIONS]))
@@ -138,7 +139,11 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def openAbout(self):
         aboutBox = AboutDialog(self)
-        aboutBox.show()
+        aboutBox.exec_()
+
+    def openPreferences(self):
+        preferencesBox = PreferencesDialog(self.model, initial=False, parent=self)
+        preferencesBox.exec_()
 
     def predmodeChanged(self, mode):
         self.model.predmode = mode
