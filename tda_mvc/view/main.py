@@ -89,8 +89,17 @@ class MenuBar(QMenuBar):
         self.action_forwardfile = create_action(self, "&Forward File", slot=None,
                                                  shortcut="Alt+Right", tip="Forward file")
 
+        # export csv
+        self.action_exportCSV = create_action(self, "&Export CSV", slot=None,
+                                              shortcut="Ctrl+E", tip="Export CSV file")
+
+        # export dataset
+        self.action_exportDataset = create_action(self, "&Export Dataset", slot=None,
+                                                  shortcut="Ctrl+Shift+E", tip="Export Dataset file as VOC format")
+
         add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
-                                      self.action_backfile, self.action_forwardfile))
+                                     self.action_backfile, self.action_forwardfile, None,
+                                     self.action_exportCSV, self.action_exportDataset))
 
         ##### View #####
         # zoom in
@@ -154,13 +163,17 @@ class MenuBar(QMenuBar):
         -------
 
         """
-        self.updateOpen()
+        self.updateFile()
         self.updateViewer()
         self.updatePrediction()
 
-    def updateOpen(self):
+    def updateFile(self):
+        # open file
         self.action_backfile.setEnabled(self.model.isExistBackImg)
         self.action_forwardfile.setEnabled(self.model.isExistForwardImg)
+        # export
+        self.action_exportCSV.setEnabled(self.model.isPredicted)
+        self.action_exportDataset.setEnabled(self.model.isPredicted)
 
     def updateViewer(self):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)

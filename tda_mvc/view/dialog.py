@@ -30,7 +30,8 @@ class AboutDialog(QDialog):
                '<a href="https://icons8.com/icon/63650/plus">Plus icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/12386/minus">Minus icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/107448/remove">Remove icon by Icons8</a><br>' \
-               '<a href="https://icons8.com/icon/66368/artificial-intelligence">Artificial Intelligence icon by Icons8</a>' \
+               '<a href="https://icons8.com/icon/66368/artificial-intelligence">Artificial Intelligence icon by Icons8</a><br>' \
+               '<a href="https://icons8.com/icon/107445/export-csv">Export CSV icon by Icons8</a><br>' \
                '' \
                'Icons made by <a href="https://www.flaticon.com/authors/srip" title="srip">srip</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>'
         label_text.setText(text)

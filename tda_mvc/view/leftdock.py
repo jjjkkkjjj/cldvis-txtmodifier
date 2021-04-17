@@ -66,7 +66,6 @@ class LeftDockView(QWidget):
 
         self.button_openfolder = Button('folder.png')
         vbox_file.addWidget(self.button_openfolder)
-
         self.button_openfile = Button('file.png')
         vbox_file.addWidget(self.button_openfile)
 
@@ -74,11 +73,16 @@ class LeftDockView(QWidget):
         hbox_backforward = QHBoxLayout()
         self.button_back = Button('back.png')
         hbox_backforward.addWidget(self.button_back)
-
         self.button_forward = Button('forward.png')
         hbox_backforward.addWidget(self.button_forward)
 
         vbox_file.addLayout(hbox_backforward)
+
+        # Export csv and dataset
+        self.button_exportCSV = Button('export-csv.png')
+        vbox_file.addWidget(self.button_exportCSV)
+        self.button_exportDataset = Button('export-dataset.png')
+        vbox_file.addWidget(self.button_exportDataset)
 
         self.groupBox_file.setLayout(vbox_file)
         vbox.addWidget(self.groupBox_file, 1)
@@ -150,10 +154,6 @@ class LeftDockView(QWidget):
         self.button_predict = Button('cloud-vision.png')
         vbox_run.addWidget(self.button_predict)
 
-        # add dataset
-        self.button_addDataset = Button('add-dataset.png')
-        vbox_run.addWidget(self.button_addDataset)
-
         self.groupBox_prediction.setLayout(vbox_run)
         vbox.addWidget(self.groupBox_prediction, 1)
 
@@ -166,13 +166,17 @@ class LeftDockView(QWidget):
         -------
 
         """
-        self.updateOpen()
+        self.updateFile()
         self.updateView()
         self.updatePrediction()
 
-    def updateOpen(self):
+    def updateFile(self):
+        # open file
         self.button_back.setEnabled(self.model.isExistBackImg)
         self.button_forward.setEnabled(self.model.isExistForwardImg)
+        # export
+        self.button_exportCSV.setEnabled(self.model.isPredicted)
+        self.button_exportDataset.setEnabled(self.model.isPredicted)
 
     def updateView(self):
         self.spinBox_zoom.setEnabled(self.model.isExistImg)
