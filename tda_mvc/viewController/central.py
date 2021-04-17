@@ -50,13 +50,13 @@ class CentralVCMixin(VCAbstractMixin):
     def mousePressed(self, e: QMouseEvent):
         if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
             self.model.annotations.mousePress(e.pos(), self.predictedParentQSize)
-            return
 
-        if self.model.areamode == AreaMode.RECTANGLE:
-            self.model.mousePress_rectmode(e.pos(), self.imageView.size())
+        else:
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.mousePress_rectmode(e.pos(), self.imageView.size())
 
-        elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.model.mousePress_quadmode(e.pos(), self.imageView.size())
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.mousePress_quadmode(e.pos(), self.imageView.size())
 
         self.modelUpdateAftermouseEvent()
 
@@ -69,32 +69,31 @@ class CentralVCMixin(VCAbstractMixin):
                 self.model.annotations.mouseMoveNoButton(pos)
                 if self.model.annotations.isExistSelectedAnnotation:
                     self.rightdock.tableview.selectRow(self.model.annotations.selectedAnnotationIndex)
-            return
+        else:
+            if e.buttons() == Qt.LeftButton:
+                # in clicking
+                if self.model.areamode == AreaMode.RECTANGLE:
+                    self.model.mouseMoveClicked_rectmode(pos, self.imageView.size())
+                elif self.model.areamode == AreaMode.QUADRANGLE:
+                    self.model.mouseMoveClicked_quadmode(pos, self.imageView.size())
 
-        if e.buttons() == Qt.LeftButton:
-            # in clicking
-            if self.model.areamode == AreaMode.RECTANGLE:
-                self.model.mouseMoveClicked_rectmode(pos, self.imageView.size())
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                self.model.mouseMoveClicked_quadmode(pos, self.imageView.size())
-
-        elif e.buttons() == Qt.NoButton:
-            if self.model.areamode == AreaMode.RECTANGLE:
-                self.model.mouseMoveNoButton_rectmode(pos)
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                self.model.mouseMoveNoButton_quadmode(pos)
+            elif e.buttons() == Qt.NoButton:
+                if self.model.areamode == AreaMode.RECTANGLE:
+                    self.model.mouseMoveNoButton_rectmode(pos)
+                elif self.model.areamode == AreaMode.QUADRANGLE:
+                    self.model.mouseMoveNoButton_quadmode(pos)
 
         self.modelUpdateAftermouseEvent()
 
     def mouseReleased(self, e: QMouseEvent):
         if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
             self.model.annotations.mouseRelease()
-            return
 
-        if self.model.areamode == AreaMode.RECTANGLE:
-            self.model.mouseRelease_rectmode()
-        elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.model.mouseRelease_quadmode()
+        else:
+            if self.model.areamode == AreaMode.RECTANGLE:
+                self.model.mouseRelease_rectmode()
+            elif self.model.areamode == AreaMode.QUADRANGLE:
+                self.model.mouseRelease_quadmode()
 
         self.modelUpdateAftermouseEvent()
         self.leftdock.updateUI()

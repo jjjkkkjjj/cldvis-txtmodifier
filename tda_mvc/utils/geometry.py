@@ -549,6 +549,22 @@ class Annotation(Polygon):
         super().set_parentVals(parentQSize, offsetQPoint)
         self.band.setGeometry(self.qpolygon.boundingRect())
 
+    def move(self, movedAmount):
+        super().move(movedAmount)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
+    def move_qpoint(self, index, qpt):
+        super().move_qpoint(index, qpt)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
+    def move_percent_point(self, index, percent_pt):
+        super().move_percent_point(index, percent_pt)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
+    def set_qpolygon(self, qpolygon):
+        super().set_qpolygon(qpolygon)
+        self.band.setGeometry(self.qpolygon.boundingRect())
+
     def set_selectPos(self, pos):
         if super().set_selectPos(pos):
             # selected
