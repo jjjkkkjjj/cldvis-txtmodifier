@@ -1,12 +1,12 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import os, glob
+import os, glob, csv
 
 from ..view import AboutDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode
 from ..utils.exception import PredictionError
-from ..utils.funcs import qsize_from_quadrangle
+from ..utils.funcs import parse_annotations
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -16,13 +16,15 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def establish_connection(self):
         ### leftdock ###
-        # open
+        # file
         self.leftdock.button_openfile.clicked.connect(self.openfile)
         self.leftdock.button_openfolder.clicked.connect(self.openFolder)
         self.leftdock.button_forward.clicked.connect(lambda: self.changeImg(True))
         self.leftdock.button_back.clicked.connect(lambda: self.changeImg(False))
+        self.leftdock.button_exportCSV.clicked.connect(self.exportCSV)
+        self.leftdock.button_exportDataset.clicked.connect(self.exportDataset)
 
-        # viewer
+        # view
         self.leftdock.button_zoomin.clicked.connect(lambda: self.zoomInOut(True))
         self.leftdock.button_zoomout.clicked.connect(lambda: self.zoomInOut(False))
         self.leftdock.spinBox_zoom.valueChanged.connect(lambda value: self.zoomValueChanged(value))
@@ -37,13 +39,15 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.button_predict.clicked.connect(self.predict)
 
         ### menu ###
-        # open
+        # file
         self.menu.action_openfiles.triggered.connect(self.openfile)
         self.menu.action_openfolder.triggered.connect(self.openFolder)
         self.menu.action_forwardfile.triggered.connect(lambda: self.changeImg(True))
         self.menu.action_backfile.triggered.connect(lambda: self.changeImg(False))
+        self.menu.action_exportCSV.triggered.connect(self.exportCSV)
+        self.menu.action_exportDataset.triggered.connect(self.exportDataset)
 
-        # viewer
+        # view
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
         self.menu.action_showentire.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
@@ -107,6 +111,15 @@ class LeftDockVCMixin(VCAbstractMixin):
         # update view
         self.leftdock.updateUI()
         self.central.updateUI()
+
+    def exportCSV(self):
+        csv_list = parse_annotations(self.model)
+        with open('./debug/texts.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerows(csv_list)
+
+    def exportDataset(self):
+        pass
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:

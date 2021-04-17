@@ -103,6 +103,9 @@ class PercentVertexes(GeoBase):
     @property
     def y(self):
         return self.percent_y * self.parentHeight
+    @property
+    def pts(self):
+        return np.concatenate((self.x.reshape(-1, 1), self.y.reshape(-1, 1)), axis=-1)
 
     @property
     def qpoints(self):
