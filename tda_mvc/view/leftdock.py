@@ -23,7 +23,7 @@ class LeftDockView(QWidget):
     ### Attributes ###
     # group
     groupBox_file: QGroupBox
-    groupBox_viewer: QGroupBox
+    groupBox_view: QGroupBox
     groupBox_prediction: QGroupBox
 
     # open
@@ -32,7 +32,7 @@ class LeftDockView(QWidget):
     button_back: Button
     button_forward: Button
 
-    # viewer
+    # view
     button_zoomout: Button
     button_zoomin: Button
     spinBox_zoom: QSpinBox
@@ -59,16 +59,16 @@ class LeftDockView(QWidget):
     def initUI(self):
         vbox = QVBoxLayout()
 
-        ###### open ######
-        # open folder and file
-        vbox_open = QVBoxLayout()
-        self.groupBox_file = QGroupBox('Open', self)
+        ###### file ######
+        # file folder and file
+        vbox_file = QVBoxLayout()
+        self.groupBox_file = QGroupBox('File', self)
 
         self.button_openfolder = Button('folder.png')
-        vbox_open.addWidget(self.button_openfolder)
+        vbox_file.addWidget(self.button_openfolder)
 
         self.button_openfile = Button('file.png')
-        vbox_open.addWidget(self.button_openfile)
+        vbox_file.addWidget(self.button_openfile)
 
         # open back and forward
         hbox_backforward = QHBoxLayout()
@@ -78,14 +78,14 @@ class LeftDockView(QWidget):
         self.button_forward = Button('forward.png')
         hbox_backforward.addWidget(self.button_forward)
 
-        vbox_open.addLayout(hbox_backforward)
+        vbox_file.addLayout(hbox_backforward)
 
-        self.groupBox_file.setLayout(vbox_open)
+        self.groupBox_file.setLayout(vbox_file)
         vbox.addWidget(self.groupBox_file, 1)
 
-        ###### Viewer ######
-        vbox_viewer = QVBoxLayout()
-        self.groupBox_viewer = QGroupBox('Viewer', self)
+        ###### View ######
+        vbox_view = QVBoxLayout()
+        self.groupBox_view = QGroupBox('View', self)
 
         ## zoom in and out ##
         hbox_zoom_auto = QHBoxLayout()
@@ -95,13 +95,13 @@ class LeftDockView(QWidget):
 
         self.button_zoomin = Button('zoomin.png')
         hbox_zoom_auto.addWidget(self.button_zoomin)
-        vbox_viewer.addLayout(hbox_zoom_auto, 1)
+        vbox_view.addLayout(hbox_zoom_auto, 1)
 
         ## zoom manually ##
         self.spinBox_zoom = QSpinBox(self)
         self.spinBox_zoom.setRange(20, 200)
         self.spinBox_zoom.setValue(100)
-        vbox_viewer.addWidget(self.spinBox_zoom, 1)
+        vbox_view.addWidget(self.spinBox_zoom, 1)
 
         # showing
         vbox_showing = QVBoxLayout()
@@ -115,10 +115,10 @@ class LeftDockView(QWidget):
         vbox_showing.addWidget(self.radioButton_selected)
 
         self.groupBox_showing.setLayout(vbox_showing)
-        vbox_viewer.addWidget(self.groupBox_showing, 1)
+        vbox_view.addWidget(self.groupBox_showing, 1)
 
-        self.groupBox_viewer.setLayout(vbox_viewer)
-        vbox.addWidget(self.groupBox_viewer, 1)
+        self.groupBox_view.setLayout(vbox_view)
+        vbox.addWidget(self.groupBox_view, 1)
 
         ##### Run #####
         vbox_run = QVBoxLayout()
@@ -167,14 +167,14 @@ class LeftDockView(QWidget):
 
         """
         self.updateOpen()
-        self.updateViewer()
+        self.updateView()
         self.updatePrediction()
 
     def updateOpen(self):
         self.button_back.setEnabled(self.model.isExistBackImg)
         self.button_forward.setEnabled(self.model.isExistForwardImg)
 
-    def updateViewer(self):
+    def updateView(self):
         self.spinBox_zoom.setEnabled(self.model.isExistImg)
         self.button_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
         self.button_zoomout.setEnabled(self.model.isExistImg and self.model.isZoomOutable)
