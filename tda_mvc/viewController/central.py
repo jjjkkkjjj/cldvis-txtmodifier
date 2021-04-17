@@ -118,18 +118,28 @@ class CentralVCMixin(VCAbstractMixin):
         editDialog.exec_()
 
     def modelUpdateAftermouseEvent(self):
-        if self.model.showingmode == ShowingMode.SELECTED:
+        if not self.model.isPredicted:
+            self.model.predictedArea.hide()
+            if self.model.showingmode == ShowingMode.SELECTED:
+                self.model.rectangle.hide()
+                self.model.quadrangle.hide()
+                self.imageView.setEnabled(False)
+
+            elif self.model.showingmode == ShowingMode.ENTIRE:
+                if self.model.areamode == AreaMode.RECTANGLE:
+                    self.model.rectangle.show()
+                    self.model.quadrangle.hide()
+                elif self.model.areamode == AreaMode.QUADRANGLE:
+                    self.model.rectangle.hide()
+                    self.model.quadrangle.show()
+                self.imageView.setEnabled(True)
+        else:
             self.model.rectangle.hide()
             self.model.quadrangle.hide()
-            self.imageView.setEnabled(False)
-
-        elif self.model.showingmode == ShowingMode.ENTIRE:
-            if self.model.areamode == AreaMode.RECTANGLE:
-                self.model.rectangle.show()
-                self.model.quadrangle.hide()
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                self.model.rectangle.hide()
-                self.model.quadrangle.show()
+            if self.model.showingmode == ShowingMode.ENTIRE:
+                self.model.predictedArea.show()
+            elif self.model.showingmode == ShowingMode.SELECTED:
+                self.model.predictedArea.hide()
             self.imageView.setEnabled(True)
 
         self.imageView.repaint()
