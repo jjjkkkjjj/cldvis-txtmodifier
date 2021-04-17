@@ -48,7 +48,7 @@ class CentralVCMixin(VCAbstractMixin):
 
 
     def mousePressed(self, e: QMouseEvent):
-        if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
+        if self.model.isPredicted:
             self.model.annotations.mousePress(e.pos(), self.predictedParentQSize)
 
         else:
@@ -63,7 +63,7 @@ class CentralVCMixin(VCAbstractMixin):
     def mouseMoved(self, e: QMouseEvent):
         pos = e.pos()
         if self.model.isPredicted:
-            if e.buttons() == Qt.LeftButton and self.model.annotations.isExistSelectedAnnotationPoint:
+            if e.buttons() == Qt.LeftButton:
                 self.model.annotations.mouseMoveClicked(pos, self.predictedParentQSize)
             elif e.buttons() == Qt.NoButton:
                 self.model.annotations.mouseMoveNoButton(pos)
@@ -86,7 +86,7 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseReleased(self, e: QMouseEvent):
-        if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
+        if self.model.isPredicted:
             self.model.annotations.mouseRelease()
 
         else:

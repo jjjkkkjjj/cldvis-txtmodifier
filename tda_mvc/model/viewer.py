@@ -222,9 +222,8 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         if self.moveActionState == MoveActionState.RESIZE:
             self.quadrangle.move_qpoint(self.quadrangle.selectedPointIndex, pos)
-            # for changing selected Point
-            self.quadrangle.set_selectPos(pos)
             return
+
         self.quadrangle.move_qpoint(-1, pos)
 
     def mouseMoveNoButton_quadmode(self, pos):

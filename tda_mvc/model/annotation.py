@@ -193,9 +193,9 @@ class AnnotationsManager(object):
         offsetted_pos.setX(min(max(offsetted_pos.x(), 0), parentQSize.width()))
         offsetted_pos.setY(min(max(offsetted_pos.y(), 0), parentQSize.height()))
 
-        anno.move_qpoint(anno.selectedPointIndex, offsetted_pos)
-        # for changing selected Point
-        anno.set_selectPos(pos)
+        if self.moveActionState == MoveActionState.RESIZE:
+            anno.move_qpoint(anno.selectedPointIndex, offsetted_pos)
+
 
     def mouseMoveNoButton(self, pos):
         self.set_selectPos(pos)
