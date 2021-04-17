@@ -39,9 +39,9 @@ class CentralVCMixin(VCAbstractMixin):
         elif action == contextMenu.action_duplicate_annotation:
             self.model.annotations.duplicate_selectedAnnotation()
         elif action == contextMenu.action_remove_point:
-            pass
+            self.model.annotations.remove_selectedAnnotationPoint()
         elif action == contextMenu.action_duplicate_point:
-            pass
+            self.model.annotations.duplicate_selectedAnnotationPoint()
 
         self.updateModel()
         self.updateAllUI()

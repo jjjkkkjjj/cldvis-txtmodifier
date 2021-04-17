@@ -261,6 +261,23 @@ class Vertexes(PercentVertexes):
         percent_pt = np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight))
         self.move_percent_point(index, percent_pt)
 
+    def remove_point(self, index):
+        percent_pts = self.percent_points
+        self.set_percent_points(np.delete(percent_pts, index, 0))
+
+    def duplicateMe(self):
+        newpoints_percent = self.percent_points.copy()
+        newpoints_percent[:, 0] += 10 / self.parentWidth
+        newpoints_percent[:, 1] += 10 / self.parentHeight
+        return Vertexes(newpoints_percent, self.parentQSize, self.offsetQPoint)
+
+    def duplicate_point(self, index):
+        newpoints_percent = self.percent_points.copy()
+        duplicated_percent_pts = newpoints_percent[index, :].copy()
+        duplicated_percent_pts += 10 / self.parentWidth
+        duplicated_percent_pts += 10 / self.parentHeight
+        self.set_percent_points(np.insert(newpoints_percent, index, duplicated_percent_pts, axis=0))
+
 class Rect(Vertexes):
     def __init__(self, points=np.zeros(shape=(0, 2)), parentQSize=QSize(0, 0), offsetQPoint=QPoint(0, 0)):
         """
@@ -502,7 +519,7 @@ class Polygon(Vertexes):
         super().paint(painter)
 
     def duplicateMe(self):
-        newpoints_percent = self._percent_points.copy()
+        newpoints_percent = self.percent_points.copy()
         newpoints_percent[:, 0] += 10 / self.parentWidth
         newpoints_percent[:, 1] += 10 / self.parentHeight
         return Polygon(newpoints_percent, self.parentQSize, self.offsetQPoint)

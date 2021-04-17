@@ -162,6 +162,19 @@ class AnnotationsManager(object):
             newanno.show()
             self.append(newanno)
 
+    def remove_selectedAnnotationPoint(self):
+        if self.isExistSelectedAnnotationPoint:
+            anno: Annotation = self.selectedAnnotation
+            if anno.points_number > 3:
+                anno.remove_point(anno.selectedPointIndex)
+            else:
+                self.remove_selectedAnnotation()
+
+    def duplicate_selectedAnnotationPoint(self):
+        if self.isExistSelectedAnnotationPoint:
+            anno: Annotation = self.selectedAnnotation
+            anno.duplicate_point(anno.selectedPointIndex)
+
     def mousePress(self, pos, parentQSize):
         self._startPosition = pos
         self.set_parentVals(parentQSize)
