@@ -5,6 +5,7 @@ from PySide2.QtCore import *
 from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
+from ..utils.modes import MoveActionState
 from ..utils.funcs import qsize_from_quadrangle
 
 class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
@@ -49,7 +50,11 @@ class AnnotationsManager(object):
         # -1 if annotation is not selected
         self._selectedIndex = -1
 
+        self._startPosition = QPoint(0, 0)
+
         self._annotations = []
+
+        self.moveActionState = MoveActionState.CREATE
 
     def __iter__(self):
         """
@@ -131,7 +136,7 @@ class AnnotationsManager(object):
         for anno in self._annotations:
             anno.hide()
 
-    def set_parentVals(self, parentQSize, offsetQPoint):
+    def set_parentVals(self, parentQSize=None, offsetQPoint=None):
         for anno in self._annotations:
             anno.set_parentVals(parentQSize, offsetQPoint)
 
@@ -156,3 +161,44 @@ class AnnotationsManager(object):
             newanno = self.selectedAnnotation.duplicateMe()
             newanno.show()
             self.append(newanno)
+
+    def mousePress(self, pos, parentQSize):
+        self._startPosition = pos
+        self.set_parentVals(parentQSize)
+        self.set_selectPos(pos)
+
+        if self.isExistSelectedAnnotationPoint:
+            self.moveActionState = MoveActionState.RESIZE
+            self._startPosition = self.selectedAnnotation.selectedQPoint
+            return
+
+        if self.isExistSelectedAnnotation:
+            # if pressed position is contained in parentQSize
+            # move the parentQSize
+            self.moveActionState = MoveActionState.MOVE
+
+    def mouseMoveClicked(self, pos, parentQSize: QSize):
+        if not self.isExistSelectedAnnotation:
+            return
+
+        anno: Annotation = self.selectedAnnotation
+        if self.moveActionState == MoveActionState.MOVE:
+            movedAmount = pos - self._startPosition
+            anno.move(movedAmount)
+            self._startPosition = pos
+            return
+
+        offsetted_pos = pos - anno.offsetQPoint
+        # clipping
+        offsetted_pos.setX(min(max(offsetted_pos.x(), 0), parentQSize.width()))
+        offsetted_pos.setY(min(max(offsetted_pos.y(), 0), parentQSize.height()))
+
+        anno.move_qpoint(anno.selectedPointIndex, offsetted_pos)
+        # for changing selected Point
+        anno.set_selectPos(pos)
+
+    def mouseMoveNoButton(self, pos):
+        self.set_selectPos(pos)
+
+    def mouseRelease(self):
+        self._startPosition = QPoint(0, 0)

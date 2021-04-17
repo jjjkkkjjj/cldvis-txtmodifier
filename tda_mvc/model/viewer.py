@@ -18,6 +18,8 @@ class ViewerModelMixin(ModelAbstractMixin):
         # area mode
         self.areamode = AreaMode.RECTANGLE
 
+        self.moveActionState = MoveActionState.CREATE
+
         # image mode
         self.rectangle = Rect()
         # table mode

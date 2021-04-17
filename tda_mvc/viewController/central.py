@@ -19,18 +19,13 @@ class CentralVCMixin(VCAbstractMixin):
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
         self.imageView.mouseDoubleClicked.connect(lambda e: self.mouseDoubleClicked(e))
 
-    def mouseReleased(self, e: QMouseEvent):
-        if self.model.isPredicted:
-            return
-
-        if self.model.areamode == AreaMode.RECTANGLE:
-            self.model.mouseRelease_rectmode()
-        elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.model.mouseRelease_quadmode()
-
-        self.modelUpdateAftermouseEvent()
-        self.leftdock.updateUI()
-        self.menu.updateUI()
+    @property
+    def predictedParentQSize(self):
+        if self.model.showingmode == ShowingMode.SELECTED:
+            return self.imageView.size()
+        elif self.model.showingmode == ShowingMode.ENTIRE:
+            return self.model.predictedAreaQSize
+        return None
 
     def rightClicked(self, e: QContextMenuEvent):
         if not self.model.isPredicted:
@@ -53,7 +48,8 @@ class CentralVCMixin(VCAbstractMixin):
 
 
     def mousePressed(self, e: QMouseEvent):
-        if self.model.isPredicted:
+        if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
+            self.model.annotations.mousePress(e.pos(), self.predictedParentQSize)
             return
 
         if self.model.areamode == AreaMode.RECTANGLE:
@@ -65,15 +61,16 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseMoved(self, e: QMouseEvent):
+        pos = e.pos()
         if self.model.isPredicted:
-            if e.buttons() == Qt.NoButton:
-                self.model.annotations.set_selectPos(e.pos())
-                if not self.model.annotations.isExistSelectedAnnotation:
-                    return
-                self.rightdock.tableview.selectRow(self.model.annotations.selectedAnnotationIndex)
+            if e.buttons() == Qt.LeftButton and self.model.annotations.isExistSelectedAnnotationPoint:
+                self.model.annotations.mouseMoveClicked(pos, self.predictedParentQSize)
+            elif e.buttons() == Qt.NoButton:
+                self.model.annotations.mouseMoveNoButton(pos)
+                if self.model.annotations.isExistSelectedAnnotation:
+                    self.rightdock.tableview.selectRow(self.model.annotations.selectedAnnotationIndex)
             return
 
-        pos = e.pos()
         if e.buttons() == Qt.LeftButton:
             # in clicking
             if self.model.areamode == AreaMode.RECTANGLE:
@@ -88,6 +85,20 @@ class CentralVCMixin(VCAbstractMixin):
                 self.model.mouseMoveNoButton_quadmode(pos)
 
         self.modelUpdateAftermouseEvent()
+
+    def mouseReleased(self, e: QMouseEvent):
+        if self.model.isPredicted and self.model.annotations.isExistSelectedAnnotationPoint:
+            self.model.annotations.mouseRelease()
+            return
+
+        if self.model.areamode == AreaMode.RECTANGLE:
+            self.model.mouseRelease_rectmode()
+        elif self.model.areamode == AreaMode.QUADRANGLE:
+            self.model.mouseRelease_quadmode()
+
+        self.modelUpdateAftermouseEvent()
+        self.leftdock.updateUI()
+        self.menu.updateUI()
 
     def mouseDoubleClicked(self, e: QMouseEvent):
         if not self.model.annotations.isExistSelectedAnnotation:
