@@ -245,6 +245,18 @@ class Vertexes(PercentVertexes):
                 PaintMaster.set_pen_brush(painter, self.vertex_selected_color)
                 painter.drawEllipse(self.selectedQPoint, self.vertex_r, self.vertex_r)
 
+    def move(self, movedAmount: QPoint):
+        # check moved rect is with in parent
+        x, y = self.x, self.y
+        new_tlX, new_tlY = x.min() + movedAmount.x(), y.min() + movedAmount.y()
+        new_brX, new_brY = x.max() + movedAmount.x(), y.max() + movedAmount.y()
+
+        revertAmount = QPoint(0, 0)
+        revertAmount -= QPoint(min(new_tlX, 0), min(new_tlY, 0))
+        revertAmount -= QPoint(max(new_brX-self.parentWidth, 0), max(new_brY-self.parentHeight, 0))
+
+        super().move(movedAmount + revertAmount)
+
     def move_qpoint(self, index, qpt):
         percent_pt = np.array((float(qpt.x()) / self.parentWidth, float(qpt.y()) / self.parentHeight))
         self.move_percent_point(index, percent_pt)
@@ -393,17 +405,6 @@ class Rect(Vertexes):
             painter.drawRect(self.qrect)
 
         super().paint(painter)
-
-    def move(self, movedAmount):
-        # check moved rect is with in parent
-        tl, _, br, _ = self.qpoints
-        new_tl, new_br = tl + movedAmount, br + movedAmount
-
-        revertAmount = QPoint(0, 0)
-        revertAmount -= QPoint(min(new_tl.x(), 0), min(new_tl.y(), 0))
-        revertAmount -= QPoint(max(new_br.x()-self.parentWidth, 0), max(new_br.y()-self.parentHeight, 0))
-
-        super().move(movedAmount + revertAmount)
 
 
     def duplicateMe(self):
