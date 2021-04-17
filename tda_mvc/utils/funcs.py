@@ -89,6 +89,9 @@ def get_pixmap(model, parentQSize=None):
     QPixmap
         The current pixmap to set the imageView
 
+    QSize
+        The shown image's size
+
     """
     from ..model import Model
     model: Model
@@ -101,6 +104,7 @@ def get_pixmap(model, parentQSize=None):
     h, w, c = cvimg.shape
     ratio = model.zoomvalue / 100.
     cvimg = cv2.resize(cvimg, (int(w * ratio), int(h * ratio)))
+    originalImgQSize = QSize(int(w * ratio), int(h * ratio))
 
     if parentQSize is not None:
         h, w, c = cvimg.shape
@@ -118,7 +122,7 @@ def get_pixmap(model, parentQSize=None):
             cvimg = np.concatenate((cvimg, padded_img), axis=0)
 
     pixmap = cvimg2qpixmap(cvimg)
-    return pixmap
+    return pixmap, originalImgQSize
 
 
 def parse_annotations(model):

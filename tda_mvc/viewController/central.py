@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from ..utils.modes import AreaMode, ShowingMode
+from ..utils.funcs import get_pixmap
 from ..view.dialog import EditDialog
 from .base import VCAbstractMixin
 
@@ -22,7 +23,8 @@ class CentralVCMixin(VCAbstractMixin):
     @property
     def predictedParentQSize(self):
         if self.model.showingmode == ShowingMode.SELECTED:
-            return self.imageView.size()
+            _, originalImgQSize = get_pixmap(self.model)
+            return originalImgQSize
         elif self.model.showingmode == ShowingMode.ENTIRE:
             return self.model.predictedAreaQSize
         return None

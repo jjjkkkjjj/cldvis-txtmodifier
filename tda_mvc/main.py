@@ -92,14 +92,14 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
             if self.model.showingmode == ShowingMode.ENTIRE:
                 #### Entire mode ####
                 # set parant size and offset point
-                pixmap = get_pixmap(self.model)
+                _, originalImgQSize = get_pixmap(self.model)
                 if self.model.areamode == AreaMode.RECTANGLE:
                     self.model.rectangle.show()
-                    self.model.rectangle.set_parentVals(parentQSize=pixmap.size())
+                    self.model.rectangle.set_parentVals(parentQSize=originalImgQSize)
 
                 elif self.model.areamode == AreaMode.QUADRANGLE:
                     self.model.quadrangle.show()
-                    self.model.quadrangle.set_parentVals(parentQSize=pixmap.size())
+                    self.model.quadrangle.set_parentVals(parentQSize=originalImgQSize)
 
 
             elif self.model.showingmode == ShowingMode.SELECTED:
@@ -119,8 +119,8 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
             if self.model.showingmode == ShowingMode.ENTIRE:
                 #### Entire mode ####
                 # set parant size and offset point
-                pixmap = get_pixmap(self.model)
-                self.model.predictedArea.set_parentVals(parentQSize=pixmap.size())
+                _, originalImgQSize = get_pixmap(self.model)
+                self.model.predictedArea.set_parentVals(parentQSize=originalImgQSize)
                 self.model.annotations.set_parentVals(parentQSize=self.model.predictedAreaQSize, offsetQPoint=self.model.predictedAreaTopLeft)
                 if self.model.areamode == AreaMode.RECTANGLE:
                     # change area's color
@@ -143,15 +143,15 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
                 #### Selected mode ####
 
                 # set parant size and offset point
-                pixmap = get_pixmap(self.model)
+                _, originalImgQSize = get_pixmap(self.model)
                 if self.model.areamode == AreaMode.RECTANGLE:
-                    self.model.annotations.set_parentVals(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
+                    self.model.annotations.set_parentVals(parentQSize=originalImgQSize, offsetQPoint=QPoint(0, 0))
 
                     self.model.predictedArea.hide()
                     self.model.annotations.show()
 
                 elif self.model.areamode == AreaMode.QUADRANGLE:
-                    self.model.annotations.set_parentVals(parentQSize=pixmap.size(), offsetQPoint=QPoint(0, 0))
+                    self.model.annotations.set_parentVals(parentQSize=originalImgQSize, offsetQPoint=QPoint(0, 0))
 
                     self.model.predictedArea.hide()
                     self.model.annotations.show()
