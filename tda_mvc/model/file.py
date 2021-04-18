@@ -35,16 +35,16 @@ class FileModelMixin(ModelAbstractMixin):
 
     @property
     def export_tdaDir(self):
-        return os.path.join(self.config.export_datasetdir, 'tda')
+        return os.path.join(self.config.export_datasetDir, 'tda')
     @property
     def export_imageDir(self):
-        return os.path.join(self.config.export_datasetdir, 'image')
+        return os.path.join(self.config.export_datasetDir, 'image')
     @property
     def export_datasetDir(self):
-        return os.path.join(self.config.export_datasetdir, 'dataset')
+        return os.path.join(self.config.export_datasetDir, 'dataset')
     @property
     def tdapath(self):
-        return os.path.join(self.config.export_datasetdir, 'tda', self.default_tdaname)
+        return os.path.join(self.config.export_datasetDir, 'tda', self.default_tdaname)
 
     def _set_defaultsavename(self):
         self.default_tdaname = os.path.splitext(os.path.basename(self.imgpath))[0] + '.tda'
@@ -70,7 +70,7 @@ class FileModelMixin(ModelAbstractMixin):
 
         self._imgPaths = paths
         self._imgIndex = 0
-        self.config.last_opendir = os.path.dirname(self._imgPaths[0])
+        self.config.lastOpenDir = os.path.dirname(self._imgPaths[0])
         self._set_defaultsavename()
 
     def saveInDefaultDirectory(self):
@@ -107,7 +107,7 @@ class FileModelMixin(ModelAbstractMixin):
         -------
             TDA or None
         """
-        if not os.path.exists(self.tdapath):
+        if not (os.path.exists(self.tdapath) and os.path.isfile(self.tdapath)):
             return None
 
         return TDA.load(self.tdapath)

@@ -14,10 +14,10 @@ class Config(object):
 
     @property
     def last_opendir(self):
-        return self.config['settings']['last_opendir']
+        return self.config['settings']['lastOpenDir']
     @last_opendir.setter
     def last_opendir(self, last_dir):
-        self.config['settings']['last_opendir'] = last_dir
+        self.config['settings']['lastOpenDir'] = last_dir
         self.writeConfig()
 
     @property
@@ -40,7 +40,7 @@ class Config(object):
 
             # default value
             default = {
-                'last_opendir': path_desktop(),
+                'lastOpenDir': path_desktop(),
                 'credentialJsonpath': 'None'
             }
 

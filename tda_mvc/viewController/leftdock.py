@@ -5,9 +5,9 @@ import os, glob
 import pandas as pd
 
 from ..view import AboutDialog, PreferencesDialog
-from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention
+from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention, ExportDatasetFormat
 from ..utils.exception import PredictionError
-from ..utils.funcs import parse_annotations, create_fileters
+from ..utils.funcs import parse_annotations_forFile, create_fileters
 from ..model import TDA
 from .base import VCAbstractMixin
 
@@ -73,7 +73,7 @@ class LeftDockVCMixin(VCAbstractMixin):
     def openfile(self):
         filters = '{} ({})'.format('Images', ' '.join(['*' + ext for ext in SUPPORTED_EXTENSIONS]))
 
-        filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.last_opendir, filters, None)
+        filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.lastOpenDir, filters, None)
         filenames = filenames[0]
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
@@ -88,7 +88,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateAllUI()
 
     def openFolder(self):
-        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir)
+        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.lastOpenDir)
 
         filenames = sorted(glob.glob(os.path.join(dirpath, '*')))
         # remove not supported files and directories
@@ -105,7 +105,7 @@ class LeftDockVCMixin(VCAbstractMixin):
     def savetda(self, isDefault):
         if isDefault:
             filename = os.path.splitext(self.model.default_tdaname)[0]
-            filepath = os.path.join(self.model.config.export_datasetdir, 'tda', filename + '.tda')
+            filepath = os.path.join(self.model.config.export_datasetDir, 'tda', filename + '.tda')
             if os.path.exists(filepath):
                 ret = QMessageBox.warning(self, 'Notification',
                                           '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_tdaname),
@@ -118,7 +118,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
             filters_list = create_fileters(('TDA Binary', 'tda'))
             filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as',
-                                                                    os.path.join(self.model.config.export_datasetdir, filename),
+                                                                    os.path.join(self.model.config.export_datasetDir, filename),
                                                                     ';;'.join(filters_list), None)
             if filepath == '':
                 return False
@@ -129,7 +129,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def loadtda(self):
         filters_list = create_fileters(('TDA Binary', 'tda'))
-        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.config.export_datasetdir, ';;'.join(filters_list), None)
+        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.config.export_datasetDir, ';;'.join(filters_list), None)
         if filepath == '':
             return
 
@@ -193,16 +193,17 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateAllUI()
 
     def exportCSV(self):
-        table_list = parse_annotations(self.model)
+        table_list = parse_annotations_forFile(self.model)
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
         filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
-        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetdir, filename),
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetDir, filename),
                                                ';;'.join(filters_list), None)
         #with open('./debug/texts.csv', 'w') as f:
         if filepath == '':
             return
 
         # too dirty...
+        fileformat = selected_filter.split(' ')[0]
         ext = selected_filter.split('*.')[-1][:-1]
         def _check_and_append_ext(filepath, e):
             if os.path.splitext(filepath)[1] == '':
@@ -211,21 +212,41 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         filepath = _check_and_append_ext(filepath, ext)
         df = pd.DataFrame(table_list)
-        if ext == 'csv':
+        if fileformat == 'CSV':
             df.to_csv(filepath, sep=',', header=False, index=False, encoding='utf-8')
 
-        elif ext == 'xlsx':
+        elif fileformat == 'EXCEL':
             df.to_excel(filepath, header=False, index=False, encoding='utf-8')
 
-        elif ext == 'tsv':
+        elif fileformat == 'TSV':
             df.to_csv(filepath, sep='\t', header=False, index=False, encoding='utf-8')
 
-        elif ext == 'psv':
+        elif fileformat == 'PSV':
             df.to_csv(filepath, sep='|', header=False, index=False, encoding='utf-8')
 
 
     def exportDataset(self):
-        pass
+        filters_list = create_fileters(*ExportDatasetFormat.gen_filters_args(self.model.config.export_datasetFormat))
+        filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export dataset',
+                                                                os.path.join(self.model.export_datasetDir, filename),
+                                                                ';;'.join(filters_list), None)
+        # with open('./debug/texts.csv', 'w') as f:
+        if filepath == '':
+            return
+
+        # too dirty...
+        fileformat = selected_filter.split(' ')[0]
+        ext = selected_filter.split('*.')[-1][:-1]
+
+        def _check_and_append_ext(filepath, e):
+            if os.path.splitext(filepath)[1] == '':
+                filepath += '.' + e
+            return filepath
+
+        filepath = _check_and_append_ext(filepath, ext)
+        if fileformat == 'VOC':
+            pass
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:

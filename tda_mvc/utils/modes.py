@@ -45,3 +45,23 @@ class ExportFileExtention(Enum):
         else:
             return [(m.value[0], m.value[1]) for m in ExportFileExtention]
 
+class ExportDatasetFormat(Enum):
+    VOC = 'VOC', 'xml'
+
+    @staticmethod
+    def gen_list():
+        return [m.value[0] for m in ExportDatasetFormat]
+
+    @staticmethod
+    def get_index(val):
+        return ExportDatasetFormat.gen_list().index(val)
+
+    @staticmethod
+    def gen_filters_args(val=None):
+        if val:
+            ind = ExportDatasetFormat.get_index(val)
+            filters_list = [(m.value[0], m.value[1]) for m in ExportDatasetFormat]
+            return filters_list[ind:] + filters_list[:ind]
+        else:
+            return [(m.value[0], m.value[1]) for m in ExportDatasetFormat]
+

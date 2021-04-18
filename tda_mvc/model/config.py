@@ -16,11 +16,11 @@ class Config(object):
         return self.iniPath
 
     @property
-    def last_opendir(self):
-        return self.config.get('settings', 'last_opendir')
-    @last_opendir.setter
-    def last_opendir(self, last_dir):
-        self.config.set('settings', 'last_opendir', last_dir)
+    def lastOpenDir(self):
+        return self.config.get('settings', 'lastOpenDir')
+    @lastOpenDir.setter
+    def lastOpenDir(self, last_dir):
+        self.config.set('settings', 'lastOpenDir', last_dir)
         self.writeConfig()
 
     @property
@@ -56,11 +56,19 @@ class Config(object):
         self.writeConfig()
 
     @property
-    def export_datasetdir(self):
-        return self.config.get('settings', 'export_datasetdir')
-    @export_datasetdir.setter
-    def export_datasetdir(self, path):
-        self.config.set('settings', 'export_datasetdir', path)
+    def export_datasetFormat(self):
+        return self.config.get('settings', 'export_datasetFormat')
+    @export_datasetFormat.setter
+    def export_datasetFormat(self, datasetformat):
+        self.config.set('settings', 'export_datasetFormat', datasetformat)
+        self.writeConfig()
+    
+    @property
+    def export_datasetDir(self):
+        return self.config.get('settings', 'export_datasetDir')
+    @export_datasetDir.setter
+    def export_datasetDir(self, path):
+        self.config.set('settings', 'export_datasetDir', path)
         self.writeConfig()
 
     def _initialReadConfig(self):
@@ -73,13 +81,15 @@ class Config(object):
 
             # default value
             default = {
-                'last_opendir': path_desktop(),
+                'lastOpenDir': path_desktop(),
                 'credentialJsonpath': None,
 
                 'export_defaultFileFormat': 'CSV',
                 'export_sameRowY': 50,
                 'export_sameColX': 15,
-                'export_datasetdir': None
+                
+                'export_datasetFormat': 'VOC',
+                'export_datasetDir': None
             }
 
             self.config['default'] = default

@@ -142,7 +142,7 @@ def create_fileters(*exts):
         ret += ['{} (*.{})'.format(*e)]
     return ret
 
-def parse_annotations(model):
+def parse_annotations_forFile(model):
     from ..model import Model
     model: Model
     polys = np.array([anno.pts for anno in model.annotations], dtype=int)
@@ -203,6 +203,11 @@ def parse_annotations(model):
         ret += [row]
 
     return ret
+
+
+def parse_annotations_forDataset(model):
+    from ..model import Model
+    model: Model
 
 
 def add_actions(target, actions):

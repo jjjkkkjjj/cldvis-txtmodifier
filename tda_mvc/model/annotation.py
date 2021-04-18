@@ -61,6 +61,9 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
         with open(path, 'w') as f:
             json.dump(self.results, f)
 
+    def saveAsVOC(self, path):
+        pass
+
 class AnnotationsManager(object):
     def __init__(self):
         # -1 if annotation is not selected

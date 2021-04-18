@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import glob, os, sys
 
-from ..utils.modes import ExportFileExtention
+from ..utils.modes import ExportFileExtention, ExportDatasetFormat
 from ..utils.funcs import create_fileters
 
 class AboutDialog(QDialog):
@@ -57,8 +57,8 @@ class PreferencesDialog(QDialog):
         self.initial = initial
 
         self._confignames = ['credentialJsonpath', 'export_defaultFileFormat',
-                             'export_sameRowY', 'export_sameColX',
-                             'export_datasetdir']
+                             'export_sameRowY', 'export_sameColX', 'export_datasetFormat',
+                             'export_datasetDir']
         # temporal attr
         # load jsonpath from environment path or config file
         try:
@@ -75,7 +75,8 @@ class PreferencesDialog(QDialog):
         self.export_defaultFileFormat = model.config.export_defaultFileFormat
         self.export_sameRowY = model.config.export_sameRowY
         self.export_sameColX = model.config.export_sameColX
-        self.export_datasetdir = model.config.export_datasetdir
+        self.export_datasetFormat = model.config.export_datasetFormat
+        self.export_datasetDir = model.config.export_datasetDir
 
         self.initUI()
         self.establish_connection()
@@ -129,7 +130,7 @@ class PreferencesDialog(QDialog):
         ]
         setGridLayout(grid_gcv, layout_params)
         self.groupBox_gcv.setLayout(grid_gcv)
-        vbox.addWidget(self.groupBox_gcv)
+        vbox.addWidget(self.groupBox_gcv, 1)
 
         ##### export ######
         self.groupBox_export = QGroupBox('Export')
@@ -152,6 +153,11 @@ class PreferencesDialog(QDialog):
         self.spinBox_exportConcatColX.setValue(self.model.config.export_sameColX)
         self.label_exportConcatColXUnit = QLabel('pixel')
 
+        self.label_datasetformat = QLabel('Dataset Format:')
+        self.comboBox_datasetformat = QComboBox()
+        self.comboBox_datasetformat.addItems(ExportDatasetFormat.gen_list())
+        self.comboBox_datasetformat.setCurrentText(self.model.config.export_datasetFormat)
+
         self.label_datasetdir = QLabel('Dataset Directory:')
         self.label_datasetdirStatus = QLabel('Not selected')
         self.label_datasetdirStatusIcon = QLabel()
@@ -161,7 +167,7 @@ class PreferencesDialog(QDialog):
             [
                 (self.label_exportfileformat, 0, 1, 2),
                 (self.comboBox_exportfileformat, 2, 1, 2),
-                (QLabel(), 4, 1, 4),
+                (QLabel(), 4, 1, 4), # dummy
             ],
             [
                 (self.label_exportSameRowY, 1, 1, 2),
@@ -174,6 +180,11 @@ class PreferencesDialog(QDialog):
                 (self.label_exportConcatColXUnit, 5, 1, 2),
             ],
             [
+                (self.label_datasetformat, 0, 1, 2),
+                (self.comboBox_datasetformat, 2, 1, 2),
+                (QLabel(), 4, 1, 4), # dummy
+            ],
+            [
                 (self.label_datasetdir, 0, 1, 2),
                 (self.label_datasetdirStatus, 2, 1, 4),
                 (self.label_datasetdirStatusIcon, 6, 1, 1),
@@ -183,7 +194,7 @@ class PreferencesDialog(QDialog):
 
         setGridLayout(grid_export, layout_params)
         self.groupBox_export.setLayout(grid_export)
-        vbox.addWidget(self.groupBox_export)
+        vbox.addWidget(self.groupBox_export, 2)
 
         self.button_ok = QPushButton('OK')
         self.button_ok.setDefault(True)
@@ -200,7 +211,8 @@ class PreferencesDialog(QDialog):
         self.comboBox_exportfileformat.currentTextChanged.connect(lambda: self.connection('export_defaultFileFormat'))
         self.spinBox_exportSameRowY.valueChanged.connect(lambda: self.connection('export_sameRowY'))
         self.spinBox_exportConcatColX.valueChanged.connect(lambda: self.connection('export_sameColX'))
-        self.button_openDatasetDir.clicked.connect(lambda: self.connection('export_datasetdir'))
+        self.comboBox_datasetformat.currentTextChanged.connect(lambda: self.connection('export_datasetFormat'))
+        self.button_openDatasetDir.clicked.connect(lambda: self.connection('export_datasetDir'))
 
         self.button_ok.clicked.connect(lambda: self.connection('ok'))
 
@@ -225,8 +237,8 @@ class PreferencesDialog(QDialog):
         self.label_jsonpathStatusIcon.setPixmap(icon.pixmap(QSize(16, 16)))
 
         #### export dataset path ####
-        if self.export_datasetdir:
-            self.label_datasetdirStatus.setText(self.export_datasetdir)
+        if self.export_datasetDir:
+            self.label_datasetdirStatus.setText(self.export_datasetDir)
             icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
             enable_ok = enable_ok and True
         else:
@@ -272,13 +284,16 @@ class PreferencesDialog(QDialog):
         elif connecttype == 'export_sameColX':
             self.export_sameColX = self.spinBox_exportConcatColX.value()
 
-        elif connecttype == 'export_datasetdir':
+        elif connecttype == 'export_datasetFormat':
+            self.export_datasetFormat = self.comboBox_datasetformat.currentText()
+
+        elif connecttype == 'export_datasetDir':
             dirpath = QFileDialog.getExistingDirectory(self, 'Open Dataset Directory to be exported',
-                                                       self.model.config.export_datasetdir)
+                                                       self.model.config.export_datasetDir)
             if dirpath == '':
                 return
 
-            self.export_datasetdir = dirpath
+            self.export_datasetDir = dirpath
 
         elif connecttype == 'ok':
             ## save

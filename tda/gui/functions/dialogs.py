@@ -18,7 +18,7 @@ def openFiles(self, name, exts):
         filters = '{} (*{})'.format(name, exts)
 
     # filenames is (list of str(filepath), str(filters))
-    filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.info.config.last_opendir, filters, None,
+    filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.info.config.lastOpenDir, filters, None,
                                              QFileDialog.DontUseNativeDialog)
     filenames = filenames[0]
 
@@ -36,7 +36,7 @@ def openDir(self):
     from ..mainWC import MainWindowController
     _ = check_instance('self', self, MainWindowController)
 
-    dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', self.info.config.last_opendir, QFileDialog.DontUseNativeDialog)
+    dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', self.info.config.lastOpenDir, QFileDialog.DontUseNativeDialog)
 
     filenames = sorted(glob.glob(os.path.join(dirname, '*')))
     # remove not supported files and directories
