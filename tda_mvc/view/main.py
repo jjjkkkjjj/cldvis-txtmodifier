@@ -122,11 +122,11 @@ class MenuBar(QMenuBar):
 
         # show entire image
         self.action_showentire = create_action(self, '&Show Entire Image', slot=None,
-                                                shortcut='Ctrl+E', tip='Show the entire image')
+                                                shortcut='Ctrl+Alt+E', tip='Show the entire image')
 
         # show selected image
         self.action_showselected = create_action(self, '&Show Selected Image', slot=None,
-                                                  shortcut='Ctrl+R', tip='Show the selected image')
+                                                  shortcut='Ctrl+Alt+R', tip='Show the selected image')
 
         add_actions(self.menu_viewer, (self.action_zoomin, self.action_zoomout, None,
                                         self.action_showentire, self.action_showselected))
