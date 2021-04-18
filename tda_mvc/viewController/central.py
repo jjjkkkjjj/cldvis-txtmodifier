@@ -33,13 +33,13 @@ class CentralVCMixin(VCAbstractMixin):
             self.central.label_savefilename.setStyleSheet('color: black')
 
     def savefilename_doubleClicked(self, e: QMouseEvent):
-        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.defaultsavename)
+        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.default_tdaname)
 
         if ok:
             _, ext = os.path.splitext(savefilename)
             if ext != '.tda':
                 savefilename += '.tda'
-            self.model.defaultsavename = savefilename
+            self.model.default_tdaname = savefilename
 
             self.updateModel()
             self.updateAllUI()

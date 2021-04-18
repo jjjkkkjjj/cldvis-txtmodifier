@@ -80,6 +80,10 @@ class LeftDockVCMixin(VCAbstractMixin):
             filenames = None
 
         self.model.set_imgPaths(filenames)
+        tda = self.model.get_default_tda()
+        if tda:
+            self._setModel_from_tda(tda)
+
         # update view
         self.updateModel()
         self.updateAllUI()
@@ -92,17 +96,21 @@ class LeftDockVCMixin(VCAbstractMixin):
         filenames = [filename for filename in filenames if os.path.splitext(filename)[-1] in SUPPORTED_EXTENSIONS]
 
         self.model.set_imgPaths(filenames)
+        tda = self.model.get_default_tda()
+        if tda:
+            self._setModel_from_tda(tda)
+
         # update view
         self.updateModel()
         self.updateAllUI()
 
     def savetda(self, isDefault):
         if isDefault:
-            filename = os.path.splitext(self.model.defaultsavename)[0]
+            filename = os.path.splitext(self.model.default_tdaname)[0]
             filepath = os.path.join(self.model.config.export_datasetdir, 'tda', filename + '.tda')
             if os.path.exists(filepath):
                 ret = QMessageBox.warning(self, 'Notification',
-                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.defaultsavename),
+                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_tdaname),
                                           QMessageBox.No | QMessageBox.Yes)
                 if ret == QMessageBox.No:
                     return
@@ -127,6 +135,12 @@ class LeftDockVCMixin(VCAbstractMixin):
             return
 
         tda = TDA.load(filepath)
+        self._setModel_from_tda(tda)
+
+        self.updateModel()
+        self.updateAllUI()
+
+    def _setModel_from_tda(self, tda):
         self.model.areamode = tda.areamode
         # rectangle
         self.model.rectangle.set_percent_points(tda.rectangle_percent_pts)
@@ -148,11 +162,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
                                                parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
 
-        filename = os.path.basename(filepath)
-        self.model.defaultsavename = filename
-
-        self.updateModel()
-        self.updateAllUI()
+        self.model.default_tdaname = tda.default_tdaname
 
     def changeImg(self, isForward):
         """

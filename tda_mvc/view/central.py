@@ -146,7 +146,7 @@ class CentralView(QWidget):
             # set the filename of the shown image
             self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
             # set the default saved filename
-            self.label_savefilename.setText('Savename: {}'.format(self.model.defaultsavename))
+            self.label_savefilename.setText('Savename: {}'.format(self.model.default_tdaname))
 
             # set the image
             pixmap, _ = get_pixmap(self.model, self.scrollArea.size())

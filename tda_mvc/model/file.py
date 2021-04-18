@@ -9,7 +9,7 @@ class FileModelMixin(ModelAbstractMixin):
     def __init__(self):
         self._imgIndex = -1
         self._imgPaths = []
-        self.defaultsavename = ''
+        self.default_tdaname = ''
 
     @property
     def imgpath(self):
@@ -33,13 +33,31 @@ class FileModelMixin(ModelAbstractMixin):
         else:
             return False
 
+    @property
+    def export_tdaDir(self):
+        return os.path.join(self.config.export_datasetdir, 'tda')
+    @property
+    def export_imageDir(self):
+        return os.path.join(self.config.export_datasetdir, 'image')
+    @property
+    def export_datasetDir(self):
+        return os.path.join(self.config.export_datasetdir, 'dataset')
+    @property
+    def tdapath(self):
+        return os.path.join(self.config.export_datasetdir, 'tda', self.default_tdaname)
+
+    def _set_defaultsavename(self):
+        self.default_tdaname = os.path.splitext(os.path.basename(self.imgpath))[0] + '.tda'
+
     def forward(self):
         if self.isExistForwardImg:
             self._imgIndex += 1
+            self._set_defaultsavename()
 
     def back(self):
         if self.isExistBackImg:
             self._imgIndex += -1
+            self._set_defaultsavename()
 
     def set_imgPaths(self, paths):
         """
@@ -53,25 +71,22 @@ class FileModelMixin(ModelAbstractMixin):
         self._imgPaths = paths
         self._imgIndex = 0
         self.config.last_opendir = os.path.dirname(self._imgPaths[0])
+        self._set_defaultsavename()
 
     def saveInDefaultDirectory(self):
-        filename = os.path.splitext(self.defaultsavename)[0]
+        filename = os.path.splitext(self.default_tdaname)[0]
         #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        tdadirpath = os.path.join(self.config.export_datasetdir, 'tda')
-        imgdirpath = os.path.join(self.config.export_datasetdir, 'image')
-        datasetdirpath = os.path.join(self.config.export_datasetdir, 'dataset')
+        os.makedirs(self.export_tdaDir, exist_ok=True)
+        os.makedirs(self.export_imageDir, exist_ok=True)
+        os.makedirs(self.export_datasetDir, exist_ok=True)
 
-        os.makedirs(tdadirpath, exist_ok=True)
-        os.makedirs(imgdirpath, exist_ok=True)
-        os.makedirs(datasetdirpath, exist_ok=True)
-
-        if os.path.exists(os.path.join(tdadirpath, filename + '.tda')):
+        if os.path.exists(os.path.join(self.export_tdaDir, filename + '.tda')):
             return False
 
         # save tda
         tda = TDA(self)
-        TDA.save(tda, os.path.join(tdadirpath, filename + '.tda'))
+        TDA.save(tda, os.path.join(self.export_tdaDir, filename + '.tda'))
 
         # save image
         if self.areamode == AreaMode.RECTANGLE:
@@ -81,6 +96,18 @@ class FileModelMixin(ModelAbstractMixin):
 
         _, ext = os.path.splitext(self.selectedImgPath)
         cvimg = cv2.imread(self.selectedImgPath)
-        cv2.imwrite(os.path.join(imgdirpath, filename + ext), cvimg)
+        cv2.imwrite(os.path.join(self.export_imageDir, filename + ext), cvimg)
 
         return True
+
+    def get_default_tda(self):
+        """
+        Get tda file in default dataset directory
+        Returns
+        -------
+            TDA or None
+        """
+        if not os.path.exists(self.tdapath):
+            return None
+
+        return TDA.load(self.tdapath)

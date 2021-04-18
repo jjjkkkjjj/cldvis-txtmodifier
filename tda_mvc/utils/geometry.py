@@ -626,6 +626,7 @@ class Annotation(Polygon):
         """
     def __del__(self):
         self.band.deleteLater()
+        self.band = None
 
 class AnnotaionRubberBand(QRubberBand):
     def __init__(self, text, *args, **kwargs):
