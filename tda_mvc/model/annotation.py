@@ -2,12 +2,14 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 import json
+import pandas as pd
 
 from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
 from ..utils.modes import MoveActionState
 from ..utils.funcs import qsize_from_quadrangle
+from ..utils.parse_annotation import parse_annotations_forFile
 
 class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
 
@@ -60,6 +62,26 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
     def saveAsJson(self, path):
         with open(path, 'w') as f:
             json.dump(self.results, f)
+
+    def saveAsCSV(self, path):
+        table_list = parse_annotations_forFile(self)
+        df = pd.DataFrame(table_list)
+        df.to_csv(path, sep=',', header=False, index=False, encoding='utf-8')
+
+    def saveAsEXCEL(self, path):
+        table_list = parse_annotations_forFile(self)
+        df = pd.DataFrame(table_list)
+        df.to_excel(path, header=False, index=False, encoding='utf-8')
+
+    def saveAsTSV(self, path):
+        table_list = parse_annotations_forFile(self)
+        df = pd.DataFrame(table_list)
+        df.to_csv(path, sep='\t', header=False, index=False, encoding='utf-8')
+
+    def saveAsPSV(self, path):
+        table_list = parse_annotations_forFile(self)
+        df = pd.DataFrame(table_list)
+        df.to_csv(path, sep='|', header=False, index=False, encoding='utf-8')
 
     def saveAsVOC(self, path):
         pass

@@ -7,7 +7,7 @@ import pandas as pd
 from ..view import AboutDialog, PreferencesDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention, ExportDatasetFormat
 from ..utils.exception import PredictionError
-from ..utils.funcs import parse_annotations_forFile, create_fileters
+from ..utils.funcs import create_fileters
 from ..model import TDA
 from .base import VCAbstractMixin
 
@@ -200,7 +200,6 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateAllUI()
 
     def exportCSV(self):
-        table_list = parse_annotations_forFile(self.model)
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
         filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
         filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetDir, filename),
@@ -218,18 +217,17 @@ class LeftDockVCMixin(VCAbstractMixin):
             return filepath
 
         filepath = _check_and_append_ext(filepath, ext)
-        df = pd.DataFrame(table_list)
         if fileformat == 'CSV':
-            df.to_csv(filepath, sep=',', header=False, index=False, encoding='utf-8')
+            self.model.saveAsCSV(filepath)
 
         elif fileformat == 'EXCEL':
-            df.to_excel(filepath, header=False, index=False, encoding='utf-8')
+            self.model.saveAsEXCEL(filepath)
 
         elif fileformat == 'TSV':
-            df.to_csv(filepath, sep='\t', header=False, index=False, encoding='utf-8')
+            self.model.saveAsTSV(filepath)
 
         elif fileformat == 'PSV':
-            df.to_csv(filepath, sep='|', header=False, index=False, encoding='utf-8')
+            self.model.saveAsPSV(filepath)
 
 
     def exportDataset(self):
@@ -253,7 +251,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         filepath = _check_and_append_ext(filepath, ext)
         if fileformat == 'VOC':
-            pass
+            self.model.saveAsVOC(filepath)
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:
