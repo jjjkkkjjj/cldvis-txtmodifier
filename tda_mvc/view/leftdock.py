@@ -41,7 +41,7 @@ class LeftDockView(QWidget):
     radioButton_selected: QRadioButton
 
     # run
-    button_removeArea: Button
+    button_discard: Button
     comboBox_predmode: QComboBox
     button_predict: Button
 
@@ -63,8 +63,8 @@ class LeftDockView(QWidget):
         self.button_predict = Button('cloud-vision.png')
         vbox.addWidget(self.button_predict)
         # remove
-        self.button_removeArea = Button('remove.png')
-        vbox.addWidget(self.button_removeArea)
+        self.button_discard = Button('remove.png')
+        vbox.addWidget(self.button_discard)
 
         ###### file ######
         # file folder and file
@@ -167,6 +167,9 @@ class LeftDockView(QWidget):
         -------
 
         """
+        self.button_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
+        self.button_discard.setEnabled(self.model.isExistArea)
+
         self.updateFile()
         self.updateView()
         self.updatePrediction()
@@ -194,6 +197,4 @@ class LeftDockView(QWidget):
 
         # if the image has already predicted, disable
         self.groupBox_areamode.setEnabled(not self.model.isPredicted)
-        self.button_removeArea.setEnabled(self.model.isExistArea and not self.model.isPredicted)
         self.comboBox_predmode.setEnabled(not self.model.isPredicted)
-        self.button_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)

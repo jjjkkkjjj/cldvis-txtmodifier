@@ -53,7 +53,7 @@ class MenuBar(QMenuBar):
     action_zoomout: QAction
 
     # prediction menu
-    action_removeArea: QAction
+    action_discard: QAction
     action_predict: QAction
 
     # help menu
@@ -137,8 +137,9 @@ class MenuBar(QMenuBar):
                                             shortcut="Ctrl+P", tip='Predict table')
 
         # remove
-        self.action_removeArea = create_action(self, '&Remove Rectangle', slot=None,
-                                               shortcut="Ctrl+D", tip='Remove rectangle')
+        self.action_discard = create_action(self, '&Discard', slot=None,
+                                            shortcut="Ctrl+D", tip='Discard rectangle/quadrangle in selection mode\n'
+                                                                   'Discard results in editing annotation mode')
 
         # area mode
         self.action_areaRectMode = create_action(self, '&Rectangle Mode', slot=None,
@@ -156,7 +157,7 @@ class MenuBar(QMenuBar):
                                                          shortcut='Ctrl+shift+D', tip='Predict the texts as Document mode')
 
 
-        add_actions(self.menu_prediction, (self.action_predict, None, self.action_removeArea, None,
+        add_actions(self.menu_prediction, (self.action_predict, None, self.action_discard, None,
                                            self.action_areaRectMode, self.action_areaQuadMode, None,
                                            self.action_predictImageMode, self.action_predictDocumentMode))
 
@@ -178,6 +179,9 @@ class MenuBar(QMenuBar):
         -------
 
         """
+        self.action_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
+        self.action_discard.setEnabled(self.model.isExistArea)
+
         self.updateFile()
         self.updateViewer()
         self.updatePrediction()
@@ -210,6 +214,4 @@ class MenuBar(QMenuBar):
 
         self.action_predictImageMode.setEnabled(not self.model.isPredicted)
         self.action_predictDocumentMode.setEnabled(not self.model.isPredicted)
-        self.action_removeArea.setEnabled(self.model.isExistArea and not self.model.isPredicted)
-        self.action_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
 

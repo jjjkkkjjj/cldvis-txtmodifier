@@ -36,7 +36,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.leftdock.radioButton_rect.clicked.connect(lambda: self.areamodeChanged(AreaMode.RECTANGLE))
         self.leftdock.radioButton_quad.clicked.connect(lambda: self.areamodeChanged(AreaMode.QUADRANGLE))
-        self.leftdock.button_removeArea.clicked.connect(self.removeArea)
+        self.leftdock.button_discard.clicked.connect(self.discard)
         self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
         self.leftdock.button_predict.clicked.connect(self.predict)
 
@@ -61,7 +61,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.menu.action_areaRectMode.triggered.connect(lambda: self.leftdock.radioButton_rect.click())
         self.menu.action_areaQuadMode.triggered.connect(lambda: self.leftdock.radioButton_quad.click())
-        self.menu.action_removeArea.triggered.connect(self.removeArea)
+        self.menu.action_discard.triggered.connect(self.discard)
         self.menu.action_predictImageMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(0))
         self.menu.action_predictDocumentMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
         self.menu.action_predict.triggered.connect(self.predict)
@@ -242,11 +242,27 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateModel()
         self.updateAllUI()
 
-    def removeArea(self):
-        self.model.removeArea()
-        self.leftdock.radioButton_entire.click()
-        # call areamodeChanged, so below codes are redundant
-        #self.updateAllUI()
+    def discard(self):
+        if self.model.isPredicted:
+            ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.No:
+                return
+
+            self.model.discard_annotations()
+
+            self.updateModel()
+            self.updateAllUI()
+
+        else:
+            ret = QMessageBox.warning(self, 'Discard selection', 'Are you sure you want to discard selection area?',
+                                      QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.No:
+                return
+
+            self.model.removeArea()
+            self.leftdock.radioButton_entire.click()
+            # call areamodeChanged, so below codes are redundant
+            #self.updateAllUI()
 
     def predict(self):
         from ..main import MainViewController

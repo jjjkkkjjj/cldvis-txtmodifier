@@ -13,7 +13,6 @@ class PredictionModelMixin(ModelAbstractMixin):
 
     def __init__(self):
         self.client = None
-        self.results = {}
 
     @property
     def credentialJsonpath(self):
@@ -22,10 +21,6 @@ class PredictionModelMixin(ModelAbstractMixin):
     @property
     def isExistCredPath(self):
         return self.config.credentialJsonpath is not None
-
-    @property
-    def isPredicted(self):
-        return len(self.results) > 0
 
     def check_credentialJsonpath(self, path):
         # export GOOGLE_APPLICATION_CREDENTIALS as environmental path
@@ -53,8 +48,8 @@ class PredictionModelMixin(ModelAbstractMixin):
         image = vision.Image(content=content)
         # https://googleapis.dev/python/vision/1.0.0/gapic/v1/api.html#google.cloud.vision_v1.ImageAnnotatorClient.text_detection
         response = self.client.text_detection(image=image)
-        self.results = parse_response(response, w, h, imgpath)
-        return self.results
+        results = parse_response(response, w, h, imgpath)
+        return results
 
     def detectAsDocument(self, imgpath):
         # detect texts as document mode
@@ -66,12 +61,10 @@ class PredictionModelMixin(ModelAbstractMixin):
         image = vision.Image(content=content)
         # https://googleapis.dev/python/vision/1.0.0/gapic/v1/api.html#google.cloud.vision_v1.ImageAnnotatorClient.document_text_detection
         response = self.client.document_text_detection(image=image)
-        self.results = parse_response(response, w, h, imgpath)
-        return self.results
+        results = parse_response(response, w, h, imgpath)
+        return results
 
-    def saveAsJson(self, path):
-        with open(path, 'w') as f:
-            json.dump(self.results, f)
+
 
 def parse_response(response, w, h, imgpath):
     # type is AnnotateImageResponse

@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
+import json
 
 from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
@@ -15,11 +16,16 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
 
         self._header_labels = ['Text']
 
+        self.results = {}
         self.annotations = AnnotationsManager()
         # prediction area
         self.predictedArea = Polygon(maximum_points_number=4)
         self.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
                                      vertex_default_color=NoColor())
+
+    @property
+    def isPredicted(self):
+        return len(self.results) > 0
 
     @property
     def predictedAreaQSize(self):
@@ -44,6 +50,16 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
     def columnCount(self, parent=None, *args, **kwargs):
         return 1
 
+    def discard_annotations(self):
+        self.results = {}
+        self.annotations.clear()
+        # prediction area
+        self.predictedArea = Polygon(maximum_points_number=4)
+        self.predictedArea.set_color(poly_default_color=Color(border=orange, fill=transparency),
+                                     vertex_default_color=NoColor())
+    def saveAsJson(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.results, f)
 
 class AnnotationsManager(object):
     def __init__(self):
@@ -129,6 +145,14 @@ class AnnotationsManager(object):
             pred['bbox'] = anno.percent_points
             ret['prediction'] += [pred]
         return ret
+
+    def clear(self):
+        for i in reversed(range(len(self._annotations))):
+            del self._annotations[i]
+        self._selectedIndex = -1
+        self._startPosition = QPoint(0, 0)
+        self._annotations = []
+        self.moveActionState = MoveActionState.CREATE
 
     def paint(self, painter, isShow):
         if isShow:

@@ -624,6 +624,8 @@ class Annotation(Polygon):
             painter.drawText(self.qpolygon.boundingRect(), Qt.AlignCenter, self.text)
             #painter.drawText(QFontMetrics(painter.font()).size(Qt.TextSingleLine, self.text).width(), self.text)
         """
+    def __del__(self):
+        self.band.deleteLater()
 
 class AnnotaionRubberBand(QRubberBand):
     def __init__(self, text, *args, **kwargs):
