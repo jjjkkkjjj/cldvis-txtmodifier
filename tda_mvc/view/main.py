@@ -82,6 +82,16 @@ class MenuBar(QMenuBar):
         self.action_openfiles = create_action(self, "&Open Files", slot=None,
                                                shortcut="Ctrl+Shift+O", tip="open files")
 
+        # save
+        self.action_savetda = create_action(self, "&Save", slot=None,
+                                            shortcut="Ctrl+S", tip="Save tda file in dataset directory")
+        # save as tda
+        self.action_saveastda = create_action(self, "&Save as tda", slot=None,
+                                              shortcut="Ctrl+Shift+S", tip="Save as tda file")
+        # load
+        self.action_loadtda = create_action(self, "&Load tda", slot=None,
+                                            shortcut="Ctrl+l", tip="Load tda file")
+
         # back file
         self.action_backfile = create_action(self, "&Back File", slot=None,
                                               shortcut="Alt+Left", tip="Back file")
@@ -98,6 +108,7 @@ class MenuBar(QMenuBar):
                                                   shortcut="Ctrl+Shift+E", tip="Export Dataset file as VOC format")
 
         add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
+                                     self.action_savetda, self.action_saveastda, self.action_loadtda, None,
                                      self.action_backfile, self.action_forwardfile, None,
                                      self.action_exportCSV, self.action_exportDataset))
 
@@ -172,6 +183,10 @@ class MenuBar(QMenuBar):
         self.updatePrediction()
 
     def updateFile(self):
+        # save
+        self.action_savetda.setEnabled(self.model.isPredicted)
+        self.action_saveastda.setEnabled(self.model.isPredicted)
+        self.action_loadtda.setEnabled(self.model.isExistImg)
         # open file
         self.action_backfile.setEnabled(self.model.isExistBackImg)
         self.action_forwardfile.setEnabled(self.model.isExistForwardImg)

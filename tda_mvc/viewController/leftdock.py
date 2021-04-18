@@ -1,13 +1,14 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import os, glob, csv
+import os, glob
 import pandas as pd
 
 from ..view import AboutDialog, PreferencesDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention
 from ..utils.exception import PredictionError
 from ..utils.funcs import parse_annotations, create_fileters
+from ..model import TDA
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -43,6 +44,9 @@ class LeftDockVCMixin(VCAbstractMixin):
         # file
         self.menu.action_openfiles.triggered.connect(self.openfile)
         self.menu.action_openfolder.triggered.connect(self.openFolder)
+        self.menu.action_savetda.triggered.connect(lambda: self.savetda(True))
+        self.menu.action_saveastda.triggered.connect(lambda: self.savetda(False))
+        self.menu.action_loadtda.triggered.connect(self.loadtda)
         self.menu.action_forwardfile.triggered.connect(lambda: self.changeImg(True))
         self.menu.action_backfile.triggered.connect(lambda: self.changeImg(False))
         self.menu.action_exportCSV.triggered.connect(self.exportCSV)
@@ -77,8 +81,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         # update view
-        self.leftdock.updateUI()
-        self.central.updateUI()
+        self.updateAllUI()
 
     def openFolder(self):
         dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir)
@@ -89,8 +92,53 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         # update view
-        self.leftdock.updateUI()
-        self.central.updateUI()
+        self.updateAllUI()
+
+    def savetda(self, isDefault):
+        filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
+
+        if isDefault:
+            filepath = os.path.join(self.model.config.export_datasetdir, 'tda', filename + '.tda')
+        else:
+            filters_list = create_fileters(('TDA Binary', 'tda'))
+            filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as',
+                                                                    os.path.join(self.model.config.export_datasetdir, filename),
+                                                                    ';;'.join(filters_list), None)
+            if filepath == '':
+                return
+        tda = TDA(self.model)
+        TDA.save(tda, filepath)
+
+
+    def loadtda(self):
+        filters_list = create_fileters(('TDA Binary', 'tda'))
+        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.config.export_datasetdir, ';;'.join(filters_list), None)
+        if filepath == '':
+            return
+
+        tda = TDA.load(filepath)
+        # rectangle
+        self.model.rectangle.set_percent_points(tda.rectangle_percent_pts)
+        self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
+        # quadrangle
+        self.model.quadrangle.set_percent_points(tda.quadrangle_percent_pts)
+        self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
+        # predictedArea
+        self.model.predictedArea.set_percent_points(tda.predictedArea_percent_pts)
+        self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize,
+                                                offsetQPoint=self.model.areaOffsetQPoint)
+        # annotation
+        self.model.results = tda.results_dict
+        if self.model.showingmode == ShowingMode.ENTIRE:
+            self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
+                                               parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
+
+        elif self.model.showingmode == ShowingMode.SELECTED:
+            self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
+                                               parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
+
+        self.updateModel()
+        self.updateAllUI()
 
     def changeImg(self, isForward):
         """

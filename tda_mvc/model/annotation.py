@@ -113,10 +113,22 @@ class AnnotationsManager(object):
         """
 
         self._annotations = []
+        self._info = results['info']
         for result in results['prediction']:
             anno = Annotation(baseWidget, result["bbox"], result['text'], parentQSize, offsetQPoint)
             self._annotations += [anno]
             anno.show()
+
+    def to_dict(self):
+        ret = {}
+        ret['info'] = self._info
+        ret['prediction'] = []
+        for anno in self._annotations:
+            pred = {}
+            pred['text'] = anno.text
+            pred['bbox'] = anno.percent_points
+            ret['prediction'] += [pred]
+        return ret
 
     def paint(self, painter, isShow):
         if isShow:
