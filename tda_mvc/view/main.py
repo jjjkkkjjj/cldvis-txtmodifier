@@ -132,16 +132,20 @@ class MenuBar(QMenuBar):
                                         self.action_showentire, self.action_showselected))
 
         ##### Run #####
+        # predict
+        self.action_predict = create_action(self, '&Predict Table', slot=None,
+                                            shortcut="Ctrl+P", tip='Predict table')
+
+        # remove
+        self.action_removeArea = create_action(self, '&Remove Rectangle', slot=None,
+                                               shortcut="Ctrl+D", tip='Remove rectangle')
+
         # area mode
         self.action_areaRectMode = create_action(self, '&Rectangle Mode', slot=None,
                                                   shortcut="r", tip='Use rectangle for prediction')
 
         self.action_areaQuadMode = create_action(self, '&Quadrangle Mode', slot=None,
                                                   shortcut="q", tip='Use quadrangle for prediction')
-
-        # remove
-        self.action_removeArea = create_action(self, '&Remove Rectangle', slot=None,
-                                                shortcut="Ctrl+D", tip='Remove rectangle')
 
         # predict as image mode
         self.action_predictImageMode = create_action(self, '&Image mode', slot=None,
@@ -151,14 +155,10 @@ class MenuBar(QMenuBar):
         self.action_predictDocumentMode = create_action(self, '&Document mode', slot=None,
                                                          shortcut='Ctrl+shift+D', tip='Predict the texts as Document mode')
 
-        # predict
-        self.action_predict = create_action(self, '&Predict Table', slot=None,
-                                             shortcut="Ctrl+P", tip='Predict table')
 
-        add_actions(self.menu_prediction, (self.action_areaRectMode, self.action_areaQuadMode, None,
-                                            self.action_removeArea, None,
-                                            self.action_predictImageMode, self.action_predictDocumentMode, None,
-                                            self.action_predict, None))
+        add_actions(self.menu_prediction, (self.action_predict, None, self.action_removeArea, None,
+                                           self.action_areaRectMode, self.action_areaQuadMode, None,
+                                           self.action_predictImageMode, self.action_predictDocumentMode))
 
         ##### Help #####
         # about

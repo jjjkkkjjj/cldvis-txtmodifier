@@ -59,6 +59,13 @@ class LeftDockView(QWidget):
     def initUI(self):
         vbox = QVBoxLayout()
 
+        # predict
+        self.button_predict = Button('cloud-vision.png')
+        vbox.addWidget(self.button_predict)
+        # remove
+        self.button_removeArea = Button('remove.png')
+        vbox.addWidget(self.button_removeArea)
+
         ###### file ######
         # file folder and file
         vbox_file = QVBoxLayout()
@@ -143,16 +150,10 @@ class LeftDockView(QWidget):
         vbox_run.addWidget(self.groupBox_areamode, 1)
 
 
-        # remove
-        self.button_removeArea = Button('remove.png')
-        vbox_run.addWidget(self.button_removeArea)
-
         # predict
         self.comboBox_predmode = QComboBox(self)
         self.comboBox_predmode.addItems(PredictionMode.gen_list())
         vbox_run.addWidget(self.comboBox_predmode)
-        self.button_predict = Button('cloud-vision.png')
-        vbox_run.addWidget(self.button_predict)
 
         self.groupBox_prediction.setLayout(vbox_run)
         vbox.addWidget(self.groupBox_prediction, 1)
