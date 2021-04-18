@@ -7,7 +7,7 @@ class Config(object):
     iniPath = os.path.join('.tda', 'tda.ini')
 
     def __init__(self):
-        self.config = configparser.ConfigParser()
+        self.config = configparser.ConfigParser(allow_no_value=True)
 
         self._initialReadConfig()
 
@@ -17,20 +17,50 @@ class Config(object):
 
     @property
     def last_opendir(self):
-        return self.config['settings']['last_opendir']
+        return self.config.get('settings', 'last_opendir')
     @last_opendir.setter
     def last_opendir(self, last_dir):
-        self.config['settings']['last_opendir'] = last_dir
+        self.config.set('settings', 'last_opendir', last_dir)
         self.writeConfig()
 
     @property
     def credentialJsonpath(self):
-        if self.config['settings']['credentialJsonpath'] == 'None':
-            return None
-        return self.config['settings']['credentialJsonpath']
+        return self.config.get('settings', 'credentialJsonpath')
     @credentialJsonpath.setter
     def credentialJsonpath(self, path):
-        self.config['settings']['credentialJsonpath'] = path
+        self.config.set('settings', 'credentialJsonpath', path)
+        self.writeConfig()
+
+    @property
+    def export_fileformat(self):
+        return self.config.get('settings', 'export_fileformat')
+    @export_fileformat.setter
+    def export_fileformat(self, fileformat):
+        self.config.set('settings', 'export_fileformat', fileformat)
+        self.writeConfig()
+
+    @property
+    def export_sameRowY(self):
+        return self.config.getint('settings', 'export_sameRowY')
+    @export_sameRowY.setter
+    def export_sameRowY(self, value):
+        self.config.set('settings', 'export_sameRowY', str(value))
+        self.writeConfig()
+
+    @property
+    def export_sameColX(self):
+        return self.config.getint('settings', 'export_sameColX')
+    @export_sameColX.setter
+    def export_sameColX(self, value):
+        self.config.set('settings', 'export_sameColX', str(value))
+        self.writeConfig()
+
+    @property
+    def export_datasetdir(self):
+        return self.config.get('settings', 'export_datasetdir')
+    @export_datasetdir.setter
+    def export_datasetdir(self, path):
+        self.config.set('settings', 'export_datasetdir', path)
         self.writeConfig()
 
     def _initialReadConfig(self):
@@ -44,7 +74,12 @@ class Config(object):
             # default value
             default = {
                 'last_opendir': path_desktop(),
-                'credentialJsonpath': 'None'
+                'credentialJsonpath': None,
+
+                'export_fileformat': 'csv',
+                'export_sameRowY': 50,
+                'export_sameColX': 15,
+                'export_datasetdir': None
             }
 
             self.config['default'] = default

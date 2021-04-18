@@ -131,9 +131,6 @@ def parse_annotations(model):
     polys = np.array([anno.pts for anno in model.annotations], dtype=int)
     texts = np.array([anno.text for anno in model.annotations])
 
-    error = 50
-    concat_error = 15
-
     ret = []
     while polys.shape[0] > 0:
         # target_poly: shape = (1, points_num, 2=(x, y))
@@ -148,7 +145,7 @@ def parse_annotations(model):
 
         # extract the values with top-left y within the error for target_poly's one
         # shape = (cand_num,)
-        line_bindices = np.abs(polys[:, 0, 1] - target_poly[:, 0, 1]) < error
+        line_bindices = np.abs(polys[:, 0, 1] - target_poly[:, 0, 1]) < model.config.export_sameRowY
 
         # line_polys: shape = (column_num, points_num, 2=(x,y))
         # line_texts: shape = (column_num,)
@@ -175,7 +172,7 @@ def parse_annotations(model):
             for r_index in range(1, line_polys.shape[0]):
                 left_poly_maxX = line_polys[r_index - 1, :, 0].max()
                 right_poly_minX = line_polys[r_index, :, 0].min()
-                if np.abs(left_poly_maxX - right_poly_minX) < concat_error:
+                if np.abs(left_poly_maxX - right_poly_minX) < model.config.export_sameColX:
                     concat_index = r_index + 1
                     column_text += line_texts[r_index]
                 else:

@@ -81,10 +81,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.central.updateUI()
 
     def openFolder(self):
-        dirname = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir,
+        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir,
                                                    QFileDialog.DontUseNativeDialog)
 
-        filenames = sorted(glob.glob(os.path.join(dirname, '*')))
+        filenames = sorted(glob.glob(os.path.join(dirpath, '*')))
         # remove not supported files and directories
         filenames = [filename for filename in filenames if os.path.splitext(filename)[-1] in SUPPORTED_EXTENSIONS]
 

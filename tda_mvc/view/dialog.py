@@ -4,6 +4,8 @@ from PySide2.QtGui import *
 from google.auth.exceptions import DefaultCredentialsError
 import glob, os, sys
 
+from ..utils.modes import ExportFileExtention
+
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -48,19 +50,31 @@ class PreferencesDialog(QDialog):
     def __init__(self, model, initial, parent=None):
         super().__init__(parent)
 
-        # jsonpath => '': Not selected, None: Can't be loaded, other: OK.
-        try:
-            self.jsonpath = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
-        except KeyError:
-            self.jsonpath = ''
-        # None: Not selected
-        # False: Can't be loaded
-        # True: OK.
-        self.isValidJsonPath = None
+
 
         from ..model import Model
         self.model: Model = model
         self.initial = initial
+
+        self._confignames = ['credentialJsonpath', 'export_fileformat', 'export_sameRowY', 'export_sameColX',
+                             'export_datasetdir']
+        # temporal attr
+        # load jsonpath from environment path or config file
+        try:
+            self.credentialJsonpath = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+        except KeyError:
+            if model.credentialJsonpath:
+                self.credentialJsonpath = model.credentialJsonpath
+            else:
+                self.credentialJsonpath = ''
+        # None: Not selected
+        # False: Can't be loaded
+        # True: OK.
+        self._isValidJsonPath = None
+        self.export_fileformat = model.config.export_fileformat
+        self.export_sameRowY = model.config.export_sameRowY
+        self.export_sameColX = model.config.export_sameColX
+        self.export_datasetdir = model.config.export_datasetdir
 
         self.initUI()
         self.establish_connection()
@@ -73,43 +87,156 @@ class PreferencesDialog(QDialog):
 
         vbox = QVBoxLayout()
 
-        hbox_jsonpath = QHBoxLayout()
-        self.label_jsonpath = QLabel('Json Path: Not selected')
-        hbox_jsonpath.addWidget(self.label_jsonpath, 5)
-        self.label_jsonpathStatus = QLabel()
-        hbox_jsonpath.addWidget(self.label_jsonpathStatus, 1)
+        def setGridLayout(layout, params):
+            """
+            Set gridlayout
+            Parameters
+            ----------
+            layout : QGridLayout
+                The gridlayout
+            params : list of list of (widget, column)
+                The list of [
+                (widget, column, ...),
+                (widget, column, ...),
+                ]
+
+                Note that row is not needed!!
+            Returns
+            -------
+            """
+            for row, row_params in enumerate(params):
+                for param in row_params:
+                    p = param[1:]
+                    layout.addWidget(param[0], row, *p)
+
+        ##### Google Cloud Vision #####
+        self.groupBox_gcv = QGroupBox('Google Cloud Vision')
+        grid_gcv = QGridLayout()
+
+        self.label_jsonpath = QLabel('Json:')
+        self.label_jsonpathStatus = QLabel('Not selected')
+        self.label_jsonpathStatusIcon = QLabel()
         self.button_readJsonpath = QPushButton('Read Json')
-        hbox_jsonpath.addWidget(self.button_readJsonpath, 1)
-        vbox.addLayout(hbox_jsonpath)
+
+        layout_params = [
+            [
+                (self.label_jsonpath, 0, 1, 2),
+                (self.label_jsonpathStatus, 2, 1, 4),
+                (self.label_jsonpathStatusIcon, 6, 1, 1),
+                (self.button_readJsonpath, 7, 1, 1)
+            ]
+        ]
+        setGridLayout(grid_gcv, layout_params)
+        self.groupBox_gcv.setLayout(grid_gcv)
+        vbox.addWidget(self.groupBox_gcv)
+
+        ##### export ######
+        self.groupBox_export = QGroupBox('Export')
+        grid_export = QGridLayout()
+
+        self.label_exportfileformat = QLabel('File Format:')
+        self.comboBox_exportfileext = QComboBox()
+        self.comboBox_exportfileext.addItems(ExportFileExtention.gen_list())
+        self.comboBox_exportfileext.setCurrentText(self.model.config.export_fileformat)
+
+        self.label_exportSameRowY = QLabel('Same Rows within:')
+        self.spinBox_exportSameRowY = QSpinBox(self)
+        self.spinBox_exportSameRowY.setRange(1, 9999)
+        self.spinBox_exportSameRowY.setValue(self.model.config.export_sameRowY)
+        self.label_exportSameRowYUnit = QLabel('pixel')
+
+        self.label_exportConcatColX = QLabel('Concatenate Columns within:')
+        self.spinBox_exportConcatColX = QSpinBox(self)
+        self.spinBox_exportConcatColX.setRange(1, 9999)
+        self.spinBox_exportConcatColX.setValue(self.model.config.export_sameColX)
+        self.label_exportConcatColXUnit = QLabel('pixel')
+
+        self.label_datasetdir = QLabel('Dataset Directory:')
+        self.label_datasetdirStatus = QLabel('Not selected')
+        self.label_datasetdirStatusIcon = QLabel()
+        self.button_openDatasetDir = QPushButton('Open')
+
+        layout_params = [
+            [
+                (self.label_exportfileformat, 0, 1, 2),
+                (self.comboBox_exportfileext, 2, 1, 4),
+                (QLabel(), 6, 1, 2),
+            ],
+            [
+                (self.label_exportSameRowY, 1, 1, 2),
+                (self.spinBox_exportSameRowY, 3, 1, 2),
+                (self.label_exportSameRowYUnit, 5, 1, 2),
+            ],
+            [
+                (self.label_exportConcatColX, 1, 1, 2),
+                (self.spinBox_exportConcatColX, 3, 1, 2),
+                (self.label_exportConcatColXUnit, 5, 1, 2),
+            ],
+            [
+                (self.label_datasetdir, 0, 1, 2),
+                (self.label_datasetdirStatus, 2, 1, 4),
+                (self.label_datasetdirStatusIcon, 6, 1, 1),
+                (self.button_openDatasetDir, 7, 1, 1)
+            ]
+        ]
+
+        setGridLayout(grid_export, layout_params)
+        self.groupBox_export.setLayout(grid_export)
+        vbox.addWidget(self.groupBox_export)
 
         self.button_ok = QPushButton('OK')
         self.button_ok.setDefault(True)
         vbox.addWidget(self.button_ok)
 
         self.setLayout(vbox)
-        self.setFixedSize(600, 200)
+        self.setFixedSize(600, 500)
 
     def establish_connection(self):
-        self.button_readJsonpath.clicked.connect(self.readJsonpath)
-        self.button_ok.clicked.connect(self.close)
+        # google cloud vision
+        self.button_readJsonpath.clicked.connect(lambda: self.connection('credentialJsonpath'))
+
+        # export
+        self.comboBox_exportfileext.currentTextChanged.connect(lambda: self.connection('export_fileformat'))
+        self.spinBox_exportSameRowY.valueChanged.connect(lambda: self.connection('export_sameRowY'))
+        self.spinBox_exportConcatColX.valueChanged.connect(lambda: self.connection('export_sameColX'))
+        self.button_openDatasetDir.clicked.connect(lambda: self.connection('export_datasetdir'))
+
+        self.button_ok.clicked.connect(lambda: self.connection('ok'))
 
     def updateUI(self):
-        self.isValidJsonPath = self.checkJsonpath()
+        self._isValidJsonPath = self.checkJsonpath()
 
-        if self.isValidJsonPath is None:
-            self.label_jsonpath.setText('Json Path: Not selected')
+        enable_ok = True
+
+        #### credential json path ####
+        if self._isValidJsonPath is None:
+            self.label_jsonpathStatus.setText('Not selected')
             icon = self.style().standardIcon(QStyle.SP_MessageBoxWarning)
-            self.button_ok.setEnabled(False)
-        elif self.isValidJsonPath:
-            self.label_jsonpath.setText('Json Path: {}'.format(os.path.basename(self.jsonpath)))
+            enable_ok = enable_ok and False
+        elif self._isValidJsonPath:
+            self.label_jsonpathStatus.setText(os.path.basename(self.credentialJsonpath))
             icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
-            self.button_ok.setEnabled(True)
+            enable_ok = enable_ok and True
         else:
-            self.label_jsonpath.setText('Json Path: {} is invalid'.format(os.path.basename(self.jsonpath)))
+            self.label_jsonpathStatus.setText('{} is invalid'.format(os.path.basename(self.credentialJsonpath)))
             icon = self.style().standardIcon(QStyle.SP_MessageBoxCritical)
-            self.button_ok.setEnabled(False)
+            enable_ok = enable_ok and False
+        self.label_jsonpathStatusIcon.setPixmap(icon.pixmap(QSize(16, 16)))
 
-        self.label_jsonpathStatus.setPixmap(icon.pixmap(QSize(16, 16)))
+        #### export dataset path ####
+        if self.export_datasetdir:
+            self.label_datasetdirStatus.setText(self.export_datasetdir)
+            icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
+            enable_ok = enable_ok and True
+        else:
+            self.label_datasetdirStatus.setText('Not selected')
+            icon = self.style().standardIcon(QStyle.SP_MessageBoxCritical)
+            enable_ok = enable_ok and False
+        self.label_datasetdirStatusIcon.setPixmap(icon.pixmap(QSize(16, 16)))
+
+        #### ok ####
+        self.button_ok.setEnabled(enable_ok)
+
 
     def checkJsonpath(self):
         """
@@ -123,23 +250,52 @@ class PreferencesDialog(QDialog):
             False: Can't be loaded
             True: OK.
         """
-        if self.jsonpath is None or self.jsonpath == '':
+        if self.credentialJsonpath is None or self.credentialJsonpath == '':
             return None
         try:
-            self.model.set_credentialJsonpath(self.jsonpath)
+            self.model.set_credentialJsonpath(self.credentialJsonpath)
             return True
         except DefaultCredentialsError:
             return False
 
-    def readJsonpath(self):
-        filters = 'JSON (*.json)'
-        filename = QFileDialog.getOpenFileName(self, 'OpenFile', '', filters, None, QFileDialog.DontUseNativeDialog)
+    def connection(self, connecttype):
+        if connecttype == 'credentialJsonpath':
+            filters = 'JSON (*.json)'
+            filename = QFileDialog.getOpenFileName(self, 'Open Credential Json File', '', filters, None,
+                                                   QFileDialog.DontUseNativeDialog)
 
-        self.jsonpath = filename[0] if filename[0] != '' else None
+            self.credentialJsonpath = filename[0] if filename[0] != '' else None
+
+        elif connecttype == 'export_fileformat':
+            self.export_fileformat = self.comboBox_exportfileext.currentText()
+
+        elif connecttype == 'export_sameRowY':
+            self.export_sameRowY = self.spinBox_exportSameRowY.value()
+
+        elif connecttype == 'export_sameColX':
+            self.export_sameColX = self.spinBox_exportConcatColX.value()
+
+        elif connecttype == 'export_datasetdir':
+            dirpath = QFileDialog.getExistingDirectory(self, 'Open Dataset Directory to be exported',
+                                                       self.model.config.export_datasetdir,
+                                                       QFileDialog.DontUseNativeDialog)
+            if dirpath == '':
+                return
+
+            self.export_datasetdir = dirpath
+
+        elif connecttype == 'ok':
+            ## save
+            for attr in self._confignames:
+                setattr(self.model.config, attr, getattr(self, attr))
+            self.close()
+            return
+
         self.updateUI()
 
+
     def closeEvent(self, event):
-        if self.initial and not self.isValidJsonPath:
+        if self.initial and not self._isValidJsonPath:
             sys.exit()
         super().closeEvent(event)
 

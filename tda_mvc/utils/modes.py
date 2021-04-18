@@ -20,3 +20,13 @@ class MoveActionState(Enum):
     CREATE = 0
     RESIZE = 1
     MOVE = 2
+
+class ExportFileExtention(Enum):
+    CSV = 'csv'
+    EXCEL = 'excel'
+    TSV = 'tsv'
+    PSV = 'psv'
+
+    @staticmethod
+    def gen_list():
+        return [m.value for m in ExportFileExtention]
