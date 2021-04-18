@@ -81,6 +81,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         # update view
+        self.updateModel()
         self.updateAllUI()
 
     def openFolder(self):
@@ -92,23 +93,32 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         # update view
+        self.updateModel()
         self.updateAllUI()
 
     def savetda(self, isDefault):
-        filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
-
         if isDefault:
+            filename = os.path.splitext(self.model.defaultsavename)[0]
             filepath = os.path.join(self.model.config.export_datasetdir, 'tda', filename + '.tda')
+            if os.path.exists(filepath):
+                ret = QMessageBox.warning(self, 'Notification',
+                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.defaultsavename),
+                                          QMessageBox.No | QMessageBox.Yes)
+                if ret == QMessageBox.No:
+                    return
+
+            self.model.saveInDefaultDirectory()
         else:
+            filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
             filters_list = create_fileters(('TDA Binary', 'tda'))
             filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as',
                                                                     os.path.join(self.model.config.export_datasetdir, filename),
                                                                     ';;'.join(filters_list), None)
             if filepath == '':
                 return
-        tda = TDA(self.model)
-        TDA.save(tda, filepath)
-
+            tda = TDA(self.model)
+            TDA.save(tda, filepath)
+        QMessageBox.information(self, 'Saved', 'Saved to {}'.format(filepath))
 
     def loadtda(self):
         filters_list = create_fileters(('TDA Binary', 'tda'))
@@ -117,6 +127,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             return
 
         tda = TDA.load(filepath)
+        self.model.areamode = tda.areamode
         # rectangle
         self.model.rectangle.set_percent_points(tda.rectangle_percent_pts)
         self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
@@ -136,6 +147,9 @@ class LeftDockVCMixin(VCAbstractMixin):
         elif self.model.showingmode == ShowingMode.SELECTED:
             self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
                                                parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
+
+        filename = os.path.basename(filepath)
+        self.model.defaultsavename = filename
 
         self.updateModel()
         self.updateAllUI()

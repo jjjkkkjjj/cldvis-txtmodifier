@@ -1,12 +1,15 @@
-import os
+import os, datetime, cv2
 
 from .base import ModelAbstractMixin
+from ..utils.modes import ShowingMode, AreaMode
+from .tda import TDA
 
 class FileModelMixin(ModelAbstractMixin):
 
     def __init__(self):
         self._imgIndex = -1
         self._imgPaths = []
+        self.defaultsavename = ''
 
     @property
     def imgpath(self):
@@ -50,3 +53,34 @@ class FileModelMixin(ModelAbstractMixin):
         self._imgPaths = paths
         self._imgIndex = 0
         self.config.last_opendir = os.path.dirname(self._imgPaths[0])
+
+    def saveInDefaultDirectory(self):
+        filename = os.path.splitext(self.defaultsavename)[0]
+        #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        tdadirpath = os.path.join(self.config.export_datasetdir, 'tda')
+        imgdirpath = os.path.join(self.config.export_datasetdir, 'image')
+        datasetdirpath = os.path.join(self.config.export_datasetdir, 'dataset')
+
+        os.makedirs(tdadirpath, exist_ok=True)
+        os.makedirs(imgdirpath, exist_ok=True)
+        os.makedirs(datasetdirpath, exist_ok=True)
+
+        if os.path.exists(os.path.join(tdadirpath, filename + '.tda')):
+            return False
+
+        # save tda
+        tda = TDA(self)
+        TDA.save(tda, os.path.join(tdadirpath, filename + '.tda'))
+
+        # save image
+        if self.areamode == AreaMode.RECTANGLE:
+            self.saveSelectedImg_rectmode(self.imgpath)
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self.saveSelectedImg_quadmode(self.imgpath)
+
+        _, ext = os.path.splitext(self.selectedImgPath)
+        cvimg = cv2.imread(self.selectedImgPath)
+        cv2.imwrite(os.path.join(imgdirpath, filename + ext), cvimg)
+
+        return True

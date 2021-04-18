@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+import os
 
 from ..utils.modes import AreaMode, ShowingMode
 from ..utils.funcs import get_pixmap
@@ -14,11 +15,34 @@ class CentralVCMixin(VCAbstractMixin):
         return self.central.imageView
 
     def establish_connection(self):
+        self.central.label_savefilename.enterEvent = lambda e: self.savefilename_mouseover(e, True)
+        self.central.label_savefilename.leaveEvent = lambda e: self.savefilename_mouseover(e, False)
+        self.central.label_savefilename.mouseDoubleClickEvent = self.savefilename_doubleClicked
         self.imageView.rightClicked.connect(lambda e: self.rightClicked(e))
         self.imageView.mouseReleased.connect(lambda e: self.mouseReleased(e))
         self.imageView.mousePressed.connect(lambda e: self.mousePressed(e))
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
         self.imageView.mouseDoubleClicked.connect(lambda e: self.mouseDoubleClicked(e))
+
+    def savefilename_mouseover(self, e: QMouseEvent, isEnter):
+        if not self.central.label_savefilename.isEnabled():
+            return
+        if isEnter:
+            self.central.label_savefilename.setStyleSheet('color: red')
+        else:
+            self.central.label_savefilename.setStyleSheet('color: black')
+
+    def savefilename_doubleClicked(self, e: QMouseEvent):
+        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.defaultsavename)
+
+        if ok:
+            _, ext = os.path.splitext(savefilename)
+            if ext != '.tda':
+                savefilename += '.tda'
+            self.model.defaultsavename = savefilename
+
+            self.updateModel()
+            self.updateAllUI()
 
     @property
     def predictedParentQSize(self):

@@ -12,7 +12,7 @@ class TDA(object):
         self.quadrangle_percent_pts = model.quadrangle.percent_points
         self.predictedArea_percent_pts = model.predictedArea.percent_points
         self.results_dict = model.annotations.to_dict()
-
+        self.areamode = model.areamode
 
     def save(self, path):
         with open(path, 'wb') as f:

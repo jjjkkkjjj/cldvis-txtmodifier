@@ -108,10 +108,18 @@ class CentralView(QWidget):
     def initUI(self):
         vbox = QVBoxLayout()
 
+        hbox_info = QHBoxLayout()
         # filename label
         self.label_filename = QLabel(self)
         self.label_filename.setText('Filename:')
-        vbox.addWidget(self.label_filename)
+        hbox_info.addWidget(self.label_filename)
+
+        # auto save
+        self.label_savefilename = QLabel(self)
+        self.label_savefilename.setText('Savename:')
+        hbox_info.addWidget(self.label_savefilename)
+
+        vbox.addLayout(hbox_info)
 
         # image
         self.scrollArea = QScrollArea(self)
@@ -131,11 +139,14 @@ class CentralView(QWidget):
     def updateUI(self):
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
+        self.label_savefilename.setEnabled(self.model.isExistImg)
         self.imageView.setEnabled(self.model.isExistImg)
 
         if self.model.isExistImg:
             # set the filename of the shown image
             self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
+            # set the default saved filename
+            self.label_savefilename.setText('Savename: {}'.format(self.model.defaultsavename))
 
             # set the image
             pixmap, _ = get_pixmap(self.model, self.scrollArea.size())

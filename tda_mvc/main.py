@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import *
 from google.auth.exceptions import DefaultCredentialsError
-import cv2
+import cv2, os
 
 from .model import Model
 from .utils.modes import ShowingMode, AreaMode
@@ -59,6 +59,10 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
     def updateModel(self):
         if not self.model.isExistImg:
             return
+
+        if self.model.defaultsavename == '':
+            filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
+            self.model.defaultsavename = filename + '.tda'
 
         if not self.model.isPredicted:
             #### Not predicted ####
