@@ -100,7 +100,7 @@ class MenuBar(QMenuBar):
                                                  shortcut="Alt+Right", tip="Forward file")
 
         # export csv
-        self.action_exportCSV = create_action(self, "&Export CSV", slot=None,
+        self.action_exportCSV = create_action(self, "&Export File", slot=None,
                                               shortcut="Ctrl+E", tip="Export CSV file")
 
         # export dataset

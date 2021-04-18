@@ -1,4 +1,7 @@
 import numpy as np
+from lxml import etree
+from ..utils.modes import ShowingMode, AreaMode
+import os, cv2
 
 def parse_annotations_forFile(model):
     from ..model import Model
@@ -61,3 +64,69 @@ def parse_annotations_forFile(model):
         ret += [row]
 
     return ret
+
+def parse_annotations_forVOC(model, imgpath):
+    """
+    Parameters
+    ----------
+    model: Model
+
+    imgpath: str
+        the annotated image file path.
+        Note that this file must be saved before calling this function.
+
+    Returns
+    -------
+    str:
+        the xml string
+
+    """
+    from ..model import Model
+    model: Model
+    polys = np.array([anno.pts for anno in model.annotations], dtype=int)
+    texts = np.array([anno.text for anno in model.annotations])
+
+    def _subelement(el, name, value=None):
+        subel = etree.SubElement(el, name)
+        if value:
+            subel.text = str(value)
+        return subel
+
+    imgname = os.path.basename(imgpath)
+    img = cv2.imread(imgpath)
+    h, w, c = img.shape
+
+    root = etree.Element('annotation')
+    # folder
+    folderET = _subelement(root, 'folder', 'image')
+    # filename
+    filenameET = _subelement(root, 'filename', imgname)
+
+    # size
+    sizeET = _subelement(root, 'size', None)
+
+    # width
+    widthET = _subelement(sizeET, 'width', w)
+    # height
+    heightET = _subelement(sizeET, 'height', h)
+    # depth
+    depthET = _subelement(sizeET, 'depth', c)
+
+    for b in range(polys.shape[0]):
+        # object
+        objectET = _subelement(root, 'object', None)
+
+        # difficult
+        difficultET = _subelement(objectET, 'difficult', '0')
+        # content
+        contentET = _subelement(objectET, 'content', '###')
+        # name
+        nameET = _subelement(objectET, 'name', texts[b])
+
+        # bndbox
+        bndboxET = etree.SubElement(objectET, 'bndbox')
+        for q in range(polys[b].shape[0]):
+            xET = _subelement(bndboxET, 'x{}'.format(q + 1), polys[b, q, 0])
+            yET = _subelement(bndboxET, 'y{}'.format(q + 1), polys[b, q, 1])
+
+    return etree.tostring(root, pretty_print=True, encoding='utf-8')

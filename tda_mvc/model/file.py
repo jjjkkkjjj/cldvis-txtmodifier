@@ -1,7 +1,6 @@
 import os, datetime, cv2
 
 from .base import ModelAbstractMixin
-from ..utils.modes import ShowingMode, AreaMode
 from .tda import TDA
 
 class FileModelMixin(ModelAbstractMixin):
@@ -72,33 +71,6 @@ class FileModelMixin(ModelAbstractMixin):
         self._imgIndex = 0
         self.config.lastOpenDir = os.path.dirname(self._imgPaths[0])
         self._set_defaultsavename()
-
-    def saveInDefaultDirectory(self):
-        filename = os.path.splitext(self.default_tdaname)[0]
-        #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
-        os.makedirs(self.export_tdaDir, exist_ok=True)
-        os.makedirs(self.export_imageDir, exist_ok=True)
-        os.makedirs(self.export_datasetDir, exist_ok=True)
-
-        if os.path.exists(os.path.join(self.export_tdaDir, filename + '.tda')):
-            return False
-
-        # save tda
-        tda = TDA(self)
-        TDA.save(tda, os.path.join(self.export_tdaDir, filename + '.tda'))
-
-        # save image
-        if self.areamode == AreaMode.RECTANGLE:
-            self.saveSelectedImg_rectmode(self.imgpath)
-        elif self.areamode == AreaMode.QUADRANGLE:
-            self.saveSelectedImg_quadmode(self.imgpath)
-
-        _, ext = os.path.splitext(self.selectedImgPath)
-        cvimg = cv2.imread(self.selectedImgPath)
-        cv2.imwrite(os.path.join(self.export_imageDir, filename + ext), cvimg)
-
-        return True
 
     def get_default_tda(self):
         """

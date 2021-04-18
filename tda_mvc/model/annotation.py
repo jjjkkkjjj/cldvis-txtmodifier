@@ -1,15 +1,16 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import json
+import json, os, datetime, cv2
 import pandas as pd
 
 from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
-from ..utils.modes import MoveActionState
+from ..utils.modes import MoveActionState, AreaMode
 from ..utils.funcs import qsize_from_quadrangle
-from ..utils.parse_annotation import parse_annotations_forFile
+from ..utils.parse_annotation import parse_annotations_forFile, parse_annotations_forVOC
+from .tda import TDA
 
 class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
 
@@ -84,7 +85,54 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
         df.to_csv(path, sep='|', header=False, index=False, encoding='utf-8')
 
     def saveAsVOC(self, path):
-        pass
+        # save image
+        if self.areamode == AreaMode.RECTANGLE:
+            self.saveSelectedImg_rectmode(self.imgpath)
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self.saveSelectedImg_quadmode(self.imgpath)
+
+        _, ext = os.path.splitext(self.selectedImgPath)
+        cvimg = cv2.imread(self.selectedImgPath)
+
+        dipath = os.path.dirname(path)
+        imgname, _ = os.path.splitext(os.path.basename(path))
+        imgpath = os.path.join(dipath, imgname + ext)
+        cv2.imwrite(imgpath, cvimg)
+
+        vocstr = parse_annotations_forVOC(self, imgpath)
+        with open(path, 'wb') as f:
+            f.write(vocstr)
+
+    def saveInDefaultDirectory(self):
+        filename = os.path.splitext(self.default_tdaname)[0]
+        #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        os.makedirs(self.export_tdaDir, exist_ok=True)
+        os.makedirs(self.export_imageDir, exist_ok=True)
+        os.makedirs(self.export_datasetDir, exist_ok=True)
+
+        if os.path.exists(os.path.join(self.export_tdaDir, filename + '.tda')):
+            return False
+
+        # save tda
+        tda = TDA(self)
+        TDA.save(tda, os.path.join(self.export_tdaDir, filename + '.tda'))
+
+        # save image
+        if self.areamode == AreaMode.RECTANGLE:
+            self.saveSelectedImg_rectmode(self.imgpath)
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self.saveSelectedImg_quadmode(self.imgpath)
+
+        _, ext = os.path.splitext(self.selectedImgPath)
+        cvimg = cv2.imread(self.selectedImgPath)
+        cv2.imwrite(os.path.join(self.export_imageDir, filename + ext), cvimg)
+
+        # save dataset
+        if self.config.export_datasetFormat == 'VOC':
+            self.saveAsVOC(os.path.join(self.export_datasetDir, filename + '.xml'))
+
+        return True
 
 class AnnotationsManager(object):
     def __init__(self):
