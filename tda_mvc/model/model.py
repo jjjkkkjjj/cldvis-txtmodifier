@@ -20,3 +20,7 @@ class Model(FileModelMixin, ViewerModelMixin, PredictionModelMixin, AnnotationMo
         ViewerModelMixin.__init__(self)
         PredictionModelMixin.__init__(self)
         AnnotationModelMixin.__init__(self)
+
+    def discardAll(self):
+        self.discard_area()
+        self.discard_annotations()

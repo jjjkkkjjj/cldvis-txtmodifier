@@ -81,8 +81,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         tda = self.model.get_default_tda()
-        if tda:
-            self._setModel_from_tda(tda)
+        self._setModel_from_tda(tda)
 
         # update view
         self.updateModel()
@@ -97,8 +96,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         tda = self.model.get_default_tda()
-        if tda:
-            self._setModel_from_tda(tda)
+        self._setModel_from_tda(tda)
 
         # update view
         self.updateModel()
@@ -113,7 +111,7 @@ class LeftDockVCMixin(VCAbstractMixin):
                                           '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_tdaname),
                                           QMessageBox.No | QMessageBox.Yes)
                 if ret == QMessageBox.No:
-                    return
+                    return False
 
             self.model.saveInDefaultDirectory()
         else:
@@ -123,10 +121,11 @@ class LeftDockVCMixin(VCAbstractMixin):
                                                                     os.path.join(self.model.config.export_datasetdir, filename),
                                                                     ';;'.join(filters_list), None)
             if filepath == '':
-                return
+                return False
             tda = TDA(self.model)
             TDA.save(tda, filepath)
-        QMessageBox.information(self, 'Saved', 'Saved to {}'.format(filepath))
+        _ = QMessageBox.information(self, 'Saved', 'Saved to {}'.format(filepath))
+        return True
 
     def loadtda(self):
         filters_list = create_fileters(('TDA Binary', 'tda'))
@@ -141,6 +140,9 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateAllUI()
 
     def _setModel_from_tda(self, tda):
+        if tda is None:
+            self.model.discardAll()
+            return
         self.model.areamode = tda.areamode
         # rectangle
         self.model.rectangle.set_percent_points(tda.rectangle_percent_pts)
@@ -176,13 +178,19 @@ class LeftDockVCMixin(VCAbstractMixin):
         -------
 
         """
+        if self.model.isPredicted:
+            if not self.savetda(isDefault=True):
+                return
         if isForward:
             self.model.forward()
         else:
             self.model.back()
-        # update view
-        self.leftdock.updateUI()
-        self.central.updateUI()
+
+        tda = self.model.get_default_tda()
+        self._setModel_from_tda(tda)
+
+        self.updateModel()
+        self.updateAllUI()
 
     def exportCSV(self):
         table_list = parse_annotations(self.model)

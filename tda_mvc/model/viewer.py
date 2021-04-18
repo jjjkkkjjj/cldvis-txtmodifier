@@ -33,6 +33,20 @@ class ViewerModelMixin(ModelAbstractMixin):
         self.selectedRectImgPath = None
         self.selectedQuadImgPath = None
 
+    def discard_area(self):
+        # image mode
+        self.rectangle = Rect()
+        # table mode
+        self.quadrangle = Polygon(maximum_points_number=4)
+        self.rectangle.hide()
+        self.quadrangle.hide()
+
+        # start position. this is for moveEvent
+        self._startPosition = QPoint(0, 0)
+
+        self.selectedRectImgPath = None
+        self.selectedQuadImgPath = None
+
     ### Zoom ###
     @property
     def isZoomOutable(self):
