@@ -142,7 +142,7 @@ class MenuBar(QMenuBar):
 
         # predict
         self.action_predict = create_action(self, '&Predict Table', slot=None,
-                                             shortcut="Ctrl+R", tip='Predict table')
+                                             shortcut="Ctrl+P", tip='Predict table')
 
         add_actions(self.menu_prediction, (self.action_areaRectMode, self.action_areaQuadMode, None,
                                             self.action_removeArea, None,
