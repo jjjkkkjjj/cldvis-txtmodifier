@@ -124,6 +124,23 @@ def get_pixmap(model, parentQSize=None):
     pixmap = cvimg2qpixmap(cvimg)
     return pixmap, originalImgQSize
 
+def create_fileters(*exts):
+    """
+    Create filters for file dialog
+    Parameters
+    ----------
+    exts : list of list
+        The list of file extension. The extension must be not included '.'
+        [(description, extension),...]
+    Returns
+    -------
+    list of str
+        The filters for file dialog
+    """
+    ret = []
+    for e in exts:
+        ret += ['{} (*.{})'.format(*e)]
+    return ret
 
 def parse_annotations(model):
     from ..model import Model

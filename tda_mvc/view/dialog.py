@@ -5,6 +5,7 @@ from google.auth.exceptions import DefaultCredentialsError
 import glob, os, sys
 
 from ..utils.modes import ExportFileExtention
+from ..utils.funcs import create_fileters
 
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
@@ -56,7 +57,8 @@ class PreferencesDialog(QDialog):
         self.model: Model = model
         self.initial = initial
 
-        self._confignames = ['credentialJsonpath', 'export_fileformat', 'export_sameRowY', 'export_sameColX',
+        self._confignames = ['credentialJsonpath', 'export_defaultFileFormat',
+                             'export_sameRowY', 'export_sameColX',
                              'export_datasetdir']
         # temporal attr
         # load jsonpath from environment path or config file
@@ -71,7 +73,7 @@ class PreferencesDialog(QDialog):
         # False: Can't be loaded
         # True: OK.
         self._isValidJsonPath = None
-        self.export_fileformat = model.config.export_fileformat
+        self.export_defaultFileFormat = model.config.export_defaultFileFormat
         self.export_sameRowY = model.config.export_sameRowY
         self.export_sameColX = model.config.export_sameColX
         self.export_datasetdir = model.config.export_datasetdir
@@ -134,10 +136,10 @@ class PreferencesDialog(QDialog):
         self.groupBox_export = QGroupBox('Export')
         grid_export = QGridLayout()
 
-        self.label_exportfileformat = QLabel('File Format:')
-        self.comboBox_exportfileext = QComboBox()
-        self.comboBox_exportfileext.addItems(ExportFileExtention.gen_list())
-        self.comboBox_exportfileext.setCurrentText(self.model.config.export_fileformat)
+        self.label_exportfileformat = QLabel('Default File Format:')
+        self.comboBox_exportfileformat = QComboBox()
+        self.comboBox_exportfileformat.addItems(ExportFileExtention.gen_list())
+        self.comboBox_exportfileformat.setCurrentText(self.model.config.export_defaultFileFormat)
 
         self.label_exportSameRowY = QLabel('Same Rows within:')
         self.spinBox_exportSameRowY = QSpinBox(self)
@@ -159,8 +161,8 @@ class PreferencesDialog(QDialog):
         layout_params = [
             [
                 (self.label_exportfileformat, 0, 1, 2),
-                (self.comboBox_exportfileext, 2, 1, 4),
-                (QLabel(), 6, 1, 2),
+                (self.comboBox_exportfileformat, 2, 1, 2),
+                (QLabel(), 4, 1, 4),
             ],
             [
                 (self.label_exportSameRowY, 1, 1, 2),
@@ -196,7 +198,7 @@ class PreferencesDialog(QDialog):
         self.button_readJsonpath.clicked.connect(lambda: self.connection('credentialJsonpath'))
 
         # export
-        self.comboBox_exportfileext.currentTextChanged.connect(lambda: self.connection('export_fileformat'))
+        self.comboBox_exportfileformat.currentTextChanged.connect(lambda: self.connection('export_defaultFileFormat'))
         self.spinBox_exportSameRowY.valueChanged.connect(lambda: self.connection('export_sameRowY'))
         self.spinBox_exportConcatColX.valueChanged.connect(lambda: self.connection('export_sameColX'))
         self.button_openDatasetDir.clicked.connect(lambda: self.connection('export_datasetdir'))
@@ -260,14 +262,13 @@ class PreferencesDialog(QDialog):
 
     def connection(self, connecttype):
         if connecttype == 'credentialJsonpath':
-            filters = 'JSON (*.json)'
-            filename = QFileDialog.getOpenFileName(self, 'Open Credential Json File', '', filters, None,
-                                                   QFileDialog.DontUseNativeDialog)
+            filters_list = create_fileters(('JSON', 'json'))
+            filepath, _ = QFileDialog.getOpenFileName(self, 'Open Credential Json File', '', ';;'.join(filters_list), None)
 
-            self.credentialJsonpath = filename[0] if filename[0] != '' else None
+            self.credentialJsonpath = filepath if filepath != '' else None
 
-        elif connecttype == 'export_fileformat':
-            self.export_fileformat = self.comboBox_exportfileext.currentText()
+        elif connecttype == 'export_defaultFileFormat':
+            self.export_defaultFileFormat = self.comboBox_exportfileformat.currentText()
 
         elif connecttype == 'export_sameRowY':
             self.export_sameRowY = self.spinBox_exportSameRowY.value()
@@ -277,8 +278,7 @@ class PreferencesDialog(QDialog):
 
         elif connecttype == 'export_datasetdir':
             dirpath = QFileDialog.getExistingDirectory(self, 'Open Dataset Directory to be exported',
-                                                       self.model.config.export_datasetdir,
-                                                       QFileDialog.DontUseNativeDialog)
+                                                       self.model.config.export_datasetdir)
             if dirpath == '':
                 return
 

@@ -6,7 +6,7 @@ Set up cloud vision api settings following [official](https://cloud.google.com/v
 
 
 ```
-conda install -c conda-forge pyside2 opencv matplotlib
+conda install -c conda-forge pyside2 opencv matplotlib pandas openpyxl
 pip install --upgrade google-cloud-vision
 pip install --upgrade google-cloud-documentai
 ```

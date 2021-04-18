@@ -32,11 +32,11 @@ class Config(object):
         self.writeConfig()
 
     @property
-    def export_fileformat(self):
-        return self.config.get('settings', 'export_fileformat')
-    @export_fileformat.setter
-    def export_fileformat(self, fileformat):
-        self.config.set('settings', 'export_fileformat', fileformat)
+    def export_defaultFileFormat(self):
+        return self.config.get('settings', 'export_defaultFileFormat')
+    @export_defaultFileFormat.setter
+    def export_defaultFileFormat(self, value):
+        self.config.set('settings', 'export_defaultFileFormat', value)
         self.writeConfig()
 
     @property
@@ -76,7 +76,7 @@ class Config(object):
                 'last_opendir': path_desktop(),
                 'credentialJsonpath': None,
 
-                'export_fileformat': 'csv',
+                'export_defaultFileFormat': 'CSV',
                 'export_sameRowY': 50,
                 'export_sameColX': 15,
                 'export_datasetdir': None

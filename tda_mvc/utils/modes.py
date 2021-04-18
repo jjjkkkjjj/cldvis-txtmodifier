@@ -22,11 +22,26 @@ class MoveActionState(Enum):
     MOVE = 2
 
 class ExportFileExtention(Enum):
-    CSV = 'csv'
-    EXCEL = 'excel'
-    TSV = 'tsv'
-    PSV = 'psv'
+    CSV = 'CSV', 'csv'
+    EXCEL = 'EXCEL', 'xlsx'
+    TSV = 'TSV', 'tsv'
+    PSV = 'PSV', 'psv'
+
 
     @staticmethod
     def gen_list():
-        return [m.value for m in ExportFileExtention]
+        return [m.value[0] for m in ExportFileExtention]
+
+    @staticmethod
+    def get_index(val):
+        return ExportFileExtention.gen_list().index(val)
+
+    @staticmethod
+    def gen_filters_args(val=None):
+        if val:
+            ind = ExportFileExtention.get_index(val)
+            filters_list = [(m.value[0], m.value[1]) for m in ExportFileExtention]
+            return filters_list[ind:] + filters_list[:ind]
+        else:
+            return [(m.value[0], m.value[1]) for m in ExportFileExtention]
+

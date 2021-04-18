@@ -2,11 +2,12 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 import os, glob, csv
+import pandas as pd
 
 from ..view import AboutDialog, PreferencesDialog
-from ..utils.modes import PredictionMode, ShowingMode, AreaMode
+from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention
 from ..utils.exception import PredictionError
-from ..utils.funcs import parse_annotations
+from ..utils.funcs import parse_annotations, create_fileters
 from .base import VCAbstractMixin
 
 SUPPORTED_EXTENSIONS = ['.jpeg', '.jpg', '.png', '.tif', '.tiff', '.bmp', '.die', '.pbm', '.pgm', '.ppm',
@@ -68,8 +69,7 @@ class LeftDockVCMixin(VCAbstractMixin):
     def openfile(self):
         filters = '{} ({})'.format('Images', ' '.join(['*' + ext for ext in SUPPORTED_EXTENSIONS]))
 
-        filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.last_opendir, filters, None,
-                                                 QFileDialog.DontUseNativeDialog)
+        filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.last_opendir, filters, None)
         filenames = filenames[0]
         if len(filenames) == 0:
             _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
@@ -81,8 +81,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.central.updateUI()
 
     def openFolder(self):
-        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir,
-                                                   QFileDialog.DontUseNativeDialog)
+        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.last_opendir)
 
         filenames = sorted(glob.glob(os.path.join(dirpath, '*')))
         # remove not supported files and directories
@@ -114,10 +113,36 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.central.updateUI()
 
     def exportCSV(self):
-        csv_list = parse_annotations(self.model)
-        with open('./debug/texts.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerows(csv_list)
+        table_list = parse_annotations(self.model)
+        filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
+        filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetdir, filename),
+                                               ';;'.join(filters_list), None)
+        #with open('./debug/texts.csv', 'w') as f:
+        if filepath == '':
+            return
+
+        # too dirty...
+        ext = selected_filter.split('*.')[-1][:-1]
+        def _check_and_append_ext(filepath, e):
+            if os.path.splitext(filepath)[1] == '':
+                filepath += '.' + e
+            return filepath
+
+        filepath = _check_and_append_ext(filepath, ext)
+        df = pd.DataFrame(table_list)
+        if ext == 'csv':
+            df.to_csv(filepath, sep=',', header=False, index=False, encoding='utf-8')
+
+        elif ext == 'xlsx':
+            df.to_excel(filepath, header=False, index=False, encoding='utf-8')
+
+        elif ext == 'tsv':
+            df.to_csv(filepath, sep='\t', header=False, index=False, encoding='utf-8')
+
+        elif ext == 'psv':
+            df.to_csv(filepath, sep='|', header=False, index=False, encoding='utf-8')
+
 
     def exportDataset(self):
         pass
