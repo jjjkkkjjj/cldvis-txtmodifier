@@ -180,7 +180,14 @@ class LeftDockVCMixin(VCAbstractMixin):
         """
         if self.model.isPredicted:
             if not self.savetda(isDefault=True):
-                return
+                ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
+                if ret == QMessageBox.No:
+                    return
+                else:
+                    self.model.discardAll()
+        #  change image if NOT predicted or
+        #                 predicted and saved or
+        #                 predicted and NOT saved and discard
         if isForward:
             self.model.forward()
         else:
