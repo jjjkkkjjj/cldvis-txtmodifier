@@ -1,5 +1,6 @@
 from google.cloud import vision
 from google.cloud import documentai_v1beta2 as documentai
+from google.auth.exceptions import DefaultCredentialsError
 import io, os, json, cv2
 
 from .base import ModelAbstractMixin
@@ -26,13 +27,21 @@ class PredictionModelMixin(ModelAbstractMixin):
     def isPredicted(self):
         return len(self.results) > 0
 
+    def check_credentialJsonpath(self, path):
+        # export GOOGLE_APPLICATION_CREDENTIALS as environmental path
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
+        try:
+            vision.ImageAnnotatorClient()
+            return True
+        except DefaultCredentialsError:
+            return False
+
     def set_credentialJsonpath(self, path):
         # export GOOGLE_APPLICATION_CREDENTIALS as environmental path
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
         self.client = vision.ImageAnnotatorClient()
         self.config.credentialJsonpath = path
-        self.results = {}
 
     def detectAsImage(self, imgpath):
         # detect texts as image mode

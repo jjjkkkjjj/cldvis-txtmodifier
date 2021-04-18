@@ -1,7 +1,6 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
-from google.auth.exceptions import DefaultCredentialsError
 import glob, os, sys
 
 from ..utils.modes import ExportFileExtention
@@ -254,11 +253,8 @@ class PreferencesDialog(QDialog):
         """
         if self.credentialJsonpath is None or self.credentialJsonpath == '':
             return None
-        try:
-            self.model.set_credentialJsonpath(self.credentialJsonpath)
-            return True
-        except DefaultCredentialsError:
-            return False
+
+        return self.model.check_credentialJsonpath(self.credentialJsonpath)
 
     def connection(self, connecttype):
         if connecttype == 'credentialJsonpath':
@@ -288,6 +284,7 @@ class PreferencesDialog(QDialog):
             ## save
             for attr in self._confignames:
                 setattr(self.model.config, attr, getattr(self, attr))
+            self.model.set_credentialJsonpath(self.credentialJsonpath)
             self.close()
             return
 
