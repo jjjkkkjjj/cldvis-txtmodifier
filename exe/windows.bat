@@ -1,0 +1,1 @@
+pyinstaller cldvis.spec
