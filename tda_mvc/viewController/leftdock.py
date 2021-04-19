@@ -386,10 +386,18 @@ class LeftDockVCMixin(VCAbstractMixin):
 
             except PredictionError as e:
                 # show messagebox
-                ret = QMessageBox.critical(self, 'Error', 'Error was occurred. Status: {}'.format(e), QMessageBox.Yes)
+                ret = QMessageBox.critical(self, 'Couldn\'t predict', 'Couldn\'t predict texts.\nThe error code is\n'.format(e.message), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
+                return
+            except Exception as e:
+                import traceback
+                ret = QMessageBox.critical(self, 'Unexpected Error', 'Unexpected error was occurred.\nThe error code is\n{}'.format(e.message), QMessageBox.Yes)
+                if ret == QMessageBox.Yes:
+                    # remove tmp files
+                    self.model.clearTmpImg()
+                return
 
         # set the annotations from the predicted results
         self.model.predictedArea.set_percent_points(self.model.areaPercentPts)

@@ -52,9 +52,20 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
         RightDockVCMixin.establish_connection(self)
 
     def check_credential(self):
-        if not self.model.isExistCredPath:
+        def showPreferences():
             dialog = PreferencesDialog(self.model, initial=True, parent=self)
+            dialog.setCredentialJsonpath.connect(lambda path: setCredentialJsonpath(path))
             dialog.exec_()
+
+        def setCredentialJsonpath(path):
+            self.model.set_credentialJsonpath(path)
+
+        if not self.model.isExistCredPath:
+            showPreferences()
+        elif not self.model.check_credentialJsonpath(self.model.credentialJsonpath):
+            showPreferences()
+        else:
+            setCredentialJsonpath(self.model.credentialJsonpath)
 
     def updateModel(self):
         if not self.model.isExistImg:

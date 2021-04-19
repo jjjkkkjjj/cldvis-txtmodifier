@@ -46,11 +46,9 @@ class AboutDialog(QDialog):
         self.setFixedSize(400, 300)
 
 class PreferencesDialog(QDialog):
-
+    setCredentialJsonpath = Signal(str)
     def __init__(self, model, initial, parent=None):
         super().__init__(parent)
-
-
 
         from ..model import Model
         self.model: Model = model
@@ -218,6 +216,8 @@ class PreferencesDialog(QDialog):
 
     def updateUI(self):
         self._isValidJsonPath = self.checkJsonpath()
+        if self._isValidJsonPath:
+            self.setCredentialJsonpath.emit(self.credentialJsonpath)
 
         enable_ok = True
 
