@@ -240,6 +240,7 @@ class AnnotationsManager(object):
 
     def clear(self):
         for i in reversed(range(len(self._annotations))):
+            self._annotations[i].clear()
             del self._annotations[i]
         self._selectedIndex = -1
         self._startPosition = QPoint(0, 0)
