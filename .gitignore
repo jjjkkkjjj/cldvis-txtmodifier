@@ -5,6 +5,9 @@ img/*
 # backup for debug
 *.bak
 
+# build
+exe/installer
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,qt,pycharm+all,opencv,windows,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,qt,pycharm+all,opencv,windows,macos,linux
 
