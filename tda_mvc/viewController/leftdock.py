@@ -228,7 +228,9 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         elif fileformat == 'PSV':
             self.model.saveAsPSV(filepath)
-
+        else:
+            return
+        QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
 
     def exportDataset(self):
         filters_list = create_fileters(*ExportDatasetFormat.gen_filters_args(self.model.config.export_datasetFormat))
@@ -252,6 +254,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         filepath = _check_and_append_ext(filepath, ext)
         if fileformat == 'VOC':
             self.model.saveAsVOC(filepath)
+        else:
+            return
+
+        QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:
