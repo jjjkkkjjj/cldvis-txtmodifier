@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import os, glob
+import os, glob, json
 import pandas as pd
 
 from ..view import AboutDialog, PreferencesDialog
@@ -361,15 +361,19 @@ class LeftDockVCMixin(VCAbstractMixin):
 
                 with open(jsonpath, 'r') as f:
                     results = json.load(f)
-            self.results = results
 
         else:
             try:
                 # prediction
-                import json
-                if self.model.predmode == PredictionMode.IMAGE:
+                # save image file in tmp before prediction
+                if self.model.areamode == AreaMode.RECTANGLE:
                     if self.model.selectedImgPath is None:
                         self.model.saveSelectedImg_rectmode(self.model.imgpath)
+                elif self.model.areamode == AreaMode.QUADRANGLE:
+                    if self.model.selectedImgPath is None:
+                        self.model.saveSelectedImg_quadmode(self.model.imgpath)
+
+                if self.model.predmode == PredictionMode.IMAGE:
                     results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
 
                     if MainViewController.saveForDebug:
@@ -380,8 +384,6 @@ class LeftDockVCMixin(VCAbstractMixin):
                             self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
 
                 elif self.model.predmode == PredictionMode.DOCUMENT:
-                    if self.model.selectedImgPath is None:
-                        self.model.saveSelectedImg_quadmode(self.model.imgpath)
                     results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
                     if MainViewController.saveForDebug:
