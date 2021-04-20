@@ -1,1 +1,0 @@
-from .mainWC import MainWindowController
