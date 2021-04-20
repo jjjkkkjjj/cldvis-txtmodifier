@@ -13,6 +13,7 @@ class TDA(object):
         self.predictedArea_percent_pts = model.predictedArea.percent_points
         self.results_dict = model.annotations.to_dict()
         self.areamode = model.areamode
+        self.predmode = model.predmode
         self.default_tdaname = model.default_tdaname
 
     def save(self, path):

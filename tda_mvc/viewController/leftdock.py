@@ -143,28 +143,36 @@ class LeftDockVCMixin(VCAbstractMixin):
         if tda is None:
             self.model.discardAll()
             return
-        self.model.areamode = tda.areamode
+        ######### load from tda #########
+        self.model.load_from_tda(tda)
+
+        if self.model.areamode == AreaMode.RECTANGLE:
+            self.leftdock.radioButton_rect.setChecked(True)
+        elif self.model.areamode == AreaMode.QUADRANGLE:
+            self.leftdock.radioButton_quad.setChecked(True)
+
+        # predmode
+        if self.model.predmode == PredictionMode.IMAGE:
+            self.leftdock.comboBox_predmode.setCurrentText('image')
+        elif self.model.predmode == PredictionMode.DOCUMENT:
+            self.leftdock.comboBox_predmode.setCurrentText('document')
+
         # rectangle
-        self.model.rectangle.set_percent_points(tda.rectangle_percent_pts)
         self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
         # quadrangle
-        self.model.quadrangle.set_percent_points(tda.quadrangle_percent_pts)
         self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
         # predictedArea
-        self.model.predictedArea.set_percent_points(tda.predictedArea_percent_pts)
         self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize,
                                                 offsetQPoint=self.model.areaOffsetQPoint)
         # annotation
-        self.model.results = tda.results_dict
-        if self.model.showingmode == ShowingMode.ENTIRE:
-            self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
-                                               parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
+        if self.model.isPredicted:
+            if self.model.showingmode == ShowingMode.ENTIRE:
+                self.model.annotations.set_results(self.model.results, baseWidget=self.central.imageView,
+                                                   parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
-        elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.annotations.set_results(tda.results_dict, baseWidget=self.central.imageView,
-                                               parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
-
-        self.model.default_tdaname = tda.default_tdaname
+            elif self.model.showingmode == ShowingMode.SELECTED:
+                self.model.annotations.set_results(self.model.results, baseWidget=self.central.imageView,
+                                                   parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
 
     def changeImg(self, isForward):
         """
