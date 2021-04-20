@@ -355,7 +355,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
                 with open(jsonpath, 'r') as f:
                     results = json.load(f)
-            self.model.results = results
+            self.results = results
 
         else:
             try:
@@ -366,34 +366,36 @@ class LeftDockVCMixin(VCAbstractMixin):
                         self.model.saveSelectedImg_rectmode(self.model.imgpath)
                     results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
 
-                    np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
-                    if self.model.areamode == AreaMode.RECTANGLE:
-                        self.model.saveAsJson(os.path.join('debug', 'result-rect-image.json'))
-                    elif self.model.areamode == AreaMode.QUADRANGLE:
-                        self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
+                    if MainViewController.saveForDebug:
+                        np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
+                        if self.model.areamode == AreaMode.RECTANGLE:
+                            self.model.saveAsJson(os.path.join('debug', 'result-rect-image.json'))
+                        elif self.model.areamode == AreaMode.QUADRANGLE:
+                            self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
 
                 elif self.model.predmode == PredictionMode.DOCUMENT:
                     if self.model.selectedImgPath is None:
                         self.model.saveSelectedImg_quadmode(self.model.imgpath)
                     results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
 
-                    np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
-                    if self.model.areamode == AreaMode.RECTANGLE:
-                        self.model.saveAsJson(os.path.join('debug', 'result-rect-document.json'))
-                    elif self.model.areamode == AreaMode.QUADRANGLE:
-                        self.model.saveAsJson(os.path.join('debug', 'result-quad-document.json'))
+                    if MainViewController.saveForDebug:
+                        np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
+                        if self.model.areamode == AreaMode.RECTANGLE:
+                            self.model.saveAsJson(os.path.join('debug', 'result-rect-document.json'))
+                        elif self.model.areamode == AreaMode.QUADRANGLE:
+                            self.model.saveAsJson(os.path.join('debug', 'result-quad-document.json'))
 
 
             except PredictionError as e:
                 # show messagebox
-                ret = QMessageBox.critical(self, 'Couldn\'t predict', 'Couldn\'t predict texts.\nThe error code is\n'.format(e.message), QMessageBox.Yes)
+                ret = QMessageBox.critical(self, 'Couldn\'t predict', 'Couldn\'t predict texts.\nThe error code is\n'.format(str(e)), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
                 return
             except Exception as e:
                 import traceback
-                ret = QMessageBox.critical(self, 'Unexpected Error', 'Unexpected error was occurred.\nThe error code is\n{}'.format(e.message), QMessageBox.Yes)
+                ret = QMessageBox.critical(self, 'Unexpected Error', 'Unexpected error was occurred.\nThe error code is\n{}'.format(str(e)), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
@@ -403,11 +405,11 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.model.predictedArea.set_percent_points(self.model.areaPercentPts)
         self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize, offsetQPoint=self.model.areaOffsetQPoint)
         if self.model.showingmode == ShowingMode.ENTIRE:
-            self.model.annotations.set_results(results, baseWidget=self.central.imageView,
+            self.model.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
         elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.annotations.set_results(results, baseWidget=self.central.imageView,
+            self.model.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
         # update all
         self.updateModel()

@@ -53,6 +53,25 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
     def columnCount(self, parent=None, *args, **kwargs):
         return 1
 
+    def set_results(self, results, baseWidget, parentQSize, offsetQPoint):
+        """
+        :param results: dict, detection result by vision
+            "info":
+                "width": int
+                "height": int
+                "path": str
+            "prediction": list of dict whose keys are 'text' and 'bbox'
+                "text": str
+                "bbox": list(4 points) of list(2d=(x, y))
+        :param baseWidget: QWidget, the base widget for AnnotaionRubberBand
+        :param areaQPolygon: QPolygon, the selected area's qpolygon
+        :param parentQSize: Qsize, selected parentQSize
+        :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
+        :return:
+        """
+        self.results = results
+        self.annotations.set_results(results, baseWidget, parentQSize, offsetQPoint)
+
     def discard_annotations(self):
         self.results = {}
         self.annotations.clear()

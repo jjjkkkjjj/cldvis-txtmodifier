@@ -4,6 +4,7 @@ from ..utils.funcs import path_desktop
 
 class Config(object):
     selectedImgDir = os.path.join('.tda', 'selectedImg')
+    tmpDir = os.path.join('.tda', 'tmp')
     iniPath = os.path.join('.tda', 'tda.ini')
 
     def __init__(self):
@@ -72,12 +73,16 @@ class Config(object):
         self.writeConfig()
 
     def _initialReadConfig(self):
+        # create .tda directory
+        if not os.path.exists('.tda'):
+            os.makedirs('.tda')
+
+        # create config file if not exist
         if not os.path.exists(self.configpath):
             # initial creation
             if os.path.exists('.tda'):
                 shutil.rmtree('.tda') # remove all
-            os.makedirs('.tda')
-            os.makedirs(self.selectedImgDir)
+                os.makedirs('.tda')
 
             # default value
             default = {
@@ -97,6 +102,11 @@ class Config(object):
 
             # write
             self.writeConfig()
+
+        if not os.path.exists(self.selectedImgDir):
+            os.makedirs(self.selectedImgDir)
+        if not os.path.exists(self.tmpDir):
+            os.makedirs(self.tmpDir)
 
         # read
         self.readConfig()

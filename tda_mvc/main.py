@@ -12,6 +12,7 @@ from .viewController import *
 
 class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMainWindow):
     debug = False
+    saveForDebug = False
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
