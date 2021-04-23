@@ -13,8 +13,12 @@ class ShowingMode(Enum):
     SELECTED = 'selected'
 
 class AreaMode(Enum):
-    RECTANGLE = 'rectangle'
-    QUADRANGLE = 'quadrangle'
+    RECTANGLE = 'Rectangle'
+    QUADRANGLE = 'Quadrangle'
+
+    @staticmethod
+    def gen_list():
+        return [m.value for m in AreaMode]
 
 class MoveActionState(Enum):
     CREATE = 0

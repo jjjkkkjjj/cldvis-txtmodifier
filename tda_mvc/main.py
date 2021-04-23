@@ -3,7 +3,7 @@ from google.auth.exceptions import DefaultCredentialsError
 import cv2, os
 
 from .model import Model
-from .utils.modes import ShowingMode, AreaMode
+from .utils.modes import ShowingMode, AreaMode, PredictionMode
 from .utils.paint import *
 from .utils.funcs import get_pixmap
 from .view import *
@@ -18,6 +18,7 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
 
         # create model
         self.model = Model()
+        self.initModel()
         self.initUI()
         self.establish_connection()
 
@@ -67,6 +68,18 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
             showPreferences()
         else:
             setCredentialJsonpath(self.model.credentialJsonpath)
+
+    def initModel(self):
+        if self.model.config.defaultareamode == 'Rectangle':
+            self.model.areamode = AreaMode.RECTANGLE
+        elif self.model.config.defaultareamode == 'Quadrangle':
+            self.model.areamode = AreaMode.QUADRANGLE
+
+        if self.model.config.defaultpredmode == 'image':
+            self.model.predmode = PredictionMode.IMAGE
+        elif self.model.config.defaultpredmode == 'document':
+            self.model.predmode = PredictionMode.DOCUMENT
+
 
     def updateModel(self):
         if not self.model.isExistImg:

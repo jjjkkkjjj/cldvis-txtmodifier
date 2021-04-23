@@ -17,6 +17,22 @@ class Config(object):
         return self.iniPath
 
     @property
+    def defaultareamode(self):
+        return self.config.get('settings', 'defaultareamode')
+    @defaultareamode.setter
+    def defaultareamode(self, mode):
+        self.config.set('settings', 'defaultareamode', mode)
+        self.writeConfig()
+
+    @property
+    def defaultpredmode(self):
+        return self.config.get('settings', 'defaultpredmode')
+    @defaultpredmode.setter
+    def defaultpredmode(self, mode):
+        self.config.set('settings', 'defaultpredmode', mode)
+        self.writeConfig()
+
+    @property
     def lastOpenDir(self):
         return self.config.get('settings', 'lastOpenDir')
     @lastOpenDir.setter
@@ -86,11 +102,14 @@ class Config(object):
 
             # default value
             default = {
+                'defaultareamode': 'Quadrangle',
+                'defaultpredmode': 'image',
+
                 'lastOpenDir': path_desktop(),
                 'credentialJsonpath': None,
 
                 'export_defaultFileFormat': 'CSV',
-                'export_sameRowY': 50,
+                'export_sameRowY': 20,
                 'export_sameColX': 15,
                 
                 'export_datasetFormat': 'VOC',

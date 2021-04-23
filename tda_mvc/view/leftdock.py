@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import pathlib
 
-from ..utils.modes import PredictionMode, ShowingMode
+from ..utils.modes import PredictionMode, ShowingMode, AreaMode
 from ..utils.funcs import check_instance
 from ..model import Model
 
@@ -140,11 +140,14 @@ class LeftDockView(QWidget):
         self.groupBox_areamode = QGroupBox('Area Mode', self)
 
         self.radioButton_rect = QRadioButton('Rectangle')
-        self.radioButton_rect.setChecked(True)
         vbox_areamode.addWidget(self.radioButton_rect)
 
         self.radioButton_quad = QRadioButton('Quadrangle')
         vbox_areamode.addWidget(self.radioButton_quad)
+        if self.model.areamode == AreaMode.RECTANGLE:
+            self.radioButton_rect.setChecked(True)
+        elif self.model.areamode == AreaMode.QUADRANGLE:
+            self.radioButton_quad.setChecked(True)
 
         self.groupBox_areamode.setLayout(vbox_areamode)
         vbox_run.addWidget(self.groupBox_areamode, 1)
@@ -154,6 +157,7 @@ class LeftDockView(QWidget):
         self.comboBox_predmode = QComboBox(self)
         self.comboBox_predmode.addItems(PredictionMode.gen_list())
         vbox_run.addWidget(self.comboBox_predmode)
+        self.comboBox_predmode.setCurrentText(self.model.predmode.value)
 
         self.groupBox_prediction.setLayout(vbox_run)
         vbox.addWidget(self.groupBox_prediction, 1)

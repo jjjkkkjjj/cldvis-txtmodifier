@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import glob, os, sys
 
-from ..utils.modes import ExportFileExtention, ExportDatasetFormat
+from ..utils.modes import ExportFileExtention, ExportDatasetFormat, PredictionMode, AreaMode
 from ..utils.funcs import create_fileters
 
 class AboutDialog(QDialog):
@@ -54,7 +54,8 @@ class PreferencesDialog(QDialog):
         self.model: Model = model
         self.initial = initial
 
-        self._confignames = ['credentialJsonpath', 'export_defaultFileFormat',
+        self._confignames = ['defaultareamode', 'defaultpredmode',
+                             'credentialJsonpath', 'export_defaultFileFormat',
                              'export_sameRowY', 'export_sameColX', 'export_datasetFormat',
                              'export_datasetDir']
         # temporal attr
@@ -70,6 +71,10 @@ class PreferencesDialog(QDialog):
         # False: Can't be loaded
         # True: OK.
         self._isValidJsonPath = None
+
+        self.defaultareamode = model.config.defaultareamode
+        self.defaultpredmode = model.config.defaultpredmode
+
         self.export_defaultFileFormat = model.config.export_defaultFileFormat
         self.export_sameRowY = model.config.export_sameRowY
         self.export_sameColX = model.config.export_sameColX
@@ -108,6 +113,37 @@ class PreferencesDialog(QDialog):
                 for param in row_params:
                     p = param[1:]
                     layout.addWidget(param[0], row, *p)
+
+        ##### Basic Settings #####
+        self.groupBox_basic = QGroupBox('Basic Settings')
+        grid_basic = QGridLayout()
+
+        self.label_defaultareamode = QLabel('Default Area mode:')
+        self.comboBox_defaultareamode = QComboBox()
+        self.comboBox_defaultareamode.addItems(AreaMode.gen_list())
+        self.comboBox_defaultareamode.setCurrentText(self.model.config.defaultareamode)
+
+        self.label_defaultpredmode = QLabel('Default Prediction mode:')
+        self.comboBox_defaultpredmode = QComboBox()
+        self.comboBox_defaultpredmode.addItems(PredictionMode.gen_list())
+        self.comboBox_defaultpredmode.setCurrentText(self.model.config.defaultpredmode)
+
+        layout_params = [
+            [
+                (self.label_defaultareamode, 0, 1, 2),
+                (self.comboBox_defaultareamode, 2, 1, 2),
+                (QLabel(), 4, 1, 4), # dummy
+            ],
+            [
+                (self.label_defaultpredmode, 0, 1, 2),
+                (self.comboBox_defaultpredmode, 2, 1, 2),
+                (QLabel(), 4, 1, 4),  # dummy
+            ]
+        ]
+        setGridLayout(grid_basic, layout_params)
+        self.groupBox_basic.setLayout(grid_basic)
+        vbox.addWidget(self.groupBox_basic, 1)
+
 
         ##### Google Cloud Vision #####
         self.groupBox_gcv = QGroupBox('Google Cloud Vision')
@@ -202,6 +238,10 @@ class PreferencesDialog(QDialog):
         self.setFixedSize(600, 500)
 
     def establish_connection(self):
+        # basic settings
+        self.comboBox_defaultareamode.currentTextChanged.connect(lambda: self.connection('defaultareamode'))
+        self.comboBox_defaultpredmode.currentTextChanged.connect(lambda: self.connection('defaultpredmode'))
+
         # google cloud vision
         self.button_readJsonpath.clicked.connect(lambda: self.connection('credentialJsonpath'))
 
@@ -269,7 +309,13 @@ class PreferencesDialog(QDialog):
         return self.model.check_credentialJsonpath(self.credentialJsonpath)
 
     def connection(self, connecttype):
-        if connecttype == 'credentialJsonpath':
+        if connecttype == 'defaultareamode':
+            self.defaultareamode = self.comboBox_defaultareamode.currentText()
+
+        if connecttype == 'defaultpredmode':
+            self.defaultpredmode = self.comboBox_defaultpredmode.currentText()
+
+        elif connecttype == 'credentialJsonpath':
             filters_list = create_fileters(('JSON', 'json'))
             filepath, _ = QFileDialog.getOpenFileName(self, 'Open Credential Json File', '', ';;'.join(filters_list), None)
 
