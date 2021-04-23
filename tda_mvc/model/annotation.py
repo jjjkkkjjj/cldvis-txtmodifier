@@ -9,7 +9,7 @@ from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
 from ..utils.modes import MoveActionState, AreaMode
 from ..utils.funcs import qsize_from_quadrangle
-from ..utils.parse_annotation import parse_annotations_forFile, parse_annotations_forVOC
+from ..utils.parse_annotation import parse_annotations_forFile_basedTopLeft, parse_annotations_forVOC
 from .tda import TDA
 
 class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
@@ -84,22 +84,22 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
             json.dump(self.results, f)
 
     def saveAsCSV(self, path):
-        table_list = parse_annotations_forFile(self)
+        table_list = parse_annotations_forFile_basedTopLeft(self)
         df = pd.DataFrame(table_list)
         df.to_csv(path, sep=',', header=False, index=False, encoding='utf-8')
 
     def saveAsEXCEL(self, path):
-        table_list = parse_annotations_forFile(self)
+        table_list = parse_annotations_forFile_basedTopLeft(self)
         df = pd.DataFrame(table_list)
         df.to_excel(path, header=False, index=False, encoding='utf-8')
 
     def saveAsTSV(self, path):
-        table_list = parse_annotations_forFile(self)
+        table_list = parse_annotations_forFile_basedTopLeft(self)
         df = pd.DataFrame(table_list)
         df.to_csv(path, sep='\t', header=False, index=False, encoding='utf-8')
 
     def saveAsPSV(self, path):
-        table_list = parse_annotations_forFile(self)
+        table_list = parse_annotations_forFile_basedTopLeft(self)
         df = pd.DataFrame(table_list)
         df.to_csv(path, sep='|', header=False, index=False, encoding='utf-8')
 
