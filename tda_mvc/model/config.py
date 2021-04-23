@@ -2,13 +2,26 @@ import configparser, os, shutil
 
 from ..utils.funcs import path_desktop
 
+class ConfigParser(configparser.ConfigParser):
+    def get(self, section, option, default=None, *args, **kwargs):
+        try:
+            return super().get(section, option, *args, **kwargs)
+        except configparser.NoOptionError:
+            return default
+
+    def getint(self, section, option, default=None, *args, **kwargs):
+        try:
+            return super().getint(section, option, *args, **kwargs)
+        except configparser.NoOptionError:
+            return default
+
 class Config(object):
     selectedImgDir = os.path.join('.tda', 'selectedImg')
     tmpDir = os.path.join('.tda', 'tmp')
     iniPath = os.path.join('.tda', 'tda.ini')
 
     def __init__(self):
-        self.config = configparser.ConfigParser(allow_no_value=True)
+        self.config = ConfigParser(allow_no_value=True)
 
         self._initialReadConfig()
 
@@ -18,7 +31,7 @@ class Config(object):
 
     @property
     def defaultareamode(self):
-        return self.config.get('settings', 'defaultareamode')
+        return self.config.get('settings', 'defaultareamode', 'Quadrangle')
     @defaultareamode.setter
     def defaultareamode(self, mode):
         self.config.set('settings', 'defaultareamode', mode)
@@ -26,7 +39,7 @@ class Config(object):
 
     @property
     def defaultpredmode(self):
-        return self.config.get('settings', 'defaultpredmode')
+        return self.config.get('settings', 'defaultpredmode', 'image')
     @defaultpredmode.setter
     def defaultpredmode(self, mode):
         self.config.set('settings', 'defaultpredmode', mode)
@@ -34,7 +47,7 @@ class Config(object):
 
     @property
     def lastOpenDir(self):
-        return self.config.get('settings', 'lastOpenDir')
+        return self.config.get('settings', 'lastOpenDir', path_desktop())
     @lastOpenDir.setter
     def lastOpenDir(self, last_dir):
         self.config.set('settings', 'lastOpenDir', last_dir)
@@ -42,7 +55,7 @@ class Config(object):
 
     @property
     def credentialJsonpath(self):
-        return self.config.get('settings', 'credentialJsonpath')
+        return self.config.get('settings', 'credentialJsonpath', None)
     @credentialJsonpath.setter
     def credentialJsonpath(self, path):
         self.config.set('settings', 'credentialJsonpath', path)
@@ -50,7 +63,7 @@ class Config(object):
 
     @property
     def export_defaultFileFormat(self):
-        return self.config.get('settings', 'export_defaultFileFormat')
+        return self.config.get('settings', 'export_defaultFileFormat', 'CSV')
     @export_defaultFileFormat.setter
     def export_defaultFileFormat(self, value):
         self.config.set('settings', 'export_defaultFileFormat', value)
@@ -58,7 +71,7 @@ class Config(object):
 
     @property
     def export_sameRowY(self):
-        return self.config.getint('settings', 'export_sameRowY')
+        return self.config.getint('settings', 'export_sameRowY', 20)
     @export_sameRowY.setter
     def export_sameRowY(self, value):
         self.config.set('settings', 'export_sameRowY', str(value))
@@ -66,7 +79,7 @@ class Config(object):
 
     @property
     def export_sameColX(self):
-        return self.config.getint('settings', 'export_sameColX')
+        return self.config.getint('settings', 'export_sameColX', 15)
     @export_sameColX.setter
     def export_sameColX(self, value):
         self.config.set('settings', 'export_sameColX', str(value))
@@ -74,7 +87,7 @@ class Config(object):
 
     @property
     def export_datasetFormat(self):
-        return self.config.get('settings', 'export_datasetFormat')
+        return self.config.get('settings', 'export_datasetFormat', 'VOC')
     @export_datasetFormat.setter
     def export_datasetFormat(self, datasetformat):
         self.config.set('settings', 'export_datasetFormat', datasetformat)
@@ -82,7 +95,7 @@ class Config(object):
     
     @property
     def export_datasetDir(self):
-        return self.config.get('settings', 'export_datasetDir')
+        return self.config.get('settings', 'export_datasetDir', None)
     @export_datasetDir.setter
     def export_datasetDir(self, path):
         self.config.set('settings', 'export_datasetDir', path)
