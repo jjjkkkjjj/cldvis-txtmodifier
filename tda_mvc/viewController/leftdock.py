@@ -211,12 +211,15 @@ class LeftDockVCMixin(VCAbstractMixin):
         tda = self.model.get_default_tda()
         self._setModel_from_tda(tda)
 
+        # set entire
+        self.model.showingmode = ShowingMode.ENTIRE
+
         self.updateModel()
         self.updateAllUI()
 
     def exportCSV(self):
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
-        filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
+        filename = os.path.splitext(os.path.basename(self.model.default_savename))[0]
         filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetDir, filename),
                                                ';;'.join(filters_list), None)
         #with open('./debug/texts.csv', 'w') as f:

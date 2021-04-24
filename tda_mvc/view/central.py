@@ -140,7 +140,7 @@ class CentralView(QWidget):
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
         self.label_savefilename.setEnabled(self.model.isExistImg)
-        self.imageView.setEnabled(self.model.isExistImg)
+        self.imageView.setEnabled(self.model.isExistImg and (self.model.areamode == AreaMode.QUADRANGLE and self.model.showingmode == ShowingMode.ENTIRE))
 
         if self.model.isExistImg:
             # set the filename of the shown image

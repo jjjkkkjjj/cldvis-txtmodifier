@@ -148,6 +148,7 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
         if self.config.export_datasetFormat == 'VOC':
             self.saveAsVOC(os.path.join(self.export_datasetDir, filename + '.xml'))
 
+        self.annotations.resetEdit()
         return True
 
 class AnnotationsManager(object):
@@ -181,6 +182,8 @@ class AnnotationsManager(object):
     @property
     def isEdited(self):
         return self._isEdited
+    def resetEdit(self):
+        self._isEdited = False
 
     @property
     def selectedAnnotation(self):
@@ -245,7 +248,7 @@ class AnnotationsManager(object):
             self._annotations[i].clear()
             del self._annotations[i]
         self._selectedIndex = -1
-        self._isEdited = False
+        self.resetEdit()
         self._startPosition = QPoint(0, 0)
         self._annotations = []
         self.moveActionState = MoveActionState.CREATE
