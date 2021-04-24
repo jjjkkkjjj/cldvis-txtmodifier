@@ -123,6 +123,9 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
             f.write(vocstr)
 
     def saveInDefaultDirectory(self):
+        # check whether to count up or not
+        self.countup_defaultsavename()
+
         filename = os.path.splitext(self.default_savename)[0]
         #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 

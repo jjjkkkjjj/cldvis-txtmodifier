@@ -279,11 +279,6 @@ class ViewerModelMixin(ModelAbstractMixin):
         cv2.imwrite(savepath, img_cropped)
         self.selectedQuadImgPath = savepath
 
-    def removeArea(self):
-        if self.areamode == AreaMode.RECTANGLE:
-            self.rectangle.clear()
-        elif self.areamode == AreaMode.QUADRANGLE:
-            self.quadrangle.clear()
 
     def clearTmpImg(self):
         # remove all tmp images

@@ -111,8 +111,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             return True
 
         if isDefault:
-            filename = os.path.splitext(self.model.default_savename)[0]
-            filepath = os.path.join(self.model.config.export_datasetDir, 'tda', filename + '.tda')
+            filepath = os.path.join(self.model.export_tdaDir, self.model.default_savename)
             if os.path.exists(filepath):
                 ret = QMessageBox.warning(self, 'Notification',
                                           '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_savename),
@@ -335,18 +334,11 @@ class LeftDockVCMixin(VCAbstractMixin):
 
 
     def discard(self):
-        if not self.model.annotations.isEdited:
-            # not asked if the results are not edited
-            # set entire and update
-            self.leftdock.radioButton_entire.click()
-            return
-
         if self.model.isPredicted:
-            ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
-            if ret == QMessageBox.No:
-                return
-            # set entire and update
-            self.leftdock.radioButton_entire.click()
+            if self.model.annotations.isEdited:
+                ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
+                if ret == QMessageBox.No:
+                    return
 
         else:
             ret = QMessageBox.warning(self, 'Discard selection', 'Are you sure you want to discard selection area?',
@@ -354,10 +346,11 @@ class LeftDockVCMixin(VCAbstractMixin):
             if ret == QMessageBox.No:
                 return
 
-            self.model.removeArea()
-            self.leftdock.radioButton_entire.click()
-            # call areamodeChanged, so below codes are redundant
-            #self.updateAllUI()
+        self.model.discardAll()
+        self.leftdock.radioButton_entire.click()
+        # call areamodeChanged, so below codes are redundant
+        # self.updateModel()
+        # self.updateAllUI()
 
     def predict(self):
         from ..main import MainViewController

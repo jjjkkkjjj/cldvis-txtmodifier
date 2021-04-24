@@ -55,7 +55,7 @@ class CentralVCMixin(VCAbstractMixin):
 
     @property
     def isMouseDisabled(self):
-        return self.model.areamode == AreaMode.QUADRANGLE and self.model.showingmode == ShowingMode.ENTIRE
+        return self.model.isPredicted and self.model.areamode == AreaMode.QUADRANGLE and self.model.showingmode == ShowingMode.ENTIRE
 
     def rightClicked(self, e: QContextMenuEvent):
         if not self.model.isPredicted or self.isMouseDisabled:
