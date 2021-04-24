@@ -77,35 +77,35 @@ class MenuBar(QMenuBar):
         ##### File #####
         # open folder
         self.action_openfolder = create_action(self, "&Open Folder", slot=None,
-                                                shortcut="Ctrl+O", tip="open folder")
+                                                shortcut="Ctrl+O", tip="Open a folder")
         # open files
         self.action_openfiles = create_action(self, "&Open Files", slot=None,
-                                               shortcut="Ctrl+Shift+O", tip="open files")
+                                               shortcut="Ctrl+Shift+O", tip="Open files")
 
         # save
         self.action_savetda = create_action(self, "&Save", slot=None,
-                                            shortcut="Ctrl+S", tip="Save tda file in dataset directory")
+                                            shortcut="Ctrl+S", tip="Save a tda file in dataset directory")
         # save as tda
         self.action_saveastda = create_action(self, "&Save as tda", slot=None,
-                                              shortcut="Ctrl+Shift+S", tip="Save as tda file")
+                                              shortcut="Ctrl+Shift+S", tip="Save a tda file in specific location")
         # load
         self.action_loadtda = create_action(self, "&Load tda", slot=None,
-                                            shortcut="Ctrl+l", tip="Load tda file")
+                                            shortcut="Ctrl+l", tip="Load a tda file from specific location")
 
         # back file
         self.action_backfile = create_action(self, "&Back File", slot=None,
-                                              shortcut="Alt+Left", tip="Back file")
+                                              shortcut="Alt+Left", tip="Back to a previous file")
         # forward file
         self.action_forwardfile = create_action(self, "&Forward File", slot=None,
-                                                 shortcut="Alt+Right", tip="Forward file")
+                                                 shortcut="Alt+Right", tip="Forward to a next file")
 
         # export csv
         self.action_exportCSV = create_action(self, "&Export File", slot=None,
-                                              shortcut="Ctrl+E", tip="Export CSV file")
+                                              shortcut="Ctrl+E", tip="Export a file for table to specific location")
 
         # export dataset
         self.action_exportDataset = create_action(self, "&Export Dataset", slot=None,
-                                                  shortcut="Ctrl+Shift+E", tip="Export Dataset file as VOC format")
+                                                  shortcut="Ctrl+Shift+E", tip="Export a file for dataset to specific location")
 
         add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
                                      self.action_savetda, self.action_saveastda, self.action_loadtda, None,
@@ -134,12 +134,12 @@ class MenuBar(QMenuBar):
         ##### Run #####
         # predict
         self.action_predict = create_action(self, '&Predict Table', slot=None,
-                                            shortcut="Ctrl+P", tip='Predict table')
+                                            shortcut="Ctrl+P", tip='Predict texts through google cloud vision API')
 
         # remove
         self.action_discard = create_action(self, '&Discard', slot=None,
-                                            shortcut="Ctrl+D", tip='Discard rectangle/quadrangle in selection mode\n'
-                                                                   'Discard results in editing annotation mode')
+                                            shortcut="Ctrl+D", tip='Discard the rectangle/quadrangle in selection mode\n'
+                                                                   'Discard the results in editing annotation mode')
 
         # area mode
         self.action_areaRectMode = create_action(self, '&Rectangle Mode', slot=None,
@@ -150,11 +150,11 @@ class MenuBar(QMenuBar):
 
         # predict as image mode
         self.action_predictImageMode = create_action(self, '&Image mode', slot=None,
-                                                      shortcut='Ctrl+shift+I', tip='Predict the texts as Image mode')
+                                                      shortcut='Ctrl+shift+I', tip='Predict texts as Image mode')
 
         # predict as table mode
         self.action_predictDocumentMode = create_action(self, '&Document mode', slot=None,
-                                                         shortcut='Ctrl+shift+D', tip='Predict the texts as Document mode')
+                                                         shortcut='Ctrl+shift+D', tip='Predict texts as Document mode')
 
 
         add_actions(self.menu_prediction, (self.action_predict, None, self.action_discard, None,
@@ -168,7 +168,7 @@ class MenuBar(QMenuBar):
 
         # preferences
         self.action_preferences = create_action(self, '&Preferences', slot=None,
-                                                shortcut="Ctrl+,", tip='Preferences')
+                                                shortcut="Ctrl+,", tip='Open preferences')
 
         add_actions(self.menu_help, (self.action_about, None, self.action_preferences))
 
