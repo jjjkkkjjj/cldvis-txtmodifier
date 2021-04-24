@@ -459,6 +459,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         elif self.model.showingmode == ShowingMode.SELECTED:
             self.model.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
+
+        self.model.saveInDefaultDirectory()
         # update all
         self.updateModel()
         self.updateAllUI()
