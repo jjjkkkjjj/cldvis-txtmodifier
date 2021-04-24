@@ -56,6 +56,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.menu.action_backfile.triggered.connect(lambda: self.changeImg(False))
         self.menu.action_exportCSV.triggered.connect(self.exportCSV)
         self.menu.action_exportDataset.triggered.connect(self.exportDataset)
+        self.menu.action_exit.triggered.connect(self.close)
 
         # view
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))

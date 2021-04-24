@@ -101,6 +101,7 @@ The exported xml file (VOC format) is like this!
 | `Alt+→` | Forward to a next file  |
 | `Ctrl+E` | Export a file for table to specific location |
 | `Ctrl+Shift+E` | Export a file for dataset to specific location |
+| `Ctrl+Q` | Quit this application |
 
 - Viewer
 

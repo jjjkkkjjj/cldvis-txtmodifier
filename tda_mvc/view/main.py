@@ -52,6 +52,7 @@ class MenuBar(QMenuBar):
     action_forwardfile: QAction
     action_exportCSV: QAction
     action_exportDataset: QAction
+    action_exit: QAction
 
     # view menu
     action_zoomin: QAction
@@ -120,10 +121,16 @@ class MenuBar(QMenuBar):
         self.action_exportDataset = create_action(self, "&Export Dataset", slot=None,
                                                   shortcut="Ctrl+Shift+E", tip="Export a file for dataset to specific location")
 
+        # exit
+        self.action_exit = create_action(self, "&Exit", slot=None,
+                                         shortcut="Ctrl+Q", tip="Quit this application")
+
+
         add_actions(self.menu_file, (self.action_openfolder, self.action_openfiles, None,
                                      self.action_savetda, self.action_saveastda, self.action_loadtda, None,
                                      self.action_backfile, self.action_forwardfile, None,
-                                     self.action_exportCSV, self.action_exportDataset))
+                                     self.action_exportCSV, self.action_exportDataset, None,
+                                     self.action_exit))
 
         ##### View #####
         # zoom in

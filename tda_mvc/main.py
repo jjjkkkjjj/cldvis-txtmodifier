@@ -166,4 +166,12 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
         self.updateAllUI()
 
     def closeEvent(self, event):
+        if self.model.annotations.isEdited:
+            ret = QMessageBox.warning(self, 'Notification',
+                                      'Edited results has not saved yet.\nAre you sure to quit this application?',
+                                      QMessageBox.No | QMessageBox.Yes)
+            if ret == QMessageBox.No:
+                event.ignore()
+                return
         self.model.clearTmpImg()
+        event.accept()
