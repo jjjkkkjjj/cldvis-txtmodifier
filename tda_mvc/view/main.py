@@ -150,7 +150,7 @@ class MenuBar(QMenuBar):
                                             shortcut="Ctrl+P", tip='Predict texts through google cloud vision API')
         # done
         self.action_done = create_action(self, '&Done', slot=None,
-                                         shortcut="Ctrl+G", tip='Finished editing. Auto save will be done and '
+                                         shortcut="Ctrl+G", tip='Finish editing. Auto save will be done and '
                                                                 'default file name will be renamed by appending the sequence number')
         # remove
         self.action_discard = create_action(self, '&Discard', slot=None,

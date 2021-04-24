@@ -116,6 +116,7 @@ The exported xml file (VOC format) is like this!
 | ShortCut key | Description |
 |:--------------|:-------------|
 | `Ctrl+P` | Predict texts through google cloud vision API |
+| `Ctrl+G` | Finished editing. Auto save will be done and <br>default file name will be renamed by appending the sequence number |
 | `Ctrl+D` | Discard the rectangle/quadrangle in selection mode<br>Discard the results in editing annotation mode |
 | `r` | Use rectangle for prediction |
 | `q` | Use quadrangle for prediction |
