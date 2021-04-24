@@ -33,13 +33,13 @@ class CentralVCMixin(VCAbstractMixin):
             self.central.label_savefilename.setStyleSheet('color: black')
 
     def savefilename_doubleClicked(self, e: QMouseEvent):
-        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.default_tdaname)
+        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.default_savename)
 
         if ok:
             _, ext = os.path.splitext(savefilename)
             if ext != '.tda':
                 savefilename += '.tda'
-            self.model.default_tdaname = savefilename
+            self.model.default_savename = savefilename
 
             self.updateModel()
             self.updateAllUI()
@@ -129,8 +129,8 @@ class CentralVCMixin(VCAbstractMixin):
         if not self.model.annotations.isExistSelectedAnnotation:
             return
 
-        def edited(annotation, text):
-            annotation.set_text(text)
+        def edited(text):
+            self.model.annotations.set_text_selectedAnnoatation(text)
             self.updateAllUI()
 
         def remove():
@@ -139,7 +139,7 @@ class CentralVCMixin(VCAbstractMixin):
             self.updateAllUI()
 
         editDialog = EditDialog(self.model.annotations.selectedAnnotation, self)
-        editDialog.edited.connect(lambda anno, text: edited(anno, text))
+        editDialog.edited.connect(lambda text: edited(text))
         editDialog.removed.connect(remove)
         editDialog.exec_()
 

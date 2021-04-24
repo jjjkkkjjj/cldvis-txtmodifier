@@ -39,7 +39,7 @@ class Model(FileModelMixin, ViewerModelMixin, PredictionModelMixin, AnnotationMo
         tda: TDA
 
         # default tda name
-        self.default_tdaname = getattr(tda, 'default_tdaname', '')
+        self.default_savename = getattr(tda, 'default_savename', '')
 
         # the reason of using getattr is for changing TDA contents
         self.areamode = getattr(tda, 'areamode', AreaMode.RECTANGLE)

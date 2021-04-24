@@ -123,7 +123,7 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
             f.write(vocstr)
 
     def saveInDefaultDirectory(self):
-        filename = os.path.splitext(self.default_tdaname)[0]
+        filename = os.path.splitext(self.default_savename)[0]
         #now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         os.makedirs(self.export_tdaDir, exist_ok=True)
@@ -154,6 +154,7 @@ class AnnotationsManager(object):
     def __init__(self):
         # -1 if annotation is not selected
         self._selectedIndex = -1
+        self._isEdited = False
 
         self._startPosition = QPoint(0, 0)
 
@@ -176,6 +177,10 @@ class AnnotationsManager(object):
 
     def append(self, anno):
         self._annotations += [anno]
+
+    @property
+    def isEdited(self):
+        return self._isEdited
 
     @property
     def selectedAnnotation(self):
@@ -240,6 +245,7 @@ class AnnotationsManager(object):
             self._annotations[i].clear()
             del self._annotations[i]
         self._selectedIndex = -1
+        self._isEdited = False
         self._startPosition = QPoint(0, 0)
         self._annotations = []
         self.moveActionState = MoveActionState.CREATE
@@ -277,16 +283,27 @@ class AnnotationsManager(object):
         # All of polygons are not selected
         self._selectedIndex = -1
 
+    def set_text_selectedAnnoatation(self, text):
+        # set edited flag
+        self._isEdited = True
+
+        anno: Annotation = self.selectedAnnotation
+        anno.set_text(text)
+
     def remove_selectedAnnotation(self):
         if self.isExistSelectedAnnotation:
             del self._annotations[self.selectedAnnotationIndex]
             self._selectedIndex = -1
+            # set edited flag
+            self._isEdited = True
 
     def duplicate_selectedAnnotation(self):
         if self.isExistSelectedAnnotation:
             newanno = self.selectedAnnotation.duplicateMe()
             newanno.show()
             self.append(newanno)
+            # set edited flag
+            self._isEdited = True
 
     def remove_selectedAnnotationPoint(self):
         if self.isExistSelectedAnnotationPoint:
@@ -295,11 +312,15 @@ class AnnotationsManager(object):
                 anno.remove_point(anno.selectedPointIndex)
             else:
                 self.remove_selectedAnnotation()
+            # set edited flag
+            self._isEdited = True
 
     def duplicate_selectedAnnotationPoint(self):
         if self.isExistSelectedAnnotationPoint:
             anno: Annotation = self.selectedAnnotation
             anno.duplicate_point(anno.selectedPointIndex)
+            # set edited flag
+            self._isEdited = True
 
     def mousePress(self, pos, parentQSize):
         self._startPosition = pos
@@ -319,6 +340,10 @@ class AnnotationsManager(object):
     def mouseMoveClicked(self, pos, parentQSize: QSize):
         if not self.isExistSelectedAnnotation:
             return
+
+        # either point or poly will be moved
+        # set edited flag
+        self._isEdited = True
 
         anno: Annotation = self.selectedAnnotation
         if self.moveActionState == MoveActionState.MOVE:

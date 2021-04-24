@@ -18,6 +18,10 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def establish_connection(self):
         ### leftdock ###
+        self.leftdock.button_predict.clicked.connect(self.predict)
+        self.leftdock.button_done.clicked.connect(self.done)
+        self.leftdock.button_discard.clicked.connect(self.discard)
+
         # file
         self.leftdock.button_openfile.clicked.connect(self.openfile)
         self.leftdock.button_openfolder.clicked.connect(self.openFolder)
@@ -36,11 +40,12 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.leftdock.radioButton_rect.clicked.connect(lambda: self.areamodeChanged(AreaMode.RECTANGLE))
         self.leftdock.radioButton_quad.clicked.connect(lambda: self.areamodeChanged(AreaMode.QUADRANGLE))
-        self.leftdock.button_discard.clicked.connect(self.discard)
         self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
-        self.leftdock.button_predict.clicked.connect(self.predict)
 
         ### menu ###
+        self.menu.action_predict.triggered.connect(self.predict)
+        self.menu.action_done.triggered.connect(self.done)
+        self.menu.action_discard.triggered.connect(self.discard)
         # file
         self.menu.action_openfiles.triggered.connect(self.openfile)
         self.menu.action_openfolder.triggered.connect(self.openFolder)
@@ -61,10 +66,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.menu.action_areaRectMode.triggered.connect(lambda: self.leftdock.radioButton_rect.click())
         self.menu.action_areaQuadMode.triggered.connect(lambda: self.leftdock.radioButton_quad.click())
-        self.menu.action_discard.triggered.connect(self.discard)
         self.menu.action_predictImageMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(0))
         self.menu.action_predictDocumentMode.triggered.connect(lambda: self.leftdock.comboBox_predmode.setCurrentIndex(1))
-        self.menu.action_predict.triggered.connect(self.predict)
 
         # about
         self.menu.action_about.triggered.connect(self.openAbout)
@@ -103,12 +106,16 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateAllUI()
 
     def savetda(self, isDefault):
+        if not self.model.annotations.isEdited:
+            # not asked if the results are not edited
+            return True
+
         if isDefault:
-            filename = os.path.splitext(self.model.default_tdaname)[0]
+            filename = os.path.splitext(self.model.default_savename)[0]
             filepath = os.path.join(self.model.config.export_datasetDir, 'tda', filename + '.tda')
             if os.path.exists(filepath):
                 ret = QMessageBox.warning(self, 'Notification',
-                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_tdaname),
+                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_savename),
                                           QMessageBox.No | QMessageBox.Yes)
                 if ret == QMessageBox.No:
                     return False
@@ -314,7 +321,29 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateModel()
         self.updateAllUI()
 
+    def done(self):
+        # save to default directory
+        if not self.savetda(isDefault=True):
+            return
+        # discard all results
+        self.model.discardAll()
+        # count up default_savename
+        self.model.countup_defaultsavename()
+
+        # update
+        self.updateModel()
+        self.updateAllUI()
+
+
     def discard(self):
+        if not self.model.annotations.isEdited:
+            # not asked if the results are not edited
+            self.model.discard_annotations()
+
+            self.updateModel()
+            self.updateAllUI()
+            return
+
         if self.model.isPredicted:
             ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.No:

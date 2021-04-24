@@ -85,9 +85,9 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
         if not self.model.isExistImg:
             return
 
-        if self.model.default_tdaname == '':
+        if self.model.default_savename == '':
             filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
-            self.model.default_tdaname = filename + '.tda'
+            self.model.default_savename = filename + '.tda'
 
         if not self.model.isPredicted:
             #### Not predicted ####

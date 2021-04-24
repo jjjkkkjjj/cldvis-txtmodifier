@@ -35,7 +35,9 @@ class AboutDialog(QDialog):
                '<a href="https://icons8.com/icon/66368/artificial-intelligence">Artificial Intelligence icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/107445/export-csv">Export CSV icon by Icons8</a><br>' \
                '' \
-               'Icons made by <a href="https://www.flaticon.com/authors/srip" title="srip">srip</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>'
+               'Icons made by <a href="https://www.flaticon.com/authors/srip" title="srip">srip</a>, ' \
+               '<a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>' \
+               'from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>'
         label_text.setText(text)
         label_text.setTextFormat(Qt.RichText)
         label_text.setTextInteractionFlags(Qt.TextBrowserInteraction)
@@ -358,7 +360,7 @@ class PreferencesDialog(QDialog):
         super().closeEvent(event)
 
 class EditDialog(QDialog):
-    edited = Signal(object, str)
+    edited = Signal(str)
     removed = Signal()
     def __init__(self, annotation, parent=None):
         super().__init__(parent)
@@ -402,7 +404,7 @@ class EditDialog(QDialog):
     def okClicked(self):
         text = self.shifhtEnterTextEdit.toPlainText()
         if self.annoatation.text != text:
-            self.edited.emit(self.annoatation, text)
+            self.edited.emit(text)
         self.close()
 
     def removeClicked(self):

@@ -1,4 +1,5 @@
-import os, datetime, cv2
+import os, datetime, cv2, glob
+import numpy as np
 
 from .base import ModelAbstractMixin
 from .tda import TDA
@@ -8,7 +9,7 @@ class FileModelMixin(ModelAbstractMixin):
     def __init__(self):
         self._imgIndex = -1
         self._imgPaths = []
-        self.default_tdaname = ''
+        self.default_savename = ''
 
     @property
     def imgpath(self):
@@ -43,10 +44,25 @@ class FileModelMixin(ModelAbstractMixin):
         return os.path.join(self.config.export_datasetDir, 'dataset')
     @property
     def tdapath(self):
-        return os.path.join(self.config.export_datasetDir, 'tda', self.default_tdaname)
+        return os.path.join(self.config.export_datasetDir, 'tda', self.default_savename)
 
     def _set_defaultsavename(self):
-        self.default_tdaname = os.path.splitext(os.path.basename(self.imgpath))[0] + '.tda'
+        self.default_savename = os.path.splitext(os.path.basename(self.imgpath))[0] + '.tda'
+
+    def countup_defaultsavename(self):
+        if not os.path.exists(os.path.join(self.export_tdaDir, self.default_savename)):
+            return
+
+        filename, ext = os.path.splitext(self.default_savename)
+        tdapaths = glob.glob(os.path.join(self.export_tdaDir, filename + '_*' + ext))
+        if len(tdapaths) == 0:
+            postfix = 1
+        else:
+            # get numbers after '_'
+            numbers = [int(os.path.splitext(path)[0].split('_')[-1]) for path in tdapaths]
+            postfix = np.array(numbers).max() + 1
+
+        self.default_savename = '{}_{}{}'.format(filename, postfix, ext)
 
     def forward(self):
         if self.isExistForwardImg:

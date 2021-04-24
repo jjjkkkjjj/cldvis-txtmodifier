@@ -14,7 +14,7 @@ class TDA(object):
         self.results_dict = model.annotations.to_dict()
         self.areamode = model.areamode
         self.predmode = model.predmode
-        self.default_tdaname = model.default_tdaname
+        self.default_savename = model.default_savename
 
     def save(self, path):
         with open(path, 'wb') as f:

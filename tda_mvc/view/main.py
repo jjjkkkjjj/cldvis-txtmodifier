@@ -45,19 +45,32 @@ class MenuBar(QMenuBar):
     # file menu
     action_openfolder: QAction
     action_openfiles: QAction
+    action_savetda: QAction
+    action_saveastda: QAction
+    action_loadtda: QAction
     action_backfile: QAction
     action_forwardfile: QAction
+    action_exportCSV: QAction
+    action_exportDataset: QAction
 
-    # viewer menu
+    # view menu
     action_zoomin: QAction
     action_zoomout: QAction
+    action_showentire: QAction
+    action_showselected: QAction
 
     # prediction menu
-    action_discard: QAction
     action_predict: QAction
+    action_done: QAction
+    action_discard: QAction
+    action_areaRectMode: QAction
+    action_areaQuadMode: QAction
+    action_predictImageMode: QAction
+    action_predictDocumentMode: QAction
 
     # help menu
     action_about: QAction
+    action_preferences: QAction
 
     model: Model
 
@@ -135,7 +148,10 @@ class MenuBar(QMenuBar):
         # predict
         self.action_predict = create_action(self, '&Predict Table', slot=None,
                                             shortcut="Ctrl+P", tip='Predict texts through google cloud vision API')
-
+        # done
+        self.action_done = create_action(self, '&Done', slot=None,
+                                         shortcut="Ctrl+G", tip='Finished editing. Auto save will be done and '
+                                                                'default file name will be renamed by appending the sequence number')
         # remove
         self.action_discard = create_action(self, '&Discard', slot=None,
                                             shortcut="Ctrl+D", tip='Discard the rectangle/quadrangle in selection mode\n'
@@ -157,7 +173,7 @@ class MenuBar(QMenuBar):
                                                          shortcut='Ctrl+shift+D', tip='Predict texts as Document mode')
 
 
-        add_actions(self.menu_prediction, (self.action_predict, None, self.action_discard, None,
+        add_actions(self.menu_prediction, (self.action_predict, None, self.action_done, self.action_discard, None,
                                            self.action_areaRectMode, self.action_areaQuadMode, None,
                                            self.action_predictImageMode, self.action_predictDocumentMode))
 
@@ -180,6 +196,7 @@ class MenuBar(QMenuBar):
 
         """
         self.action_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
+        self.action_done.setEnabled(self.model.isPredicted)
         self.action_discard.setEnabled(self.model.isExistArea)
 
         self.updateFile()

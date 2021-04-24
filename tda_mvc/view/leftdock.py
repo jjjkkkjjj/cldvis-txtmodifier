@@ -25,12 +25,19 @@ class LeftDockView(QWidget):
     groupBox_file: QGroupBox
     groupBox_view: QGroupBox
     groupBox_prediction: QGroupBox
+    groupBox_areamode: QGroupBox
 
-    # open
+    button_done: Button
+    button_predict: Button
+    button_discard: Button
+
+    # file
     button_openfolder: Button
     button_openfile: Button
     button_back: Button
     button_forward: Button
+    button_exportCSV: Button
+    button_exportDataset: Button
 
     # view
     button_zoomout: Button
@@ -41,9 +48,12 @@ class LeftDockView(QWidget):
     radioButton_selected: QRadioButton
 
     # run
-    button_discard: Button
+    radioButton_rect: QRadioButton
+    radioButton_quad: QRadioButton
+
+    # predict
     comboBox_predmode: QComboBox
-    button_predict: Button
+
 
     # model
     model: Model
@@ -62,6 +72,9 @@ class LeftDockView(QWidget):
         # predict
         self.button_predict = Button('cloud-vision.png')
         vbox.addWidget(self.button_predict)
+        # done
+        self.button_done = Button('done.png')
+        vbox.addWidget(self.button_done)
         # remove
         self.button_discard = Button('remove.png')
         vbox.addWidget(self.button_discard)
@@ -172,6 +185,7 @@ class LeftDockView(QWidget):
 
         """
         self.button_predict.setEnabled(self.model.isPredictable and not self.model.isPredicted)
+        self.button_done.setEnabled(self.model.isPredicted)
         self.button_discard.setEnabled(self.model.isExistArea)
 
         self.updateFile()
