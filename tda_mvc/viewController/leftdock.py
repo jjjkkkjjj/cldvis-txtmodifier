@@ -60,7 +60,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # view
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
-        self.menu.action_showentire.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
+        self.menu.action_showentire.triggered.connect(lambda: self.leftdock.radioButton_entire.click())
         self.menu.action_showselected.triggered.connect(lambda: self.leftdock.radioButton_selected.click())
 
         # prediction
@@ -198,8 +198,8 @@ class LeftDockVCMixin(VCAbstractMixin):
                 ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
                 if ret == QMessageBox.No:
                     return
-                else:
-                    self.model.discardAll()
+            self.model.discardAll()
+
         #  change image if NOT predicted or
         #                 predicted and saved or
         #                 predicted and NOT saved and discard
@@ -211,11 +211,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         tda = self.model.get_default_tda()
         self._setModel_from_tda(tda)
 
-        # set entire
-        self.model.showingmode = ShowingMode.ENTIRE
-
-        self.updateModel()
-        self.updateAllUI()
+        # set entire and update
+        self.leftdock.radioButton_entire.click()
 
     def exportCSV(self):
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
@@ -333,29 +330,23 @@ class LeftDockVCMixin(VCAbstractMixin):
         # count up default_savename
         self.model.countup_defaultsavename()
 
-        # update
-        self.updateModel()
-        self.updateAllUI()
+        # set entire and update
+        self.leftdock.radioButton_entire.click()
 
 
     def discard(self):
         if not self.model.annotations.isEdited:
             # not asked if the results are not edited
-            self.model.discard_annotations()
-
-            self.updateModel()
-            self.updateAllUI()
+            # set entire and update
+            self.leftdock.radioButton_entire.click()
             return
 
         if self.model.isPredicted:
             ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.No:
                 return
-
-            self.model.discard_annotations()
-
-            self.updateModel()
-            self.updateAllUI()
+            # set entire and update
+            self.leftdock.radioButton_entire.click()
 
         else:
             ret = QMessageBox.warning(self, 'Discard selection', 'Are you sure you want to discard selection area?',

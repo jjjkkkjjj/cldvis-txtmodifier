@@ -53,8 +53,12 @@ class CentralVCMixin(VCAbstractMixin):
             return self.model.predictedAreaQSize
         return None
 
+    @property
+    def isMouseDisabled(self):
+        return self.model.areamode == AreaMode.QUADRANGLE and self.model.showingmode == ShowingMode.ENTIRE
+
     def rightClicked(self, e: QContextMenuEvent):
-        if not self.model.isPredicted:
+        if not self.model.isPredicted or self.isMouseDisabled:
             return
 
         contextMenu = self.imageView.contextMenu
@@ -74,6 +78,9 @@ class CentralVCMixin(VCAbstractMixin):
 
 
     def mousePressed(self, e: QMouseEvent):
+        if self.isMouseDisabled:
+            return
+
         if self.model.isPredicted:
             self.model.annotations.mousePress(e.pos(), self.predictedParentQSize)
 
@@ -87,6 +94,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseMoved(self, e: QMouseEvent):
+        if self.isMouseDisabled:
+            return
+
         pos = e.pos()
         if self.model.isPredicted:
             if e.buttons() == Qt.LeftButton:
@@ -112,6 +122,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseReleased(self, e: QMouseEvent):
+        if self.isMouseDisabled:
+            return
+
         if self.model.isPredicted:
             self.model.annotations.mouseRelease()
 
@@ -126,7 +139,7 @@ class CentralVCMixin(VCAbstractMixin):
         self.menu.updateUI()
 
     def mouseDoubleClicked(self, e: QMouseEvent):
-        if not self.model.annotations.isExistSelectedAnnotation:
+        if not self.model.annotations.isExistSelectedAnnotation or self.isMouseDisabled:
             return
 
         def edited(text):
