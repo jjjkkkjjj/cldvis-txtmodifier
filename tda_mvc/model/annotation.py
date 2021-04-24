@@ -130,9 +130,6 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
         os.makedirs(self.export_imageDir, exist_ok=True)
         os.makedirs(self.export_datasetDir, exist_ok=True)
 
-        if os.path.exists(os.path.join(self.export_tdaDir, filename + '.tda')):
-            return False
-
         # save tda
         tda = TDA(self)
         TDA.save(tda, os.path.join(self.export_tdaDir, filename + '.tda'))
