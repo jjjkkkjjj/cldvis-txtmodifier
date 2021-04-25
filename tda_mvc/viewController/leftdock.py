@@ -85,7 +85,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         tda = self.model.get_default_tda()
-        self._setModel_from_tda(tda)
+        self.setModel_from_tda(tda)
 
         # update view
         self.updateModel()
@@ -100,7 +100,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.set_imgPaths(filenames)
         tda = self.model.get_default_tda()
-        self._setModel_from_tda(tda)
+        self.setModel_from_tda(tda)
 
         # update view
         self.updateModel()
@@ -141,45 +141,10 @@ class LeftDockVCMixin(VCAbstractMixin):
             return
 
         tda = TDA.load(filepath)
-        self._setModel_from_tda(tda)
+        self.setModel_from_tda(tda)
 
         self.updateModel()
         self.updateAllUI()
-
-    def _setModel_from_tda(self, tda):
-        if tda is None:
-            self.model.discardAll()
-            return
-        ######### load from tda #########
-        self.model.load_from_tda(tda)
-
-        if self.model.areamode == AreaMode.RECTANGLE:
-            self.leftdock.radioButton_rect.setChecked(True)
-        elif self.model.areamode == AreaMode.QUADRANGLE:
-            self.leftdock.radioButton_quad.setChecked(True)
-
-        # predmode
-        if self.model.predmode == PredictionMode.IMAGE:
-            self.leftdock.comboBox_predmode.setCurrentText('image')
-        elif self.model.predmode == PredictionMode.DOCUMENT:
-            self.leftdock.comboBox_predmode.setCurrentText('document')
-
-        # rectangle
-        self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
-        # quadrangle
-        self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
-        # predictedArea
-        self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize,
-                                                offsetQPoint=self.model.areaOffsetQPoint)
-        # annotation
-        if self.model.isPredicted:
-            if self.model.showingmode == ShowingMode.ENTIRE:
-                self.model.annotations.set_results(self.model.results, baseWidget=self.central.imageView,
-                                                   parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
-
-            elif self.model.showingmode == ShowingMode.SELECTED:
-                self.model.annotations.set_results(self.model.results, baseWidget=self.central.imageView,
-                                                   parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
 
     def changeImg(self, isForward):
         """
@@ -209,7 +174,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             self.model.back()
 
         tda = self.model.get_default_tda()
-        self._setModel_from_tda(tda)
+        self.setModel_from_tda(tda)
 
         # set entire and update
         self.leftdock.radioButton_entire.click()

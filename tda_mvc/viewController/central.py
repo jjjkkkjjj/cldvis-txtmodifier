@@ -23,6 +23,7 @@ class CentralVCMixin(VCAbstractMixin):
         self.imageView.mousePressed.connect(lambda e: self.mousePressed(e))
         self.imageView.mouseMoved.connect(lambda e: self.mouseMoved(e))
         self.imageView.mouseDoubleClicked.connect(lambda e: self.mouseDoubleClicked(e))
+        self.imageView.filesDropped.connect(lambda filepaths: self.dropped(filepaths))
 
     def savefilename_mouseover(self, e: QMouseEvent, isEnter):
         if not self.central.label_savefilename.isEnabled():
@@ -53,11 +54,23 @@ class CentralVCMixin(VCAbstractMixin):
             return self.model.predictedAreaQSize
         return None
 
+    def dropped(self, filepaths):
+        self.model.set_imgPaths(filepaths)
+        tda = self.model.get_default_tda()
+        self.setModel_from_tda(tda)
+
+        # update view
+        self.updateModel()
+        self.updateAllUI()
+
     @property
     def isMouseDisabled(self):
         return self.model.isPredicted and self.model.areamode == AreaMode.QUADRANGLE and self.model.showingmode == ShowingMode.ENTIRE
 
     def rightClicked(self, e: QContextMenuEvent):
+        if not self.model.isExistImg:
+            return
+
         if not self.model.isPredicted or self.isMouseDisabled:
             return
 
@@ -78,6 +91,9 @@ class CentralVCMixin(VCAbstractMixin):
 
 
     def mousePressed(self, e: QMouseEvent):
+        if not self.model.isExistImg:
+            return
+
         if self.isMouseDisabled:
             return
 
@@ -94,6 +110,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseMoved(self, e: QMouseEvent):
+        if not self.model.isExistImg:
+            return
+
         if self.isMouseDisabled:
             return
 
@@ -122,6 +141,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseReleased(self, e: QMouseEvent):
+        if not self.model.isExistImg:
+            return
+
         if self.isMouseDisabled:
             return
 
@@ -139,6 +161,9 @@ class CentralVCMixin(VCAbstractMixin):
         self.menu.updateUI()
 
     def mouseDoubleClicked(self, e: QMouseEvent):
+        if not self.model.isExistImg:
+            return
+
         if not self.model.annotations.isExistSelectedAnnotation or self.isMouseDisabled:
             return
 

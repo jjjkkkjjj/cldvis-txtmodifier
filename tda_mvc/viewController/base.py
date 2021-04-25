@@ -27,3 +27,6 @@ class VCAbstractMixin(object):
 
     def updateAllUI(self):
         pass
+
+    def setModel_from_tda(self, tda):
+        pass

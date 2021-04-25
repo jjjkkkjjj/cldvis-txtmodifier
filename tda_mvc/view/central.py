@@ -16,6 +16,7 @@ class ImageView(QLabel):
     mouseMoved = Signal(QMouseEvent)
     mouseReleased = Signal(QMouseEvent)
     mouseDoubleClicked = Signal(QMouseEvent)
+    filesDropped = Signal(list)
 
     # model
     model: Model
@@ -31,6 +32,11 @@ class ImageView(QLabel):
 
         # mouseMoveEvent will be fired on pressing any button
         self.setMouseTracking(True)
+        # enable drag and drop
+        self.setAcceptDrops(True)
+
+        # fill gray
+        self.setStyleSheet("QLabel { background-color : rgb(242, 242, 242); }")
 
     def contextMenuEvent(self, e):
         self.rightClicked.emit(e)
@@ -86,6 +92,25 @@ class ImageView(QLabel):
             self.model.annotations.paint(painter, False)
 
 
+    ### drag and drop ###
+    def dragEnterEvent(self, e):
+        if e.mimeData().hasUrls:
+            e.setDropAction(Qt.CopyAction)
+            e.accept()
+        else:
+            e.ignore()
+
+    def dropEvent(self, e):
+        if e.mimeData().hasUrls:
+            e.setDropAction(Qt.CopyAction)
+            e.accept()
+            files = []
+            for url in e.mimeData().urls():
+                files += [str(url.toLocalFile())]
+            self.filesDropped.emit(files)
+        else:
+            e.ignore()
+
 class CentralView(QWidget):
     ### Attributes ###
     # label
@@ -140,7 +165,7 @@ class CentralView(QWidget):
         # check enable
         self.label_filename.setEnabled(self.model.isExistImg)
         self.label_savefilename.setEnabled(self.model.isExistImg)
-        self.imageView.setEnabled(self.model.isExistImg)
+        self.imageView.setEnabled(True) # because accept drag and drop
 
         if self.model.isExistImg:
             # set the filename of the shown image
