@@ -54,6 +54,9 @@ class FileModelMixin(ModelAbstractMixin):
             return
 
         filename, ext = os.path.splitext(self.default_savename)
+        # filename may include postfix '_', so remove last '_*'
+        _splitedname = filename.split('_')
+        filename = '_'.join(_splitedname[:-1]) if len(_splitedname) >= 2 else filename
         tdapaths = glob.glob(os.path.join(self.export_tdaDir, filename + '_*' + ext))
         if len(tdapaths) == 0:
             postfix = 1
