@@ -2,7 +2,7 @@ import cv2, os, shutil
 
 from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode
 from ..utils.geometry import *
-from ..utils.funcs import qsize_from_quadrangle
+from ..utils.funcs import qsize_from_quadrangle, cvimread_unicode, cvimwrite_unicode
 from .base import ModelAbstractMixin
 
 class ViewerModelMixin(ModelAbstractMixin):
@@ -187,7 +187,7 @@ class ViewerModelMixin(ModelAbstractMixin):
             self.selectedRectImgPath = None
             return
 
-        img = cv2.imread(imgpath)
+        img = cvimread_unicode(imgpath)
         h, w, _ = img.shape
         x, y = (self.rectangle.percent_x * w).astype(int), (self.rectangle.percent_y * h).astype(int)
 
@@ -197,7 +197,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         apex = '_x{}X{}y{}Y{}'.format(xmin, xmax, ymin, ymax)
         savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
 
-        cv2.imwrite(savepath, img[ymin:ymax, xmin:xmax])
+        cvimwrite_unicode(savepath, img[ymin:ymax, xmin:xmax])
         self.selectedRectImgPath = savepath
 
     ### quad ###
@@ -257,7 +257,7 @@ class ViewerModelMixin(ModelAbstractMixin):
             self.selectedQuadImgPath = None
             return
 
-        img = cv2.imread(imgpath)
+        img = cvimread_unicode(imgpath)
         h, w, _ = img.shape
         x, y = (self.quadrangle.percent_x * w).astype(int), (self.quadrangle.percent_y * h).astype(int)
         tl, tr, br, bl = tuple(QPoint(x[i], y[i]) for i in range(x.size))
@@ -276,7 +276,7 @@ class ViewerModelMixin(ModelAbstractMixin):
                                                                   br.x(), br.y(), bl.x(), bl.y())
         savepath = os.path.abspath(os.path.join(self.config.selectedImgDir, filename + apex + '.jpg'))
 
-        cv2.imwrite(savepath, img_cropped)
+        cvimwrite_unicode(savepath, img_cropped)
         self.selectedQuadImgPath = savepath
 
 

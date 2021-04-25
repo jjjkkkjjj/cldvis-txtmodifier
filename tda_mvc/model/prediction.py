@@ -5,6 +5,7 @@ import io, os, json, cv2
 
 from .base import ModelAbstractMixin
 from ..utils.exception import PredictionError
+from ..utils.funcs import cvimread_unicode
 
 class PredictionModelMixin(ModelAbstractMixin):
     client: vision.ImageAnnotatorClient
@@ -43,7 +44,7 @@ class PredictionModelMixin(ModelAbstractMixin):
         with open(imgpath, 'rb') as image_file:
             content = image_file.read()
 
-        h, w, _ = cv2.imread(imgpath).shape
+        h, w, _ = cvimread_unicode(imgpath).shape
         h, w = float(h), float(w)
         image = vision.Image(content=content)
         # https://googleapis.dev/python/vision/1.0.0/gapic/v1/api.html#google.cloud.vision_v1.ImageAnnotatorClient.text_detection
@@ -56,7 +57,7 @@ class PredictionModelMixin(ModelAbstractMixin):
         with open(imgpath, 'rb') as image_file:
             content = image_file.read()
 
-        h, w, _ = cv2.imread(imgpath).shape
+        h, w, _ = cvimread_unicode(imgpath).shape
         h, w = float(h), float(w)
         image = vision.Image(content=content)
         # https://googleapis.dev/python/vision/1.0.0/gapic/v1/api.html#google.cloud.vision_v1.ImageAnnotatorClient.document_text_detection

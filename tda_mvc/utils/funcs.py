@@ -73,6 +73,16 @@ def sort_clockwise(a):
 
     return np.take(a, sorted_inds, axis=0)
 
+# deal with kanji filename
+# https://jdhao.github.io/2019/09/11/opencv_unicode_image_path/
+def cvimread_unicode(filepath):
+    return cv2.imdecode(np.fromfile(filepath, dtype=np.uint8), cv2.IMREAD_COLOR)
+
+def cvimwrite_unicode(filepath, img):
+    _, ext = os.path.splitext(filepath)
+    ret, buf = cv2.imencode(ext, img)
+    buf.tofile(filepath)
+
 def get_pixmap(model, parentQSize=None):
     """
     Get pixmap from the current status
@@ -97,9 +107,9 @@ def get_pixmap(model, parentQSize=None):
     model: Model
 
     if model.showingmode == ShowingMode.ENTIRE:
-        cvimg = cv2.imread(model.imgpath)
+        cvimg = cvimread_unicode(model.imgpath)
     elif model.showingmode == ShowingMode.SELECTED:
-        cvimg = cv2.imread(model.selectedImgPath)
+        cvimg = cvimread_unicode(model.selectedImgPath)
 
     h, w, c = cvimg.shape
     ratio = model.zoomvalue / 100.

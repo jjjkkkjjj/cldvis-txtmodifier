@@ -1,6 +1,7 @@
 import numpy as np
 from lxml import etree
 from ..utils.modes import ShowingMode, AreaMode
+from ..utils.funcs import cvimread_unicode
 import os, cv2
 
 def parse_annotations_forFile_basedTopLeft(model):
@@ -168,7 +169,7 @@ def parse_annotations_forVOC(model, imgpath):
         return subel
 
     imgname = os.path.basename(imgpath)
-    img = cv2.imread(imgpath)
+    img = cvimread_unicode(imgpath)
     h, w, c = img.shape
 
     root = etree.Element('annotation')
