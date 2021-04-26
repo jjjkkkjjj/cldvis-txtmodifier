@@ -91,6 +91,10 @@ class CentralVCMixin(VCAbstractMixin):
 
 
     def mousePressed(self, e: QMouseEvent):
+        if e.buttons() == Qt.RightButton:
+            self.model.mouseClick_scroll(e.pos())
+            return
+
         if not self.model.isExistImg:
             return
 
@@ -110,13 +114,23 @@ class CentralVCMixin(VCAbstractMixin):
         self.modelUpdateAftermouseEvent()
 
     def mouseMoved(self, e: QMouseEvent):
+        pos = e.pos()
+        if e.buttons() == Qt.RightButton:
+            movedAmount = self.model.mouseMove_scroll(pos)
+
+            hscrollBar = self.central.scrollArea.horizontalScrollBar()
+            hscrollBar.setValue(hscrollBar.value() + movedAmount.x())
+
+            vscrollBar = self.central.scrollArea.verticalScrollBar()
+            vscrollBar.setValue(vscrollBar.value() + movedAmount.y())
+            return
+
         if not self.model.isExistImg:
             return
 
         if self.isMouseDisabled:
             return
 
-        pos = e.pos()
         if self.model.isPredicted:
             if e.buttons() == Qt.LeftButton:
                 self.model.annotations.mouseMoveClicked(pos, self.predictedParentQSize)
@@ -138,9 +152,30 @@ class CentralVCMixin(VCAbstractMixin):
                 elif self.model.areamode == AreaMode.QUADRANGLE:
                     self.model.mouseMoveNoButton_quadmode(pos)
 
+        # scroll
+        hscrollBar = self.central.scrollArea.horizontalScrollBar()
+        if pos.x() < hscrollBar.value() or hscrollBar.value() + hscrollBar.pageStep() < pos.x():
+            if pos.x() < hscrollBar.value():
+                movedX = pos.x() - hscrollBar.value()
+            else:
+                movedX = pos.x() - (hscrollBar.value() + hscrollBar.pageStep())
+            hscrollBar.setValue(hscrollBar.value() + movedX)
+
+        vscrollBar = self.central.scrollArea.verticalScrollBar()
+        if pos.y() < vscrollBar.value() or vscrollBar.value() + vscrollBar.pageStep() < pos.y():
+            if pos.y() < vscrollBar.value():
+                movedY = pos.y() - vscrollBar.value()
+            else:
+                movedY = pos.y() - (vscrollBar.value() + vscrollBar.pageStep())
+            vscrollBar.setValue(vscrollBar.value() + movedY)
+
         self.modelUpdateAftermouseEvent()
 
     def mouseReleased(self, e: QMouseEvent):
+        if e.buttons() == Qt.RightButton:
+            self.model.mouseRelease_scroll()
+            return
+
         if not self.model.isExistImg:
             return
 

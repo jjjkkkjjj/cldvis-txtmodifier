@@ -29,6 +29,8 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
+        # previous position for scroll
+        self._prevPosition = QPoint(0, 0)
 
         self.selectedRectImgPath = None
         self.selectedQuadImgPath = None
@@ -43,6 +45,8 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
+        # previous position for scroll
+        self._prevPosition = QPoint(0, 0)
 
         self.selectedRectImgPath = None
         self.selectedQuadImgPath = None
@@ -127,6 +131,22 @@ class ViewerModelMixin(ModelAbstractMixin):
         elif self.areamode == AreaMode.QUADRANGLE:
             return self.quadrangle.offsetQPoint
         return None
+
+    def mouseClick_scroll(self, pos):
+        self._prevPosition = pos
+
+    def mouseMove_scroll(self, pos):
+        """
+        Get moved amount and update startPosition
+        :param pos:
+        :return:
+        """
+        movedAmount = self._prevPosition - pos
+        self._prevPosition = pos
+        return movedAmount
+
+    def mouseRelease_scroll(self):
+        self._prevPosition = QPoint(0, 0)
 
     ### rect ###
     def mousePress_rectmode(self, pos, parentQSize):
