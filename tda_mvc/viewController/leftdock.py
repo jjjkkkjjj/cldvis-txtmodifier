@@ -7,7 +7,7 @@ import pandas as pd
 from ..view import AboutDialog, PreferencesDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention, ExportDatasetFormat
 from ..utils.exception import PredictionError
-from ..utils.funcs import create_fileters
+from ..utils.funcs import create_fileters, get_pixmap
 from ..model import TDA
 from .base import VCAbstractMixin
 
@@ -249,10 +249,27 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.spinBox_zoom.setValue(r)
 
     def zoomValueChanged(self, value):
+        # get the current ration on center position before zoom
+        _, size = get_pixmap(self.model)
+        hscrollBar = self.central.scrollArea.horizontalScrollBar()
+        hratio = (hscrollBar.value() + hscrollBar.pageStep()/2) / size.width()
+
+        vscrollBar = self.central.scrollArea.verticalScrollBar()
+        vratio = (vscrollBar.value() + vscrollBar.pageStep()/2) / size.height()
+
         self.model.zoomvalue = value
 
         self.updateModel()
         self.updateAllUI()
+
+        # align center position after zoom
+        _, size = get_pixmap(self.model)
+        hscrollBar = self.central.scrollArea.horizontalScrollBar()
+        hscrollBar.setValue(int(hratio * size.width()) - int(hscrollBar.pageStep()/2))
+
+        vscrollBar = self.central.scrollArea.verticalScrollBar()
+        vscrollBar.setValue(int(vratio * size.height()) - int(vscrollBar.pageStep()/2))
+
 
     def openAbout(self):
         aboutBox = AboutDialog(self)
