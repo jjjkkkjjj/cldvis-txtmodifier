@@ -1,9 +1,10 @@
 import cv2, os, shutil
 
-from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode
+from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode, LanguageMode
 from ..utils.geometry import *
 from ..utils.funcs import qsize_from_quadrangle, cvimread_unicode, cvimwrite_unicode
 from .base import ModelAbstractMixin
+from .language import *
 
 class ViewerModelMixin(ModelAbstractMixin):
     def __init__(self):
@@ -34,6 +35,19 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         self.selectedRectImgPath = None
         self.selectedQuadImgPath = None
+
+    @property
+    def language(self):
+        if self.languagemode == LanguageMode.ENGLISH:
+            return English()
+        elif self.languagemode == LanguageMode.JAPANESE:
+            return Japanese()
+    @property
+    def languagemode(self):
+        if self.config.languagemode == 'English':
+            return LanguageMode.ENGLISH
+        elif self.config.languagemode == 'Japanese':
+            return LanguageMode.JAPANESE
 
     def discard_area(self):
         # image mode

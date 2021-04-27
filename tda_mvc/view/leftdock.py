@@ -64,6 +64,7 @@ class LeftDockView(QWidget):
         self.model = check_instance('model', model, Model)
         self.initUI()
         self.updateUI()
+        self.updateLanguage()
 
 
     def initUI(self):
@@ -216,3 +217,19 @@ class LeftDockView(QWidget):
         # if the image has already predicted, disable
         self.groupBox_areamode.setEnabled(not self.model.isPredicted)
         self.comboBox_predmode.setEnabled(not self.model.isPredicted)
+
+    def updateLanguage(self):
+        language = self.model.language
+
+        self.groupBox_file.setTitle(language.leftdock_file)
+        self.groupBox_view.setTitle(language.leftdock_view)
+        self.groupBox_showing.setTitle(language.leftdock_showing)
+        self.radioButton_entire.setText(language.leftdock_entire)
+        self.radioButton_selected.setText(language.leftdock_selected)
+        self.groupBox_prediction.setTitle(language.leftdock_prediction)
+        self.groupBox_areamode.setTitle(language.leftdock_areamode)
+        self.radioButton_rect.setText(language.leftdock_rectangle)
+        self.radioButton_quad.setText(language.leftdock_quadrangle)
+        for i, text in enumerate(language.leftdock_predmode):
+            self.comboBox_predmode.setItemText(i, text)
+

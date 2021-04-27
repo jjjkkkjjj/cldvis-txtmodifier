@@ -40,7 +40,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         # prediction
         self.leftdock.radioButton_rect.clicked.connect(lambda: self.areamodeChanged(AreaMode.RECTANGLE))
         self.leftdock.radioButton_quad.clicked.connect(lambda: self.areamodeChanged(AreaMode.QUADRANGLE))
-        self.leftdock.comboBox_predmode.currentTextChanged.connect(lambda predmode: self.predmodeChanged(PredictionMode(predmode)))
+        self.leftdock.comboBox_predmode.currentIndexChanged.connect(lambda modeindex: self.predmodeChanged(PredictionMode.mode(modeindex)))
 
         ### menu ###
         self.menu.action_predict.triggered.connect(self.predict)
@@ -279,6 +279,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def openPreferences(self):
         preferencesBox = PreferencesDialog(self.model, initial=False, parent=self)
+        preferencesBox.languageChanged.connect(self.updateLanguage)
         preferencesBox.exec_()
 
     def predmodeChanged(self, mode):

@@ -3,7 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 import glob, os, sys
 
-from ..utils.modes import ExportFileExtention, ExportDatasetFormat, PredictionMode, AreaMode
+from ..utils.modes import ExportFileExtention, ExportDatasetFormat, PredictionMode, AreaMode, LanguageMode
 from ..utils.funcs import create_fileters
 
 class AboutDialog(QDialog):
@@ -49,6 +49,7 @@ class AboutDialog(QDialog):
 
 class PreferencesDialog(QDialog):
     setCredentialJsonpath = Signal(str)
+    languageChanged = Signal()
     def __init__(self, model, initial, parent=None):
         super().__init__(parent)
 
@@ -56,7 +57,7 @@ class PreferencesDialog(QDialog):
         self.model: Model = model
         self.initial = initial
 
-        self._confignames = ['defaultareamode', 'defaultpredmode',
+        self._confignames = ['languagemode', 'defaultareamode', 'defaultpredmode',
                              'credentialJsonpath', 'export_defaultFileFormat',
                              'export_sameRowY', 'export_sameColX', 'export_datasetFormat',
                              'export_datasetDir']
@@ -74,6 +75,7 @@ class PreferencesDialog(QDialog):
         # True: OK.
         self._isValidJsonPath = None
 
+        self.languagemode = model.config.languagemode
         self.defaultareamode = model.config.defaultareamode
         self.defaultpredmode = model.config.defaultpredmode
 
@@ -120,6 +122,11 @@ class PreferencesDialog(QDialog):
         self.groupBox_basic = QGroupBox('Basic Settings')
         grid_basic = QGridLayout()
 
+        self.label_languagemode = QLabel('Language:')
+        self.comboBox_languagemode = QComboBox()
+        self.comboBox_languagemode.addItems(LanguageMode.gen_list())
+        self.comboBox_languagemode.setCurrentText(self.model.config.languagemode)
+
         self.label_defaultareamode = QLabel('Default Area mode:')
         self.comboBox_defaultareamode = QComboBox()
         self.comboBox_defaultareamode.addItems(AreaMode.gen_list())
@@ -131,6 +138,11 @@ class PreferencesDialog(QDialog):
         self.comboBox_defaultpredmode.setCurrentText(self.model.config.defaultpredmode)
 
         layout_params = [
+            [
+                (self.label_languagemode, 0, 1, 2),
+                (self.comboBox_languagemode, 2, 1, 2),
+                (QLabel(), 4, 1, 4),  # dummy
+            ],
             [
                 (self.label_defaultareamode, 0, 1, 2),
                 (self.comboBox_defaultareamode, 2, 1, 2),
@@ -241,6 +253,7 @@ class PreferencesDialog(QDialog):
 
     def establish_connection(self):
         # basic settings
+        self.comboBox_languagemode.currentTextChanged.connect(lambda: self.connection('languagemode'))
         self.comboBox_defaultareamode.currentTextChanged.connect(lambda: self.connection('defaultareamode'))
         self.comboBox_defaultpredmode.currentTextChanged.connect(lambda: self.connection('defaultpredmode'))
 
@@ -311,10 +324,14 @@ class PreferencesDialog(QDialog):
         return self.model.check_credentialJsonpath(self.credentialJsonpath)
 
     def connection(self, connecttype):
-        if connecttype == 'defaultareamode':
+        if connecttype == 'languagemode':
+            self.languagemode = self.comboBox_languagemode.currentText()
+
+
+        elif connecttype == 'defaultareamode':
             self.defaultareamode = self.comboBox_defaultareamode.currentText()
 
-        if connecttype == 'defaultpredmode':
+        elif connecttype == 'defaultpredmode':
             self.defaultpredmode = self.comboBox_defaultpredmode.currentText()
 
         elif connecttype == 'credentialJsonpath':
@@ -344,10 +361,18 @@ class PreferencesDialog(QDialog):
             self.export_datasetDir = dirpath
 
         elif connecttype == 'ok':
+            # check if the languagemode is changed or not
+            prevLanguagemode = self.model.config.languagemode
+
             ## save
             for attr in self._confignames:
                 setattr(self.model.config, attr, getattr(self, attr))
             self.model.set_credentialJsonpath(self.credentialJsonpath)
+
+            # emit
+            if prevLanguagemode != self.model.config.languagemode:
+                self.languageChanged.emit()
+
             self.close()
             return
 

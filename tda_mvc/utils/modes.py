@@ -1,5 +1,13 @@
 from enum import Enum
 
+class LanguageMode(Enum):
+    ENGLISH = 'English'
+    JAPANESE = 'Japanese'
+
+    @staticmethod
+    def gen_list():
+        return [m.value for m in LanguageMode]
+
 class PredictionMode(Enum):
     IMAGE = 'image'
     DOCUMENT = 'document'
@@ -7,6 +15,9 @@ class PredictionMode(Enum):
     @staticmethod
     def gen_list():
         return [m.value for m in PredictionMode]
+    @staticmethod
+    def mode(index):
+        return [m for m in PredictionMode][index]
 
 class ShowingMode(Enum):
     ENTIRE = 'entire'

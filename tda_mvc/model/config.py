@@ -16,6 +16,7 @@ class ConfigParser(configparser.ConfigParser):
             return default
 
 configset = {
+    'languagemode': (str, 'English'),
     'defaultareamode': (str, 'Quadrangle'),
     'defaultpredmode': (str, 'image'),
 
@@ -39,6 +40,7 @@ class Config(object):
     iniPath = os.path.join('.tda', 'tda.ini')
 
     ### config file's attribute ###
+    languagemode: str
     defaultareamode: str
     defaultpredmode: str
 
