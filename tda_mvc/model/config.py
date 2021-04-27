@@ -15,10 +15,27 @@ class ConfigParser(configparser.ConfigParser):
         except configparser.NoOptionError:
             return default
 
+configset = {
+    'defaultareamode': (str, 'Quadrangle'),
+    'defaultpredmode': (str, 'image'),
+
+    'lastOpenDir': (str, path_desktop()),
+    'credentialJsonpath': (str, None),
+
+    'export_defaultFileFormat': (str, 'CSV'),
+    'export_sameRowY': (int, 10),
+    'export_sameColX': (int, 15),
+
+    'export_datasetFormat': (str, 'VOC'),
+    'export_datasetDir': (str, None)
+}
+
 class Config(object):
     selectedImgDir = os.path.join('.tda', 'selectedImg')
     tmpDir = os.path.join('.tda', 'tmp')
     iniPath = os.path.join('.tda', 'tda.ini')
+
+    defaultareamode: str
 
     def __init__(self):
         self.config = ConfigParser(allow_no_value=True)
@@ -29,77 +46,23 @@ class Config(object):
     def configpath(self):
         return self.iniPath
 
-    @property
-    def defaultareamode(self):
-        return self.config.get('settings', 'defaultareamode', 'Quadrangle')
-    @defaultareamode.setter
-    def defaultareamode(self, mode):
-        self.config.set('settings', 'defaultareamode', mode)
-        self.writeConfig()
+    def __getattr__(self, attr):
+        if attr in configset.keys():
+            cls, default = configset[attr]
+            if cls is str:
+                return self.config.get('settings', attr, default)
+            elif cls is int:
+                return self.config.getint('settings', attr, default)
+            else:
+                assert False, "Bug was occurred"
 
-    @property
-    def defaultpredmode(self):
-        return self.config.get('settings', 'defaultpredmode', 'image')
-    @defaultpredmode.setter
-    def defaultpredmode(self, mode):
-        self.config.set('settings', 'defaultpredmode', mode)
-        self.writeConfig()
+    def __setattr__(self, attr, value):
+        if attr in configset.keys():
+            self.config.set('settings', attr, str(value))
+            self.writeConfig()
+        else:
+            super().__setattr__(attr, value)
 
-    @property
-    def lastOpenDir(self):
-        return self.config.get('settings', 'lastOpenDir', path_desktop())
-    @lastOpenDir.setter
-    def lastOpenDir(self, last_dir):
-        self.config.set('settings', 'lastOpenDir', last_dir)
-        self.writeConfig()
-
-    @property
-    def credentialJsonpath(self):
-        return self.config.get('settings', 'credentialJsonpath', None)
-    @credentialJsonpath.setter
-    def credentialJsonpath(self, path):
-        self.config.set('settings', 'credentialJsonpath', path)
-        self.writeConfig()
-
-    @property
-    def export_defaultFileFormat(self):
-        return self.config.get('settings', 'export_defaultFileFormat', 'CSV')
-    @export_defaultFileFormat.setter
-    def export_defaultFileFormat(self, value):
-        self.config.set('settings', 'export_defaultFileFormat', value)
-        self.writeConfig()
-
-    @property
-    def export_sameRowY(self):
-        return self.config.getint('settings', 'export_sameRowY', 20)
-    @export_sameRowY.setter
-    def export_sameRowY(self, value):
-        self.config.set('settings', 'export_sameRowY', str(value))
-        self.writeConfig()
-
-    @property
-    def export_sameColX(self):
-        return self.config.getint('settings', 'export_sameColX', 15)
-    @export_sameColX.setter
-    def export_sameColX(self, value):
-        self.config.set('settings', 'export_sameColX', str(value))
-        self.writeConfig()
-
-    @property
-    def export_datasetFormat(self):
-        return self.config.get('settings', 'export_datasetFormat', 'VOC')
-    @export_datasetFormat.setter
-    def export_datasetFormat(self, datasetformat):
-        self.config.set('settings', 'export_datasetFormat', datasetformat)
-        self.writeConfig()
-    
-    @property
-    def export_datasetDir(self):
-        return self.config.get('settings', 'export_datasetDir', None)
-    @export_datasetDir.setter
-    def export_datasetDir(self, path):
-        self.config.set('settings', 'export_datasetDir', path)
-        self.writeConfig()
 
     def _initialReadConfig(self):
         # create .tda directory
@@ -113,24 +76,9 @@ class Config(object):
                 shutil.rmtree('.tda') # remove all
                 os.makedirs('.tda')
 
-            # default value
-            default = {
-                'defaultareamode': 'Quadrangle',
-                'defaultpredmode': 'image',
-
-                'lastOpenDir': path_desktop(),
-                'credentialJsonpath': None,
-
-                'export_defaultFileFormat': 'CSV',
-                'export_sameRowY': 20,
-                'export_sameColX': 15,
-                
-                'export_datasetFormat': 'VOC',
-                'export_datasetDir': None
-            }
-
-            self.config['default'] = default
-            self.config['settings'] = default
+            # set default value
+            self.config['default'] = configset
+            self.config['settings'] = configset
 
             # write
             self.writeConfig()
