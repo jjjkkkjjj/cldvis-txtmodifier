@@ -91,6 +91,15 @@ class FileModelMixin(ModelAbstractMixin):
         self.config.lastOpenDir = os.path.dirname(self._imgPaths[0])
         self._set_defaultsavename()
 
+    def set_lastSavedtdaDir(self, path):
+        self.config.lastSavedtdaDir = os.path.dirname(path)
+
+    def set_lastSavedTableFileDir(self, path):
+        self.config.lastSavedTableFileDir = os.path.dirname(path)
+
+    def set_lastSavedDatasetDir(self, path):
+        self.config.lastSavedDatasetDir = os.path.dirname(path)
+
     def get_default_tda(self):
         """
         Get tda file in default dataset directory

@@ -27,7 +27,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.leftdock.button_openfolder.clicked.connect(self.openFolder)
         self.leftdock.button_forward.clicked.connect(lambda: self.changeImg(True))
         self.leftdock.button_back.clicked.connect(lambda: self.changeImg(False))
-        self.leftdock.button_exportCSV.clicked.connect(self.exportCSV)
+        self.leftdock.button_exportCSV.clicked.connect(self.exportTableFile)
         self.leftdock.button_exportDataset.clicked.connect(self.exportDataset)
 
         # view
@@ -54,7 +54,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.menu.action_loadtda.triggered.connect(self.loadtda)
         self.menu.action_forwardfile.triggered.connect(lambda: self.changeImg(True))
         self.menu.action_backfile.triggered.connect(lambda: self.changeImg(False))
-        self.menu.action_exportCSV.triggered.connect(self.exportCSV)
+        self.menu.action_exportCSV.triggered.connect(self.exportTableFile)
         self.menu.action_exportDataset.triggered.connect(self.exportDataset)
         self.menu.action_exit.triggered.connect(self.close)
 
@@ -125,18 +125,19 @@ class LeftDockVCMixin(VCAbstractMixin):
             filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
             filters_list = create_fileters(('TDA Binary', 'tda'))
             filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as',
-                                                                    os.path.join(self.model.config.export_datasetDir, filename),
+                                                                    os.path.join(self.model.config.lastSavedtdaDir, filename),
                                                                     ';;'.join(filters_list), None)
             if filepath == '':
                 return False
             tda = TDA(self.model)
             TDA.save(tda, filepath)
+            self.model.set_lastSavedtdaDir(filepath)
         _ = QMessageBox.information(self, 'Saved', 'Saved to {}'.format(filepath))
         return True
 
     def loadtda(self):
         filters_list = create_fileters(('TDA Binary', 'tda'))
-        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.config.export_datasetDir, ';;'.join(filters_list), None)
+        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.export_tdaDir, ';;'.join(filters_list), None)
         if filepath == '':
             return
 
@@ -179,10 +180,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         # set entire and update
         self.leftdock.radioButton_entire.click()
 
-    def exportCSV(self):
+    def exportTableFile(self):
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
         filename = os.path.splitext(os.path.basename(self.model.default_savename))[0]
-        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.export_datasetDir, filename),
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.lastSavedTableFileDir, filename),
                                                ';;'.join(filters_list), None)
         #with open('./debug/texts.csv', 'w') as f:
         if filepath == '':
@@ -210,10 +211,11 @@ class LeftDockVCMixin(VCAbstractMixin):
             self.model.saveAsPSV(filepath)
         else:
             return
+        self.model.set_lastSavedTableFileDir(filepath)
         QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
 
     def exportDataset(self):
-        filters_list = create_fileters(*ExportDatasetFormat.gen_filters_args(self.model.config.export_datasetFormat))
+        filters_list = create_fileters(*ExportDatasetFormat.gen_filters_args(self.model.config.lastSavedDatasetDir))
         filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
         filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export dataset',
                                                                 os.path.join(self.model.export_datasetDir, filename),
@@ -236,7 +238,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             self.model.saveAsVOC(filepath)
         else:
             return
-
+        self.model.set_lastSavedDatasetDir(filepath)
         QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
 
     def zoomInOut(self, isZoomIn):

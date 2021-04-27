@@ -20,6 +20,9 @@ configset = {
     'defaultpredmode': (str, 'image'),
 
     'lastOpenDir': (str, path_desktop()),
+    'lastSavedtdaDir': (str, path_desktop()),
+    'lastSavedTableFileDir': (str, path_desktop()),
+    'lastSavedDatasetDir': (str, path_desktop()),
     'credentialJsonpath': (str, None),
 
     'export_defaultFileFormat': (str, 'CSV'),
@@ -35,7 +38,23 @@ class Config(object):
     tmpDir = os.path.join('.tda', 'tmp')
     iniPath = os.path.join('.tda', 'tda.ini')
 
+    ### config file's attribute ###
     defaultareamode: str
+    defaultpredmode: str
+
+    lastOpenDir: str
+    lastSavedtdaDir: str
+    lastSavedTableFileDir: str
+    lastSavedDatasetDir: str
+    credentialJsonpath: str
+
+    export_defaultFileFormat: int
+    export_sameRowY: int
+    export_sameColX: int
+
+    export_datasetFormat: str
+    export_datasetDir: str
+
 
     def __init__(self):
         self.config = ConfigParser(allow_no_value=True)
