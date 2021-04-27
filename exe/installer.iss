@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "cldvis"
-#define MyAppVersion "0.1"
+#define MyAppVersion "0.2"
 #define MyAppPublisher "Junnosuke Kado"
 #define MyAppURL "https://github.com/jjjkkkjjj"
 #define MyAppExeName "cldvis.exe"
