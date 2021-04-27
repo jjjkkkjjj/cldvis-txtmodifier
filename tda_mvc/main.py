@@ -50,6 +50,7 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
 
     def updateLanguage(self):
         self.leftdock.updateLanguage()
+        self.menu.updateLanguage()
 
     def establish_connection(self):
         LeftDockVCMixin.establish_connection(self)

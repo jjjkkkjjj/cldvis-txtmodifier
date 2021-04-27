@@ -81,6 +81,7 @@ class MenuBar(QMenuBar):
         self.model = check_instance('model', model, Model)
         self.initUI()
         self.updateUI()
+        self.updateLanguage()
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
@@ -238,4 +239,45 @@ class MenuBar(QMenuBar):
 
         self.action_predictImageMode.setEnabled(not self.model.isPredicted)
         self.action_predictDocumentMode.setEnabled(not self.model.isPredicted)
+
+    def updateLanguage(self):
+        language = self.model.language
+
+        # menu
+        self.menu_file.setTitle(language.menu_file)
+        self.menu_viewer.setTitle(language.menu_viewer)
+        self.menu_prediction.setTitle(language.menu_prediction)
+        self.menu_help.setTitle(language.menu_help)
+
+        # action
+        # file menu
+        self.action_openfolder.setText(language.menu_action_openfolder)
+        self.action_openfiles.setText(language.menu_action_openfiles)
+        self.action_savetda.setText(language.menu_action_savetda)
+        self.action_saveastda.setText(language.menu_action_saveastda)
+        self.action_loadtda.setText(language.menu_action_loadtda)
+        self.action_backfile.setText(language.menu_action_backfile)
+        self.action_forwardfile.setText(language.menu_action_forwardfile)
+        self.action_exportCSV.setText(language.menu_action_exportCSV)
+        self.action_exportDataset.setText(language.menu_action_exportDataset)
+        self.action_exit.setText(language.menu_action_exit)
+
+        # view menu
+        self.action_zoomin.setText(language.menu_action_zoomin)
+        self.action_zoomout.setText(language.menu_action_zoomout)
+        self.action_showentire.setText(language.menu_action_showentire)
+        self.action_showselected.setText(language.menu_action_showselected)
+
+        # prediction menu
+        self.action_predict.setText(language.menu_action_predict)
+        self.action_done.setText(language.menu_action_done)
+        self.action_discard.setText(language.menu_action_discard)
+        self.action_areaRectMode.setText(language.menu_action_areaRectMode)
+        self.action_areaQuadMode.setText(language.menu_action_areaQuadMode)
+        self.action_predictImageMode.setText(language.menu_action_predictImageMode)
+        self.action_predictDocumentMode.setText(language.menu_action_predictDocumentMode)
+
+        # help menu
+        self.action_about.setText(language.menu_action_about)
+        self.action_preferences.setText(language.menu_action_preferences)
 
