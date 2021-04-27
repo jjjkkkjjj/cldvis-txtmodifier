@@ -432,3 +432,5 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.updateModel()
         self.updateAllUI()
 
+        QMessageBox.information(self, 'Notification', 'Predicted!\nThe results were saved in {}'.format(self.model.tdapath))
+
