@@ -22,6 +22,9 @@ class VCAbstractMixin(object):
         """
         pass
 
+    def updateAll(self):
+        pass
+
     def updateModel(self):
         pass
 

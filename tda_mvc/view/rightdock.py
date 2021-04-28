@@ -19,6 +19,7 @@ class RightDockView(QWidget):
         self.model = check_instance('model', model, Model)
         self.initUI()
         self.updateUI()
+        self.updateLanguage()
 
     def initUI(self):
         vbox = QVBoxLayout()
@@ -40,3 +41,7 @@ class RightDockView(QWidget):
     def updateUI(self):
         self.model.layoutChanged.emit()
         self.tableview.repaint()
+
+    def updateLanguage(self):
+        language = self.model.language
+        self.label_predict.setText(language.prediction)

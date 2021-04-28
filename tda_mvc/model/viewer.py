@@ -38,10 +38,14 @@ class ViewerModelMixin(ModelAbstractMixin):
 
     @property
     def language(self):
+        """
+        Return Language class, NOT instance
+        :return:
+        """
         if self.languagemode == LanguageMode.ENGLISH:
-            return English()
+            return English
         elif self.languagemode == LanguageMode.JAPANESE:
-            return Japanese()
+            return Japanese
     @property
     def languagemode(self):
         if self.config.languagemode == 'English':

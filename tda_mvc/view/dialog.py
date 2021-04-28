@@ -5,6 +5,7 @@ import glob, os, sys
 
 from ..utils.modes import ExportFileExtention, ExportDatasetFormat, PredictionMode, AreaMode, LanguageMode
 from ..utils.funcs import create_fileters
+from ..model.language import *
 
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
@@ -13,7 +14,7 @@ class AboutDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        title = 'About Table Data Analyzer'
+        title = 'About cldvis'
         self.setWindowTitle(title)
 
         hbox = QHBoxLayout()
@@ -23,7 +24,7 @@ class AboutDialog(QDialog):
         hbox.addWidget(label_icon)
 
         label_text = QLabel()
-        text = 'Table Data Analyzer uses following icon <br>' \
+        text = 'cldvis uses following icons <br>' \
                'by <a href="https://icons8.com/icons">icons8.com</a>;<br><br>' \
                '<a href="https://icons8.com/icon/XWoSyGbnshH2/file">File icon by Icons8</a><br>' \
                '<a href="https://icons8.com/icon/dINnkNb1FBl4/folder">Folder icon by Icons8</a><br>' \
@@ -88,7 +89,14 @@ class PreferencesDialog(QDialog):
         self.initUI()
         self.establish_connection()
         self.updateUI()
+        self.updateLanguage()
 
+    @property
+    def language(self):
+        if self.languagemode == 'English':
+            return English
+        elif self.languagemode == 'Japanese':
+            return Japanese
 
     def initUI(self):
         title = 'Preferences'
@@ -253,9 +261,9 @@ class PreferencesDialog(QDialog):
 
     def establish_connection(self):
         # basic settings
-        self.comboBox_languagemode.currentTextChanged.connect(lambda: self.connection('languagemode'))
-        self.comboBox_defaultareamode.currentTextChanged.connect(lambda: self.connection('defaultareamode'))
-        self.comboBox_defaultpredmode.currentTextChanged.connect(lambda: self.connection('defaultpredmode'))
+        self.comboBox_languagemode.currentIndexChanged.connect(lambda: self.connection('languagemode'))
+        self.comboBox_defaultareamode.currentIndexChanged.connect(lambda: self.connection('defaultareamode'))
+        self.comboBox_defaultpredmode.currentIndexChanged.connect(lambda: self.connection('defaultpredmode'))
 
         # google cloud vision
         self.button_readJsonpath.clicked.connect(lambda: self.connection('credentialJsonpath'))
@@ -278,7 +286,7 @@ class PreferencesDialog(QDialog):
 
         #### credential json path ####
         if self._isValidJsonPath is None:
-            self.label_jsonpathStatus.setText('Not selected')
+            self.label_jsonpathStatus.setText(self.language.pref_notselected)
             icon = self.style().standardIcon(QStyle.SP_MessageBoxWarning)
             enable_ok = enable_ok and False
         elif self._isValidJsonPath:
@@ -286,7 +294,7 @@ class PreferencesDialog(QDialog):
             icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
             enable_ok = enable_ok and True
         else:
-            self.label_jsonpathStatus.setText('{} is invalid'.format(os.path.basename(self.credentialJsonpath)))
+            self.label_jsonpathStatus.setText(self.language.pref_jsonInvalidStatus.format(os.path.basename(self.credentialJsonpath)))
             icon = self.style().standardIcon(QStyle.SP_MessageBoxCritical)
             enable_ok = enable_ok and False
         self.label_jsonpathStatusIcon.setPixmap(icon.pixmap(QSize(16, 16)))
@@ -297,13 +305,38 @@ class PreferencesDialog(QDialog):
             icon = self.style().standardIcon(QStyle.SP_DialogApplyButton)
             enable_ok = enable_ok and True
         else:
-            self.label_datasetdirStatus.setText('Not selected')
+            self.label_datasetdirStatus.setText(self.language.pref_notselected)
             icon = self.style().standardIcon(QStyle.SP_MessageBoxCritical)
             enable_ok = enable_ok and False
         self.label_datasetdirStatusIcon.setPixmap(icon.pixmap(QSize(16, 16)))
 
         #### ok ####
         self.button_ok.setEnabled(enable_ok)
+
+    def updateLanguage(self):
+        language = self.language
+
+        self.setWindowTitle(language.pref_title)
+        self.groupBox_basic.setTitle(language.pref_basic)
+        self.label_languagemode.setText(language.pref_languagemode)
+        for i, val in enumerate(language.languagemode_list):
+            self.comboBox_languagemode.setItemText(i, val)
+        self.label_defaultareamode.setText(language.pref_defaultareamode)
+        for i, val in enumerate(language.areamode_list):
+            self.comboBox_defaultareamode.setItemText(i, val)
+        self.label_defaultpredmode.setText(language.pref_defaultpredmode)
+        for i, val in enumerate(language.predmode_list):
+            self.comboBox_defaultpredmode.setItemText(i, val)
+        self.button_readJsonpath.setText(language.pref_readJsonpath)
+        self.groupBox_export.setTitle(language.pref_export)
+        self.label_exportfileformat.setText(language.pref_exportfileformat)
+        self.label_exportSameRowY.setText(language.pref_exportSameRowY)
+        self.label_exportConcatColX.setText(language.pref_exportConcatColX)
+        self.label_datasetformat.setText(language.pref_datasetformat)
+        self.label_datasetdir.setText(language.pref_datasetdir)
+        self.button_openDatasetDir.setText(language.open)
+        self.button_ok.setText(language.ok)
+
 
 
     def checkJsonpath(self):
@@ -325,18 +358,19 @@ class PreferencesDialog(QDialog):
 
     def connection(self, connecttype):
         if connecttype == 'languagemode':
-            self.languagemode = self.comboBox_languagemode.currentText()
-
+            self.languagemode = LanguageMode.gen_list()[self.comboBox_languagemode.currentIndex()]
+            self.updateUI()
+            self.updateLanguage()
 
         elif connecttype == 'defaultareamode':
-            self.defaultareamode = self.comboBox_defaultareamode.currentText()
+            self.defaultareamode = AreaMode.gen_list()[self.comboBox_defaultareamode.currentIndex()]
 
         elif connecttype == 'defaultpredmode':
-            self.defaultpredmode = self.comboBox_defaultpredmode.currentText()
+            self.defaultpredmode = PredictionMode.gen_list()[self.comboBox_defaultpredmode.currentIndex()]
 
         elif connecttype == 'credentialJsonpath':
             filters_list = create_fileters(('JSON', 'json'))
-            filepath, _ = QFileDialog.getOpenFileName(self, 'Open Credential Json File', '', ';;'.join(filters_list), None)
+            filepath, _ = QFileDialog.getOpenFileName(self, self.language.pref_openjsonfile, '', ';;'.join(filters_list), None)
 
             self.credentialJsonpath = filepath if filepath != '' else None
 
@@ -353,7 +387,7 @@ class PreferencesDialog(QDialog):
             self.export_datasetFormat = self.comboBox_datasetformat.currentText()
 
         elif connecttype == 'export_datasetDir':
-            dirpath = QFileDialog.getExistingDirectory(self, 'Open Dataset Directory to be exported',
+            dirpath = QFileDialog.getExistingDirectory(self, self.language.pref_opendatasetdir,
                                                        self.model.config.export_datasetDir)
             if dirpath == '':
                 return
@@ -387,22 +421,28 @@ class PreferencesDialog(QDialog):
 class EditDialog(QDialog):
     edited = Signal(str)
     removed = Signal()
-    def __init__(self, annotation, parent=None):
+    def __init__(self, model, parent=None):
         super().__init__(parent)
 
-        self.annoatation = annotation
+        from ..model import Model
+        self.model: Model = model
 
         self.initUI()
         self.establish_connection()
+        self.updateLanguage()
+
+    @property
+    def annotation(self):
+        return self.model.annotations.selectedAnnotation
 
     def initUI(self):
-        title = 'Edit {}'.format(self.annoatation.text)
+        title = 'Edit {}'.format(self.annotation.text)
         self.setWindowTitle(title)
 
         vbox = QVBoxLayout()
         self.shifhtEnterTextEdit = ShiftEnterTextEdit(self)
         self.shifhtEnterTextEdit.installEventFilter(self)
-        self.shifhtEnterTextEdit.setText(self.annoatation.text)
+        self.shifhtEnterTextEdit.setText(self.annotation.text)
         self.shifhtEnterTextEdit.moveCursor(QTextCursor.End)
         self.shifhtEnterTextEdit.selectAll()
         vbox.addWidget(self.shifhtEnterTextEdit)
@@ -426,9 +466,19 @@ class EditDialog(QDialog):
         self.button_cancel.clicked.connect(self.close)
         self.button_remove.clicked.connect(self.removeClicked)
 
+    def updateLanguage(self):
+        language = self.model.language
+
+        title = language.edittext.format(self.annotation.text)
+        self.setWindowTitle(title)
+        self.button_remove.setText(language.remove)
+        self.button_cancel.setText(language.cancel)
+        self.button_ok.setText(language.ok)
+
+
     def okClicked(self):
         text = self.shifhtEnterTextEdit.toPlainText()
-        if self.annoatation.text != text:
+        if self.annotation.text != text:
             self.edited.emit(text)
         self.close()
 

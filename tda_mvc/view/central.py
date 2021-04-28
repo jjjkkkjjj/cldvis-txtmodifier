@@ -129,6 +129,7 @@ class CentralView(QWidget):
         self.model = check_instance('model', model, Model)
         self.initUI()
         self.updateUI()
+        self.updateLanguage()
 
     def initUI(self):
         vbox = QVBoxLayout()
@@ -168,10 +169,11 @@ class CentralView(QWidget):
         self.imageView.setEnabled(True) # because accept drag and drop
 
         if self.model.isExistImg:
+            language = self.model.language
             # set the filename of the shown image
-            self.label_filename.setText('Filename: {}'.format(os.path.basename(self.model.imgpath)))
+            self.label_filename.setText('{}: {}'.format(language.filename, os.path.basename(self.model.imgpath)))
             # set the default saved filename
-            self.label_savefilename.setText('Savename: {}'.format(self.model.default_savename))
+            self.label_savefilename.setText('{}: {}'.format(language.savename, self.model.default_savename))
 
             # set the image
             pixmap, _ = get_pixmap(self.model, self.scrollArea.size())
@@ -179,6 +181,17 @@ class CentralView(QWidget):
             self.imageView.setPixmap(pixmap)
 
         self.imageView.repaint()
+
+    def updateLanguage(self):
+        language = self.model.language
+        if self.model.isExistImg:
+            # set the filename of the shown image
+            self.label_filename.setText('{}: {}'.format(language.filename, os.path.basename(self.model.imgpath)))
+            # set the default saved filename
+            self.label_savefilename.setText('{}: {}'.format(language.savename, self.model.default_savename))
+        else:
+            self.label_filename.setText('{}:'.format(language.filename))
+            self.label_savefilename.setText('{}:'.format(language.savename))
         
 class ImgContextMenu(QMenu):
     # model

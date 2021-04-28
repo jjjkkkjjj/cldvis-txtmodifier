@@ -211,7 +211,7 @@ class CentralVCMixin(VCAbstractMixin):
             self.updateModel()
             self.updateAllUI()
 
-        editDialog = EditDialog(self.model.annotations.selectedAnnotation, self)
+        editDialog = EditDialog(self.model, self)
         editDialog.edited.connect(lambda text: edited(text))
         editDialog.removed.connect(remove)
         editDialog.exec_()

@@ -42,6 +42,11 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
         self.menu = MenuBar(self.model, self)
         self.setMenuBar(self.menu)
 
+    def updateAll(self):
+        self.updateModel()
+        self.updateAllUI()
+        self.updateLanguage()
+
     def updateAllUI(self):
         self.leftdock.updateUI()
         self.central.updateUI()
@@ -50,6 +55,8 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
 
     def updateLanguage(self):
         self.leftdock.updateLanguage()
+        self.central.updateLanguage()
+        self.rightdock.updateLanguage()
         self.menu.updateLanguage()
 
     def establish_connection(self):
@@ -207,8 +214,8 @@ class MainViewController(LeftDockVCMixin, CentralVCMixin, RightDockVCMixin, QMai
 
     def closeEvent(self, event):
         if self.model.annotations.isEdited:
-            ret = QMessageBox.warning(self, 'Notification',
-                                      'Edited results has not saved yet.\nAre you sure to quit this application?',
+            ret = QMessageBox.warning(self, self.model.language.notification,
+                                      self.model.language.appclosetext,
                                       QMessageBox.No | QMessageBox.Yes)
             if ret == QMessageBox.No:
                 event.ignore()

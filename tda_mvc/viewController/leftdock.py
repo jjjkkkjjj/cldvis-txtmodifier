@@ -74,13 +74,17 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.menu.action_about.triggered.connect(self.openAbout)
         self.menu.action_preferences.triggered.connect(self.openPreferences)
 
+    @property
+    def language(self):
+        return self.model.language
+
     def openfile(self):
         filters = '{} ({})'.format('Images', ' '.join(['*' + ext for ext in SUPPORTED_EXTENSIONS]))
 
-        filenames = QFileDialog.getOpenFileNames(self, 'OpenFiles', self.model.config.lastOpenDir, filters, None)
+        filenames = QFileDialog.getOpenFileNames(self, self.language.openfiles, self.model.config.lastOpenDir, filters, None)
         filenames = filenames[0]
         if len(filenames) == 0:
-            _ = QMessageBox.warning(self, 'Warning', 'No image files!!', QMessageBox.Ok)
+            _ = QMessageBox.warning(self, self.language.warning, self.language.notselectedtext, QMessageBox.Ok)
             filenames = None
 
         self.model.set_imgPaths(filenames)
@@ -88,11 +92,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.setModel_from_tda(tda)
 
         # update view
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
     def openFolder(self):
-        dirpath = QFileDialog.getExistingDirectory(self, 'OpenDir', self.model.config.lastOpenDir)
+        dirpath = QFileDialog.getExistingDirectory(self, self.language.opendir, self.model.config.lastOpenDir)
 
         filenames = sorted(glob.glob(os.path.join(dirpath, '*')))
         # remove not supported files and directories
@@ -103,8 +106,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.setModel_from_tda(tda)
 
         # update view
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
     def savetda(self, isDefault):
         if not self.model.annotations.isEdited:
@@ -114,8 +116,8 @@ class LeftDockVCMixin(VCAbstractMixin):
         if isDefault:
             filepath = os.path.join(self.model.export_tdaDir, self.model.default_savename)
             if os.path.exists(filepath):
-                ret = QMessageBox.warning(self, 'Notification',
-                                          '{} has already existed\nAre you sure to overwrite it?'.format(self.model.default_savename),
+                ret = QMessageBox.warning(self, self.language.notification,
+                                          self.language.existfiletext.format(self.model.default_savename),
                                           QMessageBox.No | QMessageBox.Yes)
                 if ret == QMessageBox.No:
                     return False
@@ -124,7 +126,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         else:
             filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
             filters_list = create_fileters(('TDA Binary', 'tda'))
-            filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as',
+            filepath, selected_filter = QFileDialog.getSaveFileName(self, self.language.exportfileas,
                                                                     os.path.join(self.model.config.lastSavedtdaDir, filename),
                                                                     ';;'.join(filters_list), None)
             if filepath == '':
@@ -132,20 +134,19 @@ class LeftDockVCMixin(VCAbstractMixin):
             tda = TDA(self.model)
             TDA.save(tda, filepath)
             self.model.set_lastSavedtdaDir(filepath)
-        _ = QMessageBox.information(self, 'Saved', 'Saved to {}'.format(filepath))
+        _ = QMessageBox.information(self, self.language.saved, self.language.savedtotext.format(filepath))
         return True
 
     def loadtda(self):
         filters_list = create_fileters(('TDA Binary', 'tda'))
-        filepath, _ = QFileDialog.getOpenFileName(self, 'Open TDA Binary File', self.model.export_tdaDir, ';;'.join(filters_list), None)
+        filepath, _ = QFileDialog.getOpenFileName(self, self.language.opentdabinary, self.model.export_tdaDir, ';;'.join(filters_list), None)
         if filepath == '':
             return
 
         tda = TDA.load(filepath)
         self.setModel_from_tda(tda)
 
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
     def changeImg(self, isForward):
         """
@@ -161,7 +162,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         """
         if self.model.isPredicted:
             if not self.savetda(isDefault=True):
-                ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
+                ret = QMessageBox.warning(self, self.language.discardallresults, self.language.discardallresultstext, QMessageBox.Yes | QMessageBox.No)
                 if ret == QMessageBox.No:
                     return
             self.model.discardAll()
@@ -183,7 +184,7 @@ class LeftDockVCMixin(VCAbstractMixin):
     def exportTableFile(self):
         filters_list = create_fileters(*ExportFileExtention.gen_filters_args(self.model.config.export_defaultFileFormat))
         filename = os.path.splitext(os.path.basename(self.model.default_savename))[0]
-        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export file as', os.path.join(self.model.config.lastSavedTableFileDir, filename),
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, self.language.exportfileas, os.path.join(self.model.config.lastSavedTableFileDir, filename),
                                                ';;'.join(filters_list), None)
         #with open('./debug/texts.csv', 'w') as f:
         if filepath == '':
@@ -212,12 +213,12 @@ class LeftDockVCMixin(VCAbstractMixin):
         else:
             return
         self.model.set_lastSavedTableFileDir(filepath)
-        QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
+        QMessageBox.information(self, self.language.savedasdataset, self.language.savedasdatasettext.format(filepath, fileformat))
 
     def exportDataset(self):
         filters_list = create_fileters(*ExportDatasetFormat.gen_filters_args(self.model.config.lastSavedDatasetDir))
         filename = os.path.splitext(os.path.basename(self.model.imgpath))[0]
-        filepath, selected_filter = QFileDialog.getSaveFileName(self, 'Export dataset',
+        filepath, selected_filter = QFileDialog.getSaveFileName(self, self.language.exportdataset,
                                                                 os.path.join(self.model.export_datasetDir, filename),
                                                                 ';;'.join(filters_list), None)
         # with open('./debug/texts.csv', 'w') as f:
@@ -239,7 +240,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         else:
             return
         self.model.set_lastSavedDatasetDir(filepath)
-        QMessageBox.information(self, 'Saved as dataset', 'Saved to {} as {} format'.format(filepath, fileformat))
+        QMessageBox.information(self, self.language.savedasdataset, self.language.savedasdatasettext.format(filepath, fileformat))
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:
@@ -261,8 +262,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.zoomvalue = value
 
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
         # align center position after zoom
         _, size = get_pixmap(self.model)
@@ -285,8 +285,7 @@ class LeftDockVCMixin(VCAbstractMixin):
     def predmodeChanged(self, mode):
         self.model.predmode = mode
 
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
     def showingmodeChanged(self, mode):
         self.model.showingmode = mode
@@ -297,8 +296,7 @@ class LeftDockVCMixin(VCAbstractMixin):
             elif self.model.areamode == AreaMode.QUADRANGLE:
                 self.model.saveSelectedImg_quadmode(self.model.imgpath)
 
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
     def areamodeChanged(self, mode):
         self.model.areamode = mode
@@ -322,12 +320,12 @@ class LeftDockVCMixin(VCAbstractMixin):
     def discard(self):
         if self.model.isPredicted:
             if self.model.annotations.isEdited:
-                ret = QMessageBox.warning(self, 'Discard all results', 'Are you sure you want to discard all results?', QMessageBox.Yes | QMessageBox.No)
+                ret = QMessageBox.warning(self, self.language.discardallresults, self.language.discardallresultstext, QMessageBox.Yes | QMessageBox.No)
                 if ret == QMessageBox.No:
                     return
 
         else:
-            ret = QMessageBox.warning(self, 'Discard selection', 'Are you sure you want to discard selection area?',
+            ret = QMessageBox.warning(self, self.language.discardarea, self.language.discardarreatext,
                                       QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.No:
                 return
@@ -406,14 +404,14 @@ class LeftDockVCMixin(VCAbstractMixin):
 
             except PredictionError as e:
                 # show messagebox
-                ret = QMessageBox.critical(self, 'Couldn\'t predict', 'Couldn\'t predict texts.\nThe error code is\n'.format(str(e)), QMessageBox.Yes)
+                ret = QMessageBox.critical(self, self.language.couldntpredict, self.language.couldntpredicttext.format(str(e)), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
                 return
             except Exception as e:
                 import traceback
-                ret = QMessageBox.critical(self, 'Unexpected Error', 'Unexpected error was occurred.\nThe error code is\n{}'.format(str(e)), QMessageBox.Yes)
+                ret = QMessageBox.critical(self, self.language.unexpectederror, self.language.unexpectederrortext.format(str(e)), QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
@@ -432,8 +430,7 @@ class LeftDockVCMixin(VCAbstractMixin):
 
         self.model.saveInDefaultDirectory()
         # update all
-        self.updateModel()
-        self.updateAllUI()
+        self.updateAll()
 
-        QMessageBox.information(self, 'Notification', 'Predicted!\nThe results were saved in {}'.format(self.model.tdapath))
+        QMessageBox.information(self, self.language.notification, self.language.predictedtext.format(self.model.tdapath))
 

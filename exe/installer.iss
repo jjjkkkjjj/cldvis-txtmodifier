@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "cldvis"
-#define MyAppVersion "0.2"
+#define MyAppVersion "0.3"
 #define MyAppPublisher "Junnosuke Kado"
 #define MyAppURL "https://github.com/jjjkkkjjj"
 #define MyAppExeName "cldvis.exe"
@@ -32,7 +32,7 @@ PrivilegesRequired=lowest
 OutputDir=.\installer
 OutputBaseFilename=cldvis-installer_{#MyAppVersion}
 SetupIconFile=..\tda_mvc\icon\icon.ico
-Password=cldvis-jjjkkkjjj
+;Password=cldvis-jjjkkkjjj
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

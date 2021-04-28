@@ -221,15 +221,15 @@ class LeftDockView(QWidget):
     def updateLanguage(self):
         language = self.model.language
 
-        self.groupBox_file.setTitle(language.leftdock_file)
-        self.groupBox_view.setTitle(language.leftdock_view)
-        self.groupBox_showing.setTitle(language.leftdock_showing)
-        self.radioButton_entire.setText(language.leftdock_entire)
-        self.radioButton_selected.setText(language.leftdock_selected)
-        self.groupBox_prediction.setTitle(language.leftdock_prediction)
-        self.groupBox_areamode.setTitle(language.leftdock_areamode)
-        self.radioButton_rect.setText(language.leftdock_rectangle)
-        self.radioButton_quad.setText(language.leftdock_quadrangle)
-        for i, text in enumerate(language.leftdock_predmode):
+        self.groupBox_file.setTitle(language.file)
+        self.groupBox_view.setTitle(language.view)
+        self.groupBox_showing.setTitle(language.showing)
+        self.radioButton_entire.setText(language.entire)
+        self.radioButton_selected.setText(language.selected)
+        self.groupBox_prediction.setTitle(language.prediction)
+        self.groupBox_areamode.setTitle(language.areamode)
+        self.radioButton_rect.setText(language.rectangle)
+        self.radioButton_quad.setText(language.quadrangle)
+        for i, text in enumerate(language.predmode_list):
             self.comboBox_predmode.setItemText(i, text)
 
