@@ -8,7 +8,7 @@ from .base import ModelAbstractMixin
 from ..utils.geometry import Annotation, Polygon
 from ..utils.paint import Color, NoColor, transparency, orange
 from ..utils.modes import MoveActionState, AreaMode
-from ..utils.funcs import qsize_from_quadrangle, cvimread_unicode
+from ..utils.funcs import qsize_from_quadrangle, cvimread_unicode, cvimwrite_unicode
 from ..utils.parse_annotation import parse_annotations_forFile_basedTopLeft, parse_annotations_forVOC
 from .tda import TDA
 
@@ -116,7 +116,7 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
         dipath = os.path.dirname(path)
         imgname, _ = os.path.splitext(os.path.basename(path))
         imgpath = os.path.join(dipath, imgname + ext)
-        cv2.imwrite(imgpath, cvimg)
+        cvimwrite_unicode(imgpath, cvimg)
 
         vocstr = parse_annotations_forVOC(self, imgpath)
         with open(path, 'wb') as f:
@@ -145,7 +145,7 @@ class AnnotationModelMixin(ModelAbstractMixin, QAbstractTableModel):
 
         _, ext = os.path.splitext(self.selectedImgPath)
         cvimg = cvimread_unicode(self.selectedImgPath)
-        cv2.imwrite(os.path.join(self.export_imageDir, filename + ext), cvimg)
+        cvimwrite_unicode(os.path.join(self.export_imageDir, filename + ext), cvimg)
 
         # save dataset
         if self.config.export_datasetFormat == 'VOC':
