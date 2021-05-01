@@ -37,6 +37,7 @@ class MenuBar(QMenuBar):
     ### Attributes ###
     # menu
     menu_file: QMenu
+    menu_edit: QMenu
     menu_viewer: QMenu
     menu_prediction: QMenu
     menu_help: QMenu
@@ -53,6 +54,10 @@ class MenuBar(QMenuBar):
     action_exportCSV: QAction
     action_exportDataset: QAction
     action_exit: QAction
+
+    # edit menu
+    action_undo: QAction
+    action_redo: QAction
 
     # view menu
     action_zoomin: QAction
@@ -85,6 +90,7 @@ class MenuBar(QMenuBar):
 
     def initUI(self):
         self.menu_file = self.addMenu('&File')
+        self.menu_edit = self.addMenu('&Edit')
         self.menu_viewer = self.addMenu('&View')
         self.menu_prediction = self.addMenu('&Prediction')
         self.menu_help = self.addMenu('&Help')
@@ -132,6 +138,16 @@ class MenuBar(QMenuBar):
                                      self.action_backfile, self.action_forwardfile, None,
                                      self.action_exportCSV, self.action_exportDataset, None,
                                      self.action_exit))
+
+        ##### Edit #####
+        # undo
+        self.action_undo = create_action(self, '&Undo', slot=None,
+                                         shortcut='Ctrl+Z', tip='Undo')
+        # redo
+        self.action_redo = create_action(self, '&Redo', slot=None,
+                                         shortcut='Ctrl+Y', tip='Redo')
+
+        add_actions(self.menu_edit, (self.action_undo, self.action_redo, None))
 
         ##### View #####
         # zoom in
@@ -208,6 +224,7 @@ class MenuBar(QMenuBar):
         self.action_discard.setEnabled(self.model.isExistArea)
 
         self.updateFile()
+        self.updateEdit()
         self.updateViewer()
         self.updatePrediction()
 
@@ -222,6 +239,10 @@ class MenuBar(QMenuBar):
         # export
         self.action_exportCSV.setEnabled(self.model.isPredicted)
         self.action_exportDataset.setEnabled(self.model.isPredicted)
+
+    def updateEdit(self):
+        self.action_undo.setEnabled(self.model.isUndoable)
+        self.action_redo.setEnabled(self.model.isRedoable)
 
     def updateViewer(self):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)
@@ -245,6 +266,7 @@ class MenuBar(QMenuBar):
 
         # menu
         self.menu_file.setTitle(language.menu_file)
+        self.menu_edit.setTitle(language.menu_edit)
         self.menu_viewer.setTitle(language.menu_viewer)
         self.menu_prediction.setTitle(language.menu_prediction)
         self.menu_help.setTitle(language.menu_help)
@@ -261,6 +283,10 @@ class MenuBar(QMenuBar):
         self.action_exportCSV.setText(language.menu_action_exportCSV)
         self.action_exportDataset.setText(language.menu_action_exportDataset)
         self.action_exit.setText(language.menu_action_exit)
+
+        # edit menu
+        self.action_undo.setText(language.menu_action_undo)
+        self.action_redo.setText(language.menu_action_redo)
 
         # view menu
         self.action_zoomin.setText(language.menu_action_zoomin)

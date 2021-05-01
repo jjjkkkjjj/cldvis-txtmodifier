@@ -58,6 +58,10 @@ class LeftDockVCMixin(VCAbstractMixin):
         self.menu.action_exportDataset.triggered.connect(self.exportDataset)
         self.menu.action_exit.triggered.connect(self.close)
 
+        # edit
+        self.menu.action_undo.triggered.connect(lambda: self.undoredo(True))
+        self.menu.action_redo.triggered.connect(lambda: self.undoredo(False))
+
         # view
         self.menu.action_zoomin.triggered.connect(lambda: self.zoomInOut(True))
         self.menu.action_zoomout.triggered.connect(lambda: self.zoomInOut(False))
@@ -241,6 +245,20 @@ class LeftDockVCMixin(VCAbstractMixin):
             return
         self.model.set_lastSavedDatasetDir(filepath)
         QMessageBox.information(self, self.language.savedasdataset, self.language.savedasdatasettext.format(filepath, fileformat))
+
+    def undoredo(self, isUndo):
+        if self.model.isPredicted:
+            # TODO: implement undo and redo for annotation
+            return
+
+        if isUndo:
+            self.model.undo()
+        else:
+            self.model.redo()
+
+        # update
+        self.updateModel()
+        self.updateAllUI()
 
     def zoomInOut(self, isZoomIn):
         if isZoomIn:

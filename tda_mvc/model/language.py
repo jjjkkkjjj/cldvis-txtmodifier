@@ -24,6 +24,7 @@ class English(object):
 
     ##### menu ######
     menu_file = '&File'
+    menu_edit = '&Edit'
     menu_viewer = '&View'
     menu_prediction = '&Prediction'
     menu_help = '&Help'
@@ -38,6 +39,9 @@ class English(object):
     menu_action_exportCSV = '&Export File'
     menu_action_exportDataset = '&Export Dataset'
     menu_action_exit = '&Exit'
+
+    menu_action_undo = '&Undo'
+    menu_action_redo = '&Redo'
 
     menu_action_zoomin = '&Zoom In'
     menu_action_zoomout = '&Zoom Out'
@@ -125,6 +129,7 @@ class Japanese(English):
 
     ##### menu #####
     menu_file = '&ファイル'
+    menu_edit = '&編集'
     menu_viewer = '&表示'
     menu_prediction = '&予測'
     menu_help = '&ヘルプ'
@@ -139,6 +144,9 @@ class Japanese(English):
     menu_action_exportCSV = '&表形式ファイルを出力'
     menu_action_exportDataset = '&データセットファイルを出力'
     menu_action_exit = '&終了'
+
+    menu_action_undo = '&元に戻す'
+    menu_action_redo = '&やり直す'
 
     menu_action_zoomin = '&拡大'
     menu_action_zoomout = '&縮小'

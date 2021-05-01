@@ -1,4 +1,4 @@
-import cv2, os, shutil
+import cv2, os, shutil, copy
 
 from ..utils.modes import PredictionMode, MoveActionState, ShowingMode, AreaMode, LanguageMode
 from ..utils.geometry import *
@@ -27,6 +27,13 @@ class ViewerModelMixin(ModelAbstractMixin):
         self.quadrangle = Polygon(maximum_points_number=4)
         self.rectangle.hide()
         self.quadrangle.hide()
+
+        # stacked rectangle and quadrangle for ctrl+z or ctrl+y
+        self._maximumStackSize = 10
+        self._stackedRectsIndex = -1
+        self._stackedRects = []
+        self._stackedQuadsIndex = -1
+        self._stackedQuads = []
 
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
@@ -61,6 +68,11 @@ class ViewerModelMixin(ModelAbstractMixin):
         self.rectangle.hide()
         self.quadrangle.hide()
 
+        self._stackedRectsIndex = -1
+        self._stackedRects = []
+        self._stackedQuadsIndex = -1
+        self._stackedQuads = []
+
         # start position. this is for moveEvent
         self._startPosition = QPoint(0, 0)
         # previous position for scroll
@@ -68,6 +80,96 @@ class ViewerModelMixin(ModelAbstractMixin):
 
         self.selectedRectImgPath = None
         self.selectedQuadImgPath = None
+
+    ### undo redo ###
+    def _appendToStack(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            if len(self._stackedRects) == self._maximumStackSize:
+                # discard first to avoid using much memory.
+                self._stackedRects = self._stackedRects[1:]
+            else:
+                # update stacked values from current index
+                self._stackedRects = self._stackedRects[:self._stackedRectsIndex + 1]
+
+            # append to last
+            self._stackedRects += [copy.deepcopy(self.rectangle)]
+            self._stackedRectsIndex = len(self._stackedRects) - 1
+
+        elif self.areamode == AreaMode.QUADRANGLE:
+            if len(self._stackedQuads) == self._maximumStackSize:
+                # discard first to avoid using much memory.
+                self._stackedQuads = self._stackedQuads[1:]
+            else:
+                # update stacked values from current index
+                self._stackedQuads = self._stackedQuads[:self._stackedQuadsIndex + 1]
+
+            # append to last
+            self._stackedQuads += [copy.deepcopy(self.quadrangle)]
+            self._stackedQuadsIndex = len(self._stackedQuads) - 1
+
+    @property
+    def currentCopiedRectangle(self):
+        if self._stackedRectsIndex == -1:
+            return Rect()
+        else:
+            return copy.deepcopy(self._stackedRects[self._stackedRectsIndex])
+    @property
+    def currentCopiedQuadrangle(self):
+        if self._stackedQuadsIndex == -1:
+            return Polygon(maximum_points_number=4)
+        else:
+            return copy.deepcopy(self._stackedQuads[self._stackedQuadsIndex])
+
+    @property
+    def isUndoable(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self._stackedRectsIndex >= 0
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self._stackedQuadsIndex >= 0
+        else:
+            return False
+    @property
+    def isRedoable(self):
+        if self.areamode == AreaMode.RECTANGLE:
+            return self._stackedRectsIndex < len(self._stackedRects) - 1
+        elif self.areamode == AreaMode.QUADRANGLE:
+            return self._stackedQuadsIndex < len(self._stackedQuads) - 1
+        else:
+            return False
+
+    def undo(self):
+        if not self.isUndoable:
+            return
+        if self.areamode == AreaMode.RECTANGLE:
+            self._stackedRectsIndex -= 1
+            self.rectangle = self.currentCopiedRectangle
+            if self._stackedRectsIndex == -1:
+                self.rectangle.hide()
+            else:
+                self.rectangle.show()
+
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self._stackedQuadsIndex -= 1
+            self.quadrangle = self.currentCopiedQuadrangle
+            if self._stackedQuadsIndex == -1:
+                self.quadrangle.hide()
+            else:
+                self.quadrangle.show()
+
+        else:
+            return
+
+    def redo(self):
+        if not self.isRedoable:
+            return
+        if self.areamode == AreaMode.RECTANGLE:
+            self._stackedRectsIndex += 1
+            self.rectangle = self.currentCopiedRectangle
+        elif self.areamode == AreaMode.QUADRANGLE:
+            self._stackedQuadsIndex += 1
+            self.quadrangle = self.currentCopiedQuadrangle
+        else:
+            return
 
     ### Zoom ###
     @property
@@ -216,6 +318,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         self.rectangle.set_selectPos(pos)
 
     def mouseRelease_rectmode(self):
+        self._appendToStack()
         if self.moveActionState == MoveActionState.RESIZE:
             self.rectangle.deselect()
         self._startPosition = QPoint(0, 0)
@@ -288,6 +391,7 @@ class ViewerModelMixin(ModelAbstractMixin):
         """
 
     def mouseRelease_quadmode(self):
+        self._appendToStack()
         self._startPosition = QPoint(0, 0)
 
     def saveSelectedImg_quadmode(self, imgpath):
