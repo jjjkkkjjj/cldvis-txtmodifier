@@ -139,7 +139,7 @@ The exported xml file (VOC format) is like this!
 # Installation
 Set up cloud vision api settings following [official](https://cloud.google.com/vision/docs/quickstart-client-libraries).
 
-And then, for Windows user, download the executable from [here](https://github.com/jjjkkkjjj/cldvis-txtmodifier/releases/download/0.3/cldvis-installer_0.3.exe)
+And then, for Windows user, download the executable from [here](https://github.com/jjjkkkjjj/cldvis-txtmodifier/releases/download/0.3.1/cldvis-installer_0.3.1.exe)
 
 Or, create a environment to run scripts.
 ```
