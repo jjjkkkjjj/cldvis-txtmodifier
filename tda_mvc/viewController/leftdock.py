@@ -248,13 +248,23 @@ class LeftDockVCMixin(VCAbstractMixin):
 
     def undoredo(self, isUndo):
         if self.model.isPredicted:
-            # TODO: implement undo and redo for annotation
-            return
-
-        if isUndo:
-            self.model.undo()
+            if self.model.showingmode == ShowingMode.ENTIRE:
+                baseWidget = self.central.imageView
+                parentQSize = self.model.areaQSize
+                offsetQPoint = self.model.areaTopLeft
+            elif self.model.showingmode == ShowingMode.SELECTED:
+                baseWidget = self.central.imageView
+                parentQSize = self.central.imageView.size()
+                offsetQPoint = QPoint(0, 0)
+            if isUndo:
+                self.model.annotations.undo(baseWidget, parentQSize, offsetQPoint)
+            else:
+                self.model.annotations.redo(baseWidget, parentQSize, offsetQPoint)
         else:
-            self.model.redo()
+            if isUndo:
+                self.model.undo()
+            else:
+                self.model.redo()
 
         # update
         self.updateModel()

@@ -103,6 +103,13 @@ The exported xml file (VOC format) is like this!
 | `Ctrl+Shift+E` | Export a file for dataset to specific location |
 | `Ctrl+Q` | Quit this application |
 
+- Edit
+
+| ShortCut key | Description |
+|:--------------|:-------------|
+| `Ctrl+Z` | Undo  |
+| `Ctrl+Y` | Redo |
+
 - Viewer
 
 | ShortCut key | Description |

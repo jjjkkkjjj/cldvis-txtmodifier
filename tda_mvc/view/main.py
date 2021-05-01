@@ -241,8 +241,10 @@ class MenuBar(QMenuBar):
         self.action_exportDataset.setEnabled(self.model.isPredicted)
 
     def updateEdit(self):
-        self.action_undo.setEnabled(self.model.isUndoable)
-        self.action_redo.setEnabled(self.model.isRedoable)
+        self.action_undo.setEnabled((self.model.isUndoable and not self.model.isPredicted) or \
+                                    (self.model.annotations.isUndoable and self.model.isPredicted))
+        self.action_redo.setEnabled((self.model.isRedoable and not self.model.isPredicted) or \
+                                    (self.model.annotations.isRedoable and self.model.isPredicted))
 
     def updateViewer(self):
         self.action_zoomin.setEnabled(self.model.isExistImg and self.model.isZoomInable)

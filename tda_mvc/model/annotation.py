@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-import json, os, datetime, cv2
+import json, os, datetime, cv2, copy
 import pandas as pd
 
 from .base import ModelAbstractMixin
@@ -163,6 +163,10 @@ class AnnotationsManager(object):
         self._startPosition = QPoint(0, 0)
 
         self._annotations = []
+        # stacked annotations for ctrl+z or ctrl+y
+        self._maximumStackSize = 10
+        self._stackedAnnoDictsIndex = -1
+        self._stackedAnnoDicts = []
 
         self.moveActionState = MoveActionState.CREATE
 
@@ -227,7 +231,25 @@ class AnnotationsManager(object):
         :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
         :return:
         """
+        self._set_results_only(results, baseWidget, parentQSize, offsetQPoint)
+        self._appendToStack()
 
+    def _set_results_only(self, results, baseWidget, parentQSize, offsetQPoint):
+        """
+        :param results: dict, detection result by vision
+            "info":
+                "width": int
+                "height": int
+                "path": str
+            "prediction": list of dict whose keys are 'text' and 'bbox'
+                "text": str
+                "bbox": list(4 points) of list(2d=(x, y))
+        :param baseWidget: QWidget, the base widget for AnnotaionRubberBand
+        :param areaQPolygon: QPolygon, the selected area's qpolygon
+        :param parentQSize: Qsize, selected parentQSize
+        :param offsetQPoint: QPoint, the topleft coordinates for selected parentQSize
+        :return:
+        """
         self._annotations = []
         self._info = results['info']
         for result in results['prediction']:
@@ -246,15 +268,61 @@ class AnnotationsManager(object):
             ret['prediction'] += [pred]
         return ret
 
-    def clear(self):
+    def clearAnnotations(self):
         for i in reversed(range(len(self._annotations))):
             self._annotations[i].clear()
             del self._annotations[i]
         self._selectedIndex = -1
+        self._annotations = []
+
+    def clear(self):
+        self.clearAnnotations()
         self.resetEdit()
         self._startPosition = QPoint(0, 0)
-        self._annotations = []
+        self._stackedAnnoDictsIndex = -1
+        self._stackedAnnoDicts = []
         self.moveActionState = MoveActionState.CREATE
+
+    ### undo redo ###
+    def _appendToStack(self):
+        if len(self._stackedAnnoDicts) == self._maximumStackSize:
+            # discard first to avoid using much memory.
+            self._stackedAnnoDicts = self._stackedAnnoDicts[1:]
+        else:
+            # update stacked values from current index
+            self._stackedAnnoDicts = self._stackedAnnoDicts[:self._stackedAnnoDictsIndex + 1]
+
+        # append to last
+        self._stackedAnnoDicts += [copy.deepcopy(self.to_dict())]
+        self._stackedAnnoDictsIndex = len(self._stackedAnnoDicts) - 1
+
+    @property
+    def currentCopiedAnnoDicts(self):
+        if self._stackedAnnoDictsIndex == -1:
+            return []
+        else:
+            return copy.deepcopy(self._stackedAnnoDicts[self._stackedAnnoDictsIndex])
+
+    @property
+    def isUndoable(self):
+        return self._stackedAnnoDictsIndex > 0
+    @property
+    def isRedoable(self):
+        return self._stackedAnnoDictsIndex < len(self._stackedAnnoDicts) - 1
+
+    def undo(self, baseWidget, parentQSize, offsetQPoint):
+        if not self.isUndoable:
+            return
+        self.clearAnnotations()
+        self._stackedAnnoDictsIndex -= 1
+        self._set_results_only(self.currentCopiedAnnoDicts, baseWidget, parentQSize, offsetQPoint)
+
+    def redo(self, baseWidget, parentQSize, offsetQPoint):
+        if not self.isRedoable:
+            return
+        self.clearAnnotations()
+        self._stackedAnnoDictsIndex += 1
+        self._set_results_only(self.currentCopiedAnnoDicts, baseWidget, parentQSize, offsetQPoint)
 
     def paint(self, painter, isShow):
         if isShow:
@@ -275,6 +343,8 @@ class AnnotationsManager(object):
             anno.hide()
 
     def set_parentVals(self, parentQSize=None, offsetQPoint=None):
+        self._parentQSize = parentQSize
+        self._offsetQPoint = offsetQPoint
         for anno in self._annotations:
             anno.set_parentVals(parentQSize, offsetQPoint)
 
@@ -295,6 +365,7 @@ class AnnotationsManager(object):
 
         anno: Annotation = self.selectedAnnotation
         anno.set_text(text)
+        self._appendToStack()
 
     def remove_selectedAnnotation(self):
         if self.isExistSelectedAnnotation:
@@ -302,6 +373,7 @@ class AnnotationsManager(object):
             self._selectedIndex = -1
             # set edited flag
             self._isEdited = True
+            self._appendToStack()
 
     def duplicate_selectedAnnotation(self):
         if self.isExistSelectedAnnotation:
@@ -310,6 +382,7 @@ class AnnotationsManager(object):
             self.append(newanno)
             # set edited flag
             self._isEdited = True
+            self._appendToStack()
 
     def remove_selectedAnnotationPoint(self):
         if self.isExistSelectedAnnotationPoint:
@@ -320,6 +393,7 @@ class AnnotationsManager(object):
                 self.remove_selectedAnnotation()
             # set edited flag
             self._isEdited = True
+            self._appendToStack()
 
     def duplicate_selectedAnnotationPoint(self):
         if self.isExistSelectedAnnotationPoint:
@@ -327,6 +401,7 @@ class AnnotationsManager(object):
             anno.duplicate_point(anno.selectedPointIndex)
             # set edited flag
             self._isEdited = True
+            self._appendToStack()
 
     def mousePress(self, pos, parentQSize):
         self._startPosition = pos
@@ -371,4 +446,6 @@ class AnnotationsManager(object):
         self.set_selectPos(pos)
 
     def mouseRelease(self):
+        if self.isExistSelectedAnnotation:
+            self._appendToStack()
         self._startPosition = QPoint(0, 0)
