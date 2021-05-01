@@ -33,7 +33,7 @@ def parse_annotations_forFile_basedTopLeft(model):
 
         polys = polys[np.logical_not(line_bindices)]
         texts = texts[np.logical_not(line_bindices)]
-        if polys.shape[0] == 0:
+        if line_polys.shape[0] == 0:
             break
 
         # sort top-left x with ascending order
@@ -108,7 +108,7 @@ def parse_annotations_forFile_basedCentroid(model):
         polys = polys[np.logical_not(line_bindices)]
         texts = texts[np.logical_not(line_bindices)]
         centroids = centroids[np.logical_not(line_bindices)]
-        if polys.shape[0] == 0:
+        if line_polys.shape[0] == 0:
             break
 
         # sort top-left x with ascending order
