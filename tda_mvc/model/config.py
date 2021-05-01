@@ -34,6 +34,8 @@ configset = {
     'export_datasetDir': (str, None)
 }
 
+default_config = {k: v[1] for k, v in configset.items()}
+
 class Config(object):
     selectedImgDir = os.path.join('.tda', 'selectedImg')
     tmpDir = os.path.join('.tda', 'tmp')
@@ -98,8 +100,8 @@ class Config(object):
                 os.makedirs('.tda')
 
             # set default value
-            self.config['default'] = configset
-            self.config['settings'] = configset
+            self.config['default'] = default_config
+            self.config['settings'] = default_config
 
             # write
             self.writeConfig()
