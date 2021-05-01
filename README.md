@@ -128,10 +128,18 @@ The exported xml file (VOC format) is like this!
 |:--------------|:-------------|
 | `Ctrl+,` | Open preferences |
 
+## Features
+
+- Multi language support (English/Japanese)
+- Drag and Drop
+- Allow scrolling by right click
+- Allow scrolling when the point is outside scrollArea
+- Auto saving
+
 # Installation
 Set up cloud vision api settings following [official](https://cloud.google.com/vision/docs/quickstart-client-libraries).
 
-And then, for Windows user, download the executable from [here](https://github.com/jjjkkkjjj/cldvis-txtmodifier/releases/download/0.0/cldvis-installer_0.0.exe)
+And then, for Windows user, download the executable from [here](https://github.com/jjjkkkjjj/cldvis-txtmodifier/releases/download/0.3/cldvis-installer_0.3.exe)
 
 Or, create a environment to run scripts.
 ```
