@@ -179,6 +179,7 @@ class LeftDockVCMixin(VCAbstractMixin):
         else:
             self.model.back()
 
+        # load tda file
         tda = self.model.get_default_tda()
         self.setModel_from_tda(tda)
 

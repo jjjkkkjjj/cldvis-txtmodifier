@@ -15,9 +15,13 @@ class CentralVCMixin(VCAbstractMixin):
         return self.central.imageView
 
     def establish_connection(self):
-        self.central.label_savefilename.enterEvent = lambda e: self.savefilename_mouseover(e, True)
-        self.central.label_savefilename.leaveEvent = lambda e: self.savefilename_mouseover(e, False)
-        self.central.label_savefilename.mouseDoubleClickEvent = self.savefilename_doubleClicked
+        self.central.label_filename.enterEvent = lambda e: self.label_mouseover(e, 'filename', True)
+        self.central.label_filename.leaveEvent = lambda e: self.label_mouseover(e, 'filename', False)
+        self.central.label_filename.mouseDoubleClickEvent = lambda e: self.label_doubleClicked(e, 'filename')
+        self.central.label_savefilename.enterEvent = lambda e: self.label_mouseover(e, 'savefilename', True)
+        self.central.label_savefilename.leaveEvent = lambda e: self.label_mouseover(e, 'savefilename', False)
+        self.central.label_savefilename.mouseDoubleClickEvent = lambda e: self.label_doubleClicked(e, 'savefilename')
+
         self.imageView.rightClicked.connect(lambda e: self.rightClicked(e))
         self.imageView.mouseReleased.connect(lambda e: self.mouseReleased(e))
         self.imageView.mousePressed.connect(lambda e: self.mousePressed(e))
@@ -25,25 +29,58 @@ class CentralVCMixin(VCAbstractMixin):
         self.imageView.mouseDoubleClicked.connect(lambda e: self.mouseDoubleClicked(e))
         self.imageView.filesDropped.connect(lambda filepaths: self.dropped(filepaths))
 
-    def savefilename_mouseover(self, e: QMouseEvent, isEnter):
-        if not self.central.label_savefilename.isEnabled():
+    def label_mouseover(self, e: QMouseEvent, labelname, isEnter):
+        label: QLabel
+        if labelname == 'filename':
+            label = self.central.label_filename
+        elif labelname == 'savefilename':
+            label = self.central.label_savefilename
+        else:
+            return
+
+        if not label.isEnabled():
             return
         if isEnter:
-            self.central.label_savefilename.setStyleSheet('color: red')
+            label.setStyleSheet('color: red')
         else:
-            self.central.label_savefilename.setStyleSheet('color: black')
+            label.setStyleSheet('color: black')
 
-    def savefilename_doubleClicked(self, e: QMouseEvent):
-        savefilename, ok = QInputDialog.getText(self, 'Set default save filename', 'Savename:', text=self.model.default_savename)
+    def label_doubleClicked(self, e: QMouseEvent, labelname):
+        language = self.model.language
+        if labelname == 'filename':
 
-        if ok:
-            _, ext = os.path.splitext(savefilename)
-            if ext != '.tda':
-                savefilename += '.tda'
-            self.model.default_savename = savefilename
+            filename, ok = QInputDialog.getItem(self, language.selectfilenametitle, language.selectfilenametext.format(self.model.imgpath),
+                                                self.model.imgfilenames, self.model.currentImgIndex, False)
+            if ok and filename != self.model.currentImgfilename:
+                # check whether to discard
+                if not self.savetda(isDefault=True):
+                    ret = QMessageBox.warning(self, language.discardallresults,
+                                              language.discardallresultstext, QMessageBox.Yes | QMessageBox.No)
+                    if ret == QMessageBox.No:
+                        return
+                self.model.discardAll()
 
-            self.updateModel()
-            self.updateAllUI()
+                imgIndex = self.model.imgfilenames.index(filename)
+                self.model.set_imgIndex(imgIndex)
+
+                # load tda file
+                tda = self.model.get_default_tda()
+                self.setModel_from_tda(tda)
+
+                # set entire and update
+                self.leftdock.radioButton_entire.click()
+
+        elif labelname == 'savefilename':
+            savefilename, ok = QInputDialog.getText(self, language.setsavenametitle, '{}:'.format(language.savename), text=self.model.default_savename)
+
+            if ok:
+                _, ext = os.path.splitext(savefilename)
+                if ext != '.tda':
+                    savefilename += '.tda'
+                self.model.default_savename = savefilename
+
+                self.updateModel()
+                self.updateAllUI()
 
     @property
     def predictedParentQSize(self):

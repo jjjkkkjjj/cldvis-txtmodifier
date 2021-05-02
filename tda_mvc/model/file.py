@@ -18,6 +18,23 @@ class FileModelMixin(ModelAbstractMixin):
         else:
             return self._imgPaths[self._imgIndex]
     @property
+    def imgfilenames(self):
+        return [os.path.basename(path) for path in self._imgPaths]
+    @property
+    def currentImgfilename(self):
+        if not self.isExistImg:
+            return None
+        else:
+            return os.path.basename(self.imgpath)
+    @property
+    def currentImgIndex(self):
+        return self._imgIndex
+    def set_imgIndex(self, index):
+        if index >= 0 and index < len(self._imgPaths):
+            self._imgIndex = index
+            self._set_defaultsavename()
+
+    @property
     def isExistImg(self):
         return len(self._imgPaths) > 0
     @property

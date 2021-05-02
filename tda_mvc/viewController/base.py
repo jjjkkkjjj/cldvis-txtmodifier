@@ -36,3 +36,6 @@ class VCAbstractMixin(object):
 
     def setModel_from_tda(self, tda):
         pass
+
+    def savetda(self, isDefault):
+        pass

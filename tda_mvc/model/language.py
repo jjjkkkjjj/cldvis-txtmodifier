@@ -101,6 +101,9 @@ class English(object):
     unexpectederror = 'Unexpected  Error'
     unexpectederrortext = 'Unexpected error was occurred.\nThe error code is\n{}'
     predictedtext = 'Predicted!\nThe results were saved in {}'
+    setsavenametitle = 'Set default save filename'
+    selectfilenametitle = 'Select a iamge filename'
+    selectfilenametext = 'Current image filepath: {}'
 
     ##### Edit dialog #####
     edittext = 'Edit {}'
@@ -208,6 +211,9 @@ class Japanese(English):
     unexpectederror = '予期せぬエラー'
     unexpectederrortext = '予期せぬエラーが発生しました．\nエラーコードは以下の通りです．\n{}'
     predictedtext = '予測しました！\n結果は{}に保存されています．'
+    setsavenametitle = '保存名の設定'
+    selectfilenametitle = '画像ファイルの選択'
+    selectfilenametext = '現在の画像ファイルのパス: {}'
 
     ##### Edit dialog #####
     edittext = '\'{}\'の編集'
