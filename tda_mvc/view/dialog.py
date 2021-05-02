@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
-import glob, os, sys
+import glob, os, sys, math
 
 from ..utils.modes import ExportFileExtention, ExportDatasetFormat, PredictionMode, AreaMode, LanguageMode
 from ..utils.funcs import create_fileters
@@ -498,3 +498,261 @@ class ShiftEnterTextEdit(QTextEdit):
             self.enterKeyPressed.emit(event)
             return
         super().keyPressEvent(event)
+
+
+# https://github.com/fbjorn/QtWaitingSpinner/blob/master/pyqtspinner/spinner.py
+class WaitingWidget(QWidget):
+    def __init__(self, parent, centerOnParent=True, disableParentWhenSpinning=False,
+                 modality=Qt.NonModal, roundness=100., opacity=None, fade=80., lines=20,
+                 line_length=10, line_width=2, radius=10, speed=math.pi / 2, color=(0, 0, 0)):
+        super().__init__(parent)
+
+        self._centerOnParent = centerOnParent
+        self._disableParentWhenSpinning = disableParentWhenSpinning
+
+        self._color = QColor(*color)
+        self._roundness = roundness
+        self._minimumTrailOpacity = math.pi
+        self._trailFadePercentage = fade
+        self._revolutionsPerSecond = speed
+        self._numberOfLines = lines
+        self._lineLength = line_length
+        self._lineWidth = line_width
+        self._innerRadius = radius
+        self._currentCounter = 0
+        self._isSpinning = False
+
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self.rotate)
+        self.updateSize()
+        self.updateTimer()
+        self.hide()
+
+        self.setWindowModality(modality)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def paintEvent(self, QPaintEvent):
+        self.updatePosition()
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), Qt.transparent)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+
+        if self._currentCounter >= self._numberOfLines:
+            self._currentCounter = 0
+
+        painter.setPen(Qt.NoPen)
+        for i in range(self._numberOfLines):
+            painter.save()
+            painter.translate(self._innerRadius + self._lineLength, self._innerRadius + self._lineLength)
+            rotateAngle = float(360 * i) / float(self._numberOfLines)
+            painter.rotate(rotateAngle)
+            painter.translate(self._innerRadius, 0)
+            distance = self.lineCountDistanceFromPrimary(i, self._currentCounter, self._numberOfLines)
+            color = self.currentLineColor(
+                distance,
+                self._numberOfLines,
+                self._trailFadePercentage,
+                self._minimumTrailOpacity,
+                self._color
+            )
+            painter.setBrush(color)
+            painter.drawRoundedRect(
+                QRect(0, -self._lineWidth / 2, self._lineLength, self._lineWidth),
+                self._roundness,
+                self._roundness,
+                Qt.RelativeSize
+            )
+            painter.restore()
+
+    def start(self):
+        self.updatePosition()
+        self._isSpinning = True
+        self.show()
+
+        if self.parentWidget and self._disableParentWhenSpinning:
+            self.parentWidget().setEnabled(False)
+
+        if not self._timer.isActive():
+            self._timer.start()
+            self._currentCounter = 0
+
+    def stop(self):
+        self._isSpinning = False
+        self.hide()
+
+        if self.parentWidget() and self._disableParentWhenSpinning:
+            self.parentWidget().setEnabled(True)
+
+        if self._timer.isActive():
+            self._timer.stop()
+            self._currentCounter = 0
+
+    def setNumberOfLines(self, lines):
+        self._numberOfLines = lines
+        self._currentCounter = 0
+        self.updateTimer()
+
+    def setLineLength(self, length):
+        self._lineLength = length
+        self.updateSize()
+
+    def setLineWidth(self, width):
+        self._lineWidth = width
+        self.updateSize()
+
+    def setInnerRadius(self, radius):
+        self._innerRadius = radius
+        self.updateSize()
+
+    @property
+    def color(self):
+        return self._color
+
+    @property
+    def roundness(self):
+        return self._roundness
+
+    @property
+    def minimumTrailOpacity(self):
+        return self._minimumTrailOpacity
+
+    @property
+    def trailFadePercentage(self):
+        return self._trailFadePercentage
+
+    @property
+    def revolutionsPersSecond(self):
+        return self._revolutionsPerSecond
+
+    @property
+    def numberOfLines(self):
+        return self._numberOfLines
+
+    @property
+    def lineLength(self):
+        return self._lineLength
+
+    @property
+    def lineWidth(self):
+        return self._lineWidth
+
+    @property
+    def innerRadius(self):
+        return self._innerRadius
+
+    @property
+    def isSpinning(self):
+        return self._isSpinning
+
+    def setRoundness(self, roundness):
+        self._roundness = max(0.0, min(100.0, roundness))
+
+    def setColor(self, color=Qt.black):
+        self._color = QColor(color)
+
+    def setRevolutionsPerSecond(self, revolutionsPerSecond):
+        self._revolutionsPerSecond = revolutionsPerSecond
+        self.updateTimer()
+
+    def setTrailFadePercentage(self, trail):
+        self._trailFadePercentage = trail
+
+    def setMinimumTrailOpacity(self, minimumTrailOpacity):
+        self._minimumTrailOpacity = minimumTrailOpacity
+
+    def rotate(self):
+        self._currentCounter += 1
+        if self._currentCounter >= self._numberOfLines:
+            self._currentCounter = 0
+        self.update()
+
+    def updateSize(self):
+        size = (self._innerRadius + self._lineLength) * 2
+        self.setFixedSize(size, size)
+
+    def updateTimer(self):
+        self._timer.setInterval(1000 / (self._numberOfLines * self._revolutionsPerSecond))
+
+    def updatePosition(self):
+        if self.parentWidget() and self._centerOnParent:
+            self.move(
+                self.parentWidget().width() / 2 - self.width() / 2,
+                self.parentWidget().height() / 2 - self.height() / 2
+            )
+
+    def lineCountDistanceFromPrimary(self, current, primary, totalNrOfLines):
+        distance = primary - current
+        if distance < 0:
+            distance += totalNrOfLines
+        return distance
+
+    def currentLineColor(self, countDistance, totalNrOfLines, trailFadePerc, minOpacity, colorinput):
+        color = QColor(colorinput)
+        if countDistance == 0:
+            return color
+        minAlphaF = minOpacity / 100.0
+        distanceThreshold = int(math.ceil((totalNrOfLines - 1) * trailFadePerc / 100.0))
+        if countDistance > distanceThreshold:
+            color.setAlphaF(minAlphaF)
+        else:
+            alphaDiff = color.alphaF() - minAlphaF
+            gradient = alphaDiff / float(distanceThreshold + 1)
+            resultAlpha = color.alphaF() - gradient * countDistance
+            # If alpha is out of bounds, clip it.
+            resultAlpha = min(1.0, max(0.0, resultAlpha))
+            color.setAlphaF(resultAlpha)
+        return color
+
+class JobThread(QThread):
+    jobFinished = Signal(bool, object)
+    def __init__(self, job, job_kwargs={}, parent=None):
+        super().__init__(parent)
+
+        assert callable(job), "job must be callable"
+        self.job = job
+        self.job_kwargs = job_kwargs
+
+    def run(self):
+        retval, results = self.job(**self.job_kwargs)
+        self.jobFinished.emit(retval, results)
+
+
+class WaitingDialog(QDialog):
+    jobFinished = Signal(bool, object)
+
+    label_message: QLabel
+    waitingWidget: WaitingWidget
+    def __init__(self, job, job_kwargs={}, title='', message='', parent=None):
+        super().__init__(parent)
+
+        self.jobthread = JobThread(job, job_kwargs, self)
+
+        self.initUI()
+        self.establish_connection()
+
+        self.setWindowTitle(title)
+        self.label_message.setText(message)
+
+    def initUI(self):
+        vbox = QVBoxLayout()
+
+        self.label_message = QLabel()
+        vbox.addWidget(self.label_message)
+
+        self.waitingWidget = WaitingWidget(self)
+        vbox.addWidget(self.waitingWidget)
+
+        self.setLayout(vbox)
+
+    def establish_connection(self):
+        self.jobthread.jobFinished.connect(lambda retval, results: self.finish(retval, results))
+
+    def start(self):
+        self.waitingWidget.start()
+        self.jobthread.start()
+
+    def finish(self, retval, results):
+        self.waitingWidget.stop()
+        self.close()
+        self.jobFinished.emit(retval, results)
+

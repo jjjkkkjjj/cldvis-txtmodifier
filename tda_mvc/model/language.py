@@ -104,6 +104,8 @@ class English(object):
     setsavenametitle = 'Set default save filename'
     selectfilenametitle = 'Select a iamge filename'
     selectfilenametext = 'Current image filepath: {}'
+    waitingtitle = 'Predicting'
+    waitingtext = 'Now Predicting...'
 
     ##### Edit dialog #####
     edittext = 'Edit {}'
@@ -214,6 +216,8 @@ class Japanese(English):
     setsavenametitle = '保存名の設定'
     selectfilenametitle = '画像ファイルの選択'
     selectfilenametext = '現在の画像ファイルのパス: {}'
+    waitingtitle = '予測中'
+    waitingtext = '予測中...'
 
     ##### Edit dialog #####
     edittext = '\'{}\'の編集'

@@ -4,7 +4,7 @@ from PySide2.QtCore import *
 import os, glob, json
 import pandas as pd
 
-from ..view import AboutDialog, PreferencesDialog
+from ..view import AboutDialog, PreferencesDialog, WaitingDialog
 from ..utils.modes import PredictionMode, ShowingMode, AreaMode, ExportFileExtention, ExportDatasetFormat
 from ..utils.exception import PredictionError
 from ..utils.funcs import create_fileters, get_pixmap
@@ -366,100 +366,110 @@ class LeftDockVCMixin(VCAbstractMixin):
         # self.updateAllUI()
 
     def predict(self):
-        from ..main import MainViewController
-        import json
-        import numpy as np
-        if MainViewController.debug:
+        def _job_predict():
+            from ..main import MainViewController
+            import json
+            import numpy as np
+            import time
+            time.sleep(2)
+            if MainViewController.debug:
 
-            # read results from json
-            if self.model.areamode == AreaMode.RECTANGLE:
-                # read predictedArea from csv
-                self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
-                self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
-
-                self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg')
-                if self.model.predmode == PredictionMode.IMAGE:
-                    jsonpath = os.path.join('debug', 'result-rect-image.json')
-                elif self.model.predmode == PredictionMode.DOCUMENT:
-                    jsonpath = os.path.join('debug', 'result-rect-document.json')
-
-                with open(jsonpath, 'r') as f:
-                    results = json.load(f)
-            elif self.model.areamode == AreaMode.QUADRANGLE:
-                # read predictedArea from csv
-                self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
-                self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
-
-                self.model.selectedQuadImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
-                if self.model.predmode == PredictionMode.IMAGE:
-                    jsonpath = os.path.join('debug', 'result-quad-image.json')
-                elif self.model.predmode == PredictionMode.DOCUMENT:
-                    jsonpath = os.path.join('debug', 'result-quad-document.json')
-
-                with open(jsonpath, 'r') as f:
-                    results = json.load(f)
-
-        else:
-            try:
-                # prediction
-                # save image file in tmp before prediction
+                # read results from json
                 if self.model.areamode == AreaMode.RECTANGLE:
-                    if self.model.selectedImgPath is None:
-                        self.model.saveSelectedImg_rectmode(self.model.imgpath)
+                    # read predictedArea from csv
+                    self.model.rectangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'rect.csv'), delimiter=',').reshape((2, 2)))
+                    self.model.rectangle.set_parentVals(parentQSize=self.central.imageView.size())
+
+                    self.model.selectedRectImgPath = os.path.join('.', 'debug', '20200619173238005_x355X2640y337Y1787.jpg')
+                    if self.model.predmode == PredictionMode.IMAGE:
+                        jsonpath = os.path.join('debug', 'result-rect-image.json')
+                    elif self.model.predmode == PredictionMode.DOCUMENT:
+                        jsonpath = os.path.join('debug', 'result-rect-document.json')
+
+                    with open(jsonpath, 'r') as f:
+                        results = json.load(f)
                 elif self.model.areamode == AreaMode.QUADRANGLE:
-                    if self.model.selectedImgPath is None:
-                        self.model.saveSelectedImg_quadmode(self.model.imgpath)
+                    # read predictedArea from csv
+                    self.model.quadrangle.set_percent_points(np.loadtxt(os.path.join('.', 'debug', 'poly.csv'), delimiter=',').reshape((4, 2)))
+                    self.model.quadrangle.set_parentVals(parentQSize=self.central.imageView.size())
 
-                if self.model.predmode == PredictionMode.IMAGE:
-                    results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
+                    self.model.selectedQuadImgPath = os.path.join('.', 'debug', '20200619173238005_tlx386tly346trx2620try380brx2600bry1790blx366bly1764.jpg')
+                    if self.model.predmode == PredictionMode.IMAGE:
+                        jsonpath = os.path.join('debug', 'result-quad-image.json')
+                    elif self.model.predmode == PredictionMode.DOCUMENT:
+                        jsonpath = os.path.join('debug', 'result-quad-document.json')
 
-                    if MainViewController.saveForDebug:
-                        np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
-                        if self.model.areamode == AreaMode.RECTANGLE:
-                            self.model.saveAsJson(os.path.join('debug', 'result-rect-image.json'))
-                        elif self.model.areamode == AreaMode.QUADRANGLE:
-                            self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
+                    with open(jsonpath, 'r') as f:
+                        results = json.load(f)
 
-                elif self.model.predmode == PredictionMode.DOCUMENT:
-                    results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
+            else:
+                try:
+                    # prediction
+                    # save image file in tmp before prediction
+                    if self.model.areamode == AreaMode.RECTANGLE:
+                        if self.model.selectedImgPath is None:
+                            self.model.saveSelectedImg_rectmode(self.model.imgpath)
+                    elif self.model.areamode == AreaMode.QUADRANGLE:
+                        if self.model.selectedImgPath is None:
+                            self.model.saveSelectedImg_quadmode(self.model.imgpath)
 
-                    if MainViewController.saveForDebug:
-                        np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
-                        if self.model.areamode == AreaMode.RECTANGLE:
-                            self.model.saveAsJson(os.path.join('debug', 'result-rect-document.json'))
-                        elif self.model.areamode == AreaMode.QUADRANGLE:
-                            self.model.saveAsJson(os.path.join('debug', 'result-quad-document.json'))
+                    if self.model.predmode == PredictionMode.IMAGE:
+                        results = self.model.detectAsImage(imgpath=self.model.selectedImgPath)
+
+                        if MainViewController.saveForDebug:
+                            np.savetxt(os.path.join('debug', 'rect.csv'), self.model.rectangle.percent_points, delimiter=',')
+                            if self.model.areamode == AreaMode.RECTANGLE:
+                                self.model.saveAsJson(os.path.join('debug', 'result-rect-image.json'))
+                            elif self.model.areamode == AreaMode.QUADRANGLE:
+                                self.model.saveAsJson(os.path.join('debug', 'result-quad-image.json'))
+
+                    elif self.model.predmode == PredictionMode.DOCUMENT:
+                        results = self.model.detectAsDocument(imgpath=self.model.selectedImgPath)
+
+                        if MainViewController.saveForDebug:
+                            np.savetxt(os.path.join('debug', 'poly.csv'), self.model.quadrangle.percent_points, delimiter=',')
+                            if self.model.areamode == AreaMode.RECTANGLE:
+                                self.model.saveAsJson(os.path.join('debug', 'result-rect-document.json'))
+                            elif self.model.areamode == AreaMode.QUADRANGLE:
+                                self.model.saveAsJson(os.path.join('debug', 'result-quad-document.json'))
 
 
-            except PredictionError as e:
-                # show messagebox
-                ret = QMessageBox.critical(self, self.language.couldntpredict, self.language.couldntpredicttext.format(str(e)), QMessageBox.Yes)
+                except PredictionError as e:
+                    # show messagebox
+                    return False, (self.language.couldntpredict, self.language.couldntpredicttext.format(str(e)))
+                except Exception as e:
+                    return False, (self.language.unexpectederror, self.language.unexpectederrortext.format(str(e)))
+            return True, results
+
+
+        def _fin(retval, results):
+            if not retval:
+                # error
+                title, msg = results[0], results[1]
+                ret = QMessageBox.critical(self, title, msg, QMessageBox.Yes)
                 if ret == QMessageBox.Yes:
                     # remove tmp files
                     self.model.clearTmpImg()
-                return
-            except Exception as e:
-                import traceback
-                ret = QMessageBox.critical(self, self.language.unexpectederror, self.language.unexpectederrortext.format(str(e)), QMessageBox.Yes)
-                if ret == QMessageBox.Yes:
-                    # remove tmp files
-                    self.model.clearTmpImg()
-                return
-
-        # set the annotations from the predicted results
-        self.model.predictedArea.set_percent_points(self.model.areaPercentPts)
-        self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize, offsetQPoint=self.model.areaOffsetQPoint)
-        if self.model.showingmode == ShowingMode.ENTIRE:
-            self.model.set_results(results, baseWidget=self.central.imageView,
+            # set the annotations from the predicted results
+            self.model.predictedArea.set_percent_points(self.model.areaPercentPts)
+            self.model.predictedArea.set_parentVals(parentQSize=self.model.areaParentQSize,
+                                                    offsetQPoint=self.model.areaOffsetQPoint)
+            if self.model.showingmode == ShowingMode.ENTIRE:
+                self.model.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.model.areaQSize, offsetQPoint=self.model.areaTopLeft)
 
-        elif self.model.showingmode == ShowingMode.SELECTED:
-            self.model.set_results(results, baseWidget=self.central.imageView,
+            elif self.model.showingmode == ShowingMode.SELECTED:
+                self.model.set_results(results, baseWidget=self.central.imageView,
                                        parentQSize=self.central.imageView.size(), offsetQPoint=QPoint(0, 0))
 
-        self.model.saveInDefaultDirectory()
-        # update all
-        self.updateAll()
+            self.model.saveInDefaultDirectory()
+            # update all
+            self.updateAll()
 
-        QMessageBox.information(self, self.language.notification, self.language.predictedtext.format(self.model.tdapath))
+            QMessageBox.information(self, self.language.notification, self.language.predictedtext.format(self.model.tdapath))
+
+        waitingDialog = WaitingDialog(_job_predict, job_kwargs={}, title=self.language.waitingtitle, message=self.language.waitingtext, parent=self)
+        waitingDialog.jobFinished.connect(lambda retval, results: _fin(retval, results))
+        waitingDialog.start()
+        waitingDialog.exec_()
 
